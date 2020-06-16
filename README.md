@@ -1,7 +1,8 @@
 # explainX
 <h1 align="center">
-	<img width="300" src="https://github.com/mindsdb/mindsdb/blob/master/assets/MindsDBColorPurp@3x.png?raw=true" alt="explainX.ai"> 
+	<img width="300" src="link" alt="explainX.ai"> 
 	<br>
+</h1>
 
 explainX.ai helps data scientists understand, explain and validate any machine learning model - in just one line of code. Checkout explainx.ai to learn more.
 
