@@ -1,8 +1,8 @@
 from .imports import *
 from .encode_decode_cat_col import *
 from .rescale_numeric_feature import *
-from aix360.algorithms.protodash import ProtodashExplainer
-from aix360.algorithms.protodash.PDASH_utils import *
+from .aix360.algorithms.protodash import ProtodashExplainer
+from .aix360.algorithms.protodash.PDASH_utils import *
 """
 This class calculates similar prototypes
 
