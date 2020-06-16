@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from aix360.algorithms.die import DIExplainer
+from .die import DIExplainer
 
 from .PDASH_utils import HeuristicSetSelection
 
