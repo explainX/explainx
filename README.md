@@ -1,11 +1,14 @@
-# explainX
 <h1 align="center">
 	<img width="300" src="https://i.ibb.co/yY7tfDg/Logo.jpg" alt="explainX.ai"> 
 	<br>
 </h1>
 
 
-explainX.ai helps data scientists understand, explain and validate any machine learning model - in just one line of code. Checkout explainx.ai to learn more.
+explainX.ai helps data scientists understand, explain and validate any machine learning model - in just one line of code.
+
+[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Machine%20Learning%20in%20one%20line%20of%20code%21&url=https://www.explainx.ai&hashtags=ai,ml,machine_learning,neural_networks)
+
+Checkout explainx.ai to learn more.
 
 
 ```bash
