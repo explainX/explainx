@@ -20,7 +20,7 @@ Visit explainx.ai website to learn more; https://www.explainx.ai
 
 * **Desktop**: You can use explainX in your Jupyter Notebook in under a minute. Just run the following command in your code block.
 
-```jupyter
+```python
 !pip install explainx
 ```
 
