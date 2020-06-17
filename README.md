@@ -1,6 +1,6 @@
 # explainX
 <h1 align="center">
-	<img width="300" src="<a href="https://explainx.ai/"><img src="https://i.ibb.co/yY7tfDg/Logo.jpg" alt="Logo" border="0"></a> 
+	<img width="300" src="<img src="https://i.ibb.co/yY7tfDg/Logo.jpg" alt="Logo" border="0"></a> 
 	<br>
 </h1>
 
