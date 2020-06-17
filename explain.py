@@ -1,6 +1,11 @@
 import os
+#
+# path= os.path.join(os.getcwd(),"explainx/lib")
 
-path= os.path.join(os.getcwd(),"explainx/lib")
+
+from pathlib import Path
+path= Path(__file__).parent.absolute()
+path= os.path.join(path, "lib")
 import sys
 sys.path.append(path)
 print(path)
