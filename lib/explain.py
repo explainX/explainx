@@ -17,8 +17,8 @@ class explain():
 
 
     def ai(self,  df,  y, model, model_name="xgboost", mode=None):
-        y_variable= "y_variable"
-        y_variable_predict= "prediction"
+        y_variable= "y_actual"
+        y_variable_predict= "y_prediction"
 
 
 
@@ -30,8 +30,13 @@ class explain():
         if model_name=="xgboost":
             self.df_final[y_variable_predict] = model.predict(xgboost.DMatrix(df))
 
-        if model_name=="catboost":
+        elif model_name=="catboost":
             self.df_final[y_variable_predict] = model.predict(df.to_numpy())
+
+        else:
+            self.df_final[y_variable_predict] = model.predict(df.to_numpy())
+
+
 
         self.df_final[y_variable] = y
 
@@ -44,6 +49,16 @@ class explain():
         # load JS visualization code to notebook
         shap.initjs()
         X, y = shap.datasets.boston()
+        return X,y
+
+
+    def dataset_heloc(self):
+        dataset= pd.read_csv("explainx/datasets/heloc_dataset.csv")
+
+        map_riskperformance= {"RiskPerformance": {"Good":1, "Bad":0}}
+        dataset.replace(map_riskperformance, inplace=True)
+        y= list(dataset["RiskPerformance"])
+        X= dataset.drop("RiskPerformance", axis=1)
         return X,y
 
 

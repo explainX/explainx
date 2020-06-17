@@ -66,6 +66,38 @@ class calculate_shap():
 
         return final_df
 
+    def kernel_shap(self, model, X_train):
+        # use Kernel SHAP to explain test set predictions
+        explainer = shap.KernelExplainer(model.predict_proba, X_train)
+        shap_values = explainer.shap_values(X_train, nsamples=100)
+
+        pd_shap = pd.DataFrame(np.concatenate(shap_values))
+        all_columns = list(X_train.columns)
+
+        shap_columns = []
+
+        for i in all_columns:
+            shap_columns.append(i + "_impact")
+        pd_shap.columns = shap_columns
+
+        Y = X_train.join(pd_shap)
+        return Y
+
+
+    def randomforest_shap(self, model, X):
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(X)
+
+        pd_shap = pd.DataFrame(np.concatenate(shap_values))
+        all_columns = list(X.columns)
+
+
+        pd_shap.columns = [f"{y}_impact" for y in all_columns]
+        Y = X.join(pd_shap)
+
+        return Y
+
+
     def get_shap_values(self, x_array, model, x_variable, cat_index):
         """
         SHAP VALUES CALCULATED
@@ -92,5 +124,31 @@ class calculate_shap():
         elif model_name == "catboost":
             df2 = self.catboost_shap(model, df)
             return df2
+
+
+        elif model_name == "randomforest":
+            df2 = self.randomforest_shap(model, df)
+            return df2
+
+        elif model_name == "svm":
+            df2 = self.kernel_shap(model, df)
+            return df2
+
+        elif model_name == "knn":
+            df2 = self.kernel_shap(model, df)
+            return df2
+
+        elif model_name == "logisticregression":
+            df2 = self.kernel_shap(model, df)
+            return df2
+
+        elif model_name == "decisiontree":
+            df2 = self.kernel_shap(model, df)
+            return df2
+
+        elif model_name == "neuralnetwork":
+            df2 = self.kernel_shap(model, df)
+            return df2
+
 
 
