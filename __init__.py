@@ -1,1 +1,1 @@
-from explainx.lib import *
+from explainx.explain import *

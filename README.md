@@ -16,8 +16,9 @@ Visit explainx.ai website to learn more: https://www.explainx.ai
 ## Try it out
 
 * [Installing explainX](https://explainx-documentation.netlify.app/)
-* [Working Example](https://explainx-documentation.netlify.app/working-example/)
+* [Working Examples](https://explainx-documentation.netlify.app/working-example/)
 * [explainX Dashboard Features](https://explainx-documentation.netlify.app/analyze-dashboard/t)
+* [Documentation](https://explainx-documentation.netlify.app/)
 
 ### Installation
 
@@ -42,12 +43,16 @@ Import **explainx**
 from explainx import *
 ```
 
-Load dataset as a dataframe & pass X_Data, Y_Data in your XGBoost Model
+Load dataset as X_Data, Y_Data in your XGBoost Model
 
 ```python
+#X_Data = Pandas DataFrame
+#Y_Data = Numpy Array or List
+
 X_Data, Y_Data = explainx.dataset_boston()
 
-model = xgboost.train({"learning_rate": 0.01}, xgboost.DMatrix(X, label=Y_data), 100)
+#Train Model
+model = xgboost.train({"learning_rate": 0.01}, xgboost.DMatrix(X_Data, label=Y_Data), 100)
 ```
 
 One line of code to **use the explainx module**

@@ -1,4 +1,4 @@
-from .imports import *
+from imports import *
 
 """
 This class calculates feature impact

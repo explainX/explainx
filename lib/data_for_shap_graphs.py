@@ -1,8 +1,8 @@
-from .imports import *
-from .feature_impact import *
-from .feature_importance import *
-from .shap_pdp import *
-from .summary_plot import *
+from imports import *
+from feature_impact import *
+from feature_importance import *
+from shap_pdp import *
+from summary_plot import *
 
 class data_for_shap_graphs():
     def __init__(self):

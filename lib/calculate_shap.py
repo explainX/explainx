@@ -1,5 +1,5 @@
-from .imports import *
-from .rescale_numeric_feature import *
+from imports import *
+from rescale_numeric_feature import *
 
 import catboost
 from catboost import CatBoostClassifier,Pool

@@ -1,6 +1,13 @@
-from .imports import *
-from .dashboard import *
-from .calculate_shap import *
+import os
+
+path= os.path.join(os.getcwd(),"explainx/lib")
+import sys
+sys.path.append(path)
+print(path)
+
+from imports import *
+from dashboard import *
+from calculate_shap import *
 """
 This class calculates feature importance
 

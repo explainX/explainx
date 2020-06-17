@@ -1,9 +1,9 @@
-from .imports import *
-from .feature_impact import *
-from .feature_importance import *
-from .shap_pdp import *
-from .summary_plot import *
-from .data_for_shap_graphs import *
+from imports import *
+from feature_impact import *
+from feature_importance import *
+from shap_pdp import *
+from summary_plot import *
+from data_for_shap_graphs import *
 
 class plotly_graphs():
     def __init__(self):

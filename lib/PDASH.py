@@ -1,8 +1,8 @@
 from __future__ import print_function
 
-from .die import DIExplainer
+from die import DIExplainer
 
-from .PDASH_utils import HeuristicSetSelection
+from PDASH_utils import HeuristicSetSelection
 
 
 class ProtodashExplainer(DIExplainer):

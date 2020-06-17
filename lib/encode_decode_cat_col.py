@@ -1,4 +1,4 @@
-from .imports import *
+from imports import *
 from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 """

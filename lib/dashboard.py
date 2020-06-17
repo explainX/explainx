@@ -1,6 +1,6 @@
-from .imports import *
-from .plotly_graphs import *
-from .protodash import *
+from imports import *
+from plotly_graphs import *
+from protodash import *
 """
 This class calculates feature importance
 
