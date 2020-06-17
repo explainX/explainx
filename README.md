@@ -45,7 +45,6 @@ from explainx import *
 Load dataset as a dataframe & pass X_Data, Y_Data in your XGBoost Model
 
 ```python
-#X_Data = Pandas DataFrame, Y_Data = Pandas Series
 X_Data, Y_Data = explainx.dataset_boston()
 
 model = xgboost.train({"learning_rate": 0.01}, xgboost.DMatrix(X, label=Y_data), 100)
