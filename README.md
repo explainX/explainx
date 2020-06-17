@@ -8,7 +8,7 @@ explainX.ai helps data scientists understand, explain and validate any machine l
 
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Explain%20any%20black-box%20Machine%20Learning%20model%20in%20just%20one%20line%20of%20code%21&url=https://www.explainx.ai&hashtags=xai,explainable_ai,explainable_machine_learning,trust_in_ai,transparent_ai)
 
-Checkout explainx.ai to learn more.
+Visit [explainx.ai][https://www.explainx.ai] to learn more.
 
 
 Open your Jupyter Notebook and follow this example to get started with explainx in less than five mins.
