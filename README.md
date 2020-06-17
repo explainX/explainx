@@ -10,6 +10,12 @@ explainX.ai helps data scientists understand, explain and validate any machine l
 
 Visit [explainx.ai][https://www.explainx.ai] to learn more.
 
+## Try it out
+
+* [Installing explainX](https://explainx-documentation.netlify.app/)
+* [Working Example](https://explainx-documentation.netlify.app/working-example/)
+* [explainX Dashboard Features](https://explainx-documentation.netlify.app/analyze-dashboard/t)
+[comment]: <> (This is a comment, it will not be included * [Provide Feedback to Improve explainX](https://mindsdb.typeform.com/to/c3CEtj))
 
 Open your Jupyter Notebook and follow this example to get started with explainx in less than five mins.
 ```bash
