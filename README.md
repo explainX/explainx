@@ -42,7 +42,7 @@ Import **explainx**
 from explainx import *
 ```
 
-Load dataset as a dataframe & pass X_Data, Y_Data as numpy arrays in your XGBoost Model
+Load dataset as a dataframe & pass X_Data, Y_Data in your XGBoost Model
 
 ```python
 X_data, Y_data = explainx.dataset_boston()
