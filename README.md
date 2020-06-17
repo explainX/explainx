@@ -1,12 +1,11 @@
 # explainX
 <h1 align="center">
-	<img width="300" src="link" alt="explainX.ai"> 
+	<img width="300" src="<a href="https://imgbb.com/"><img src="https://i.ibb.co/yY7tfDg/Logo.jpg" alt="Logo" border="0"></a>" alt="explainX.ai"> 
 	<br>
 </h1>
 
 explainX.ai helps data scientists understand, explain and validate any machine learning model - in just one line of code. Checkout explainx.ai to learn more.
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
 
 ```bash
 pip install explainx``
@@ -23,7 +22,7 @@ X_data, Y_data = explainx.dataset_boston()
 model = xgboost.train({"learning_rate": 0.01}, xgboost.DMatrix(X, label=Y_data), 100)
 
 #Pass your X_data, Y_data, y_variable name, model and model name to the explainx function
-explainx.ai(X_data, Y_data, model, model_name="xgboost")
+explainx.ai(X_Data, Y_Data, model, model_name="xgboost")
 
 #Click on the link to access the dashboard
 App running on https://127.0.0.1:8050
