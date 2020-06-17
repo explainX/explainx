@@ -1,8 +1,11 @@
 # explainX
 <h1 align="center">
-	<img width="300" src="<img src="https://i.ibb.co/yY7tfDg/Logo.jpg" alt="Logo" border="0"></a> 
+	<img width="300 src="https://i.ibb.co/yY7tfDg/Logo.jpg" alt="explainX.ai" border="0"> 
 	<br>
 </h1>
+
+<img width="300 src="https://i.ibb.co/yY7tfDg/Logo.jpg" alt="explainX.ai" border="0">
+
 
 explainX.ai helps data scientists understand, explain and validate any machine learning model - in just one line of code. Checkout explainx.ai to learn more.
 
