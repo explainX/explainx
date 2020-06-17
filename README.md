@@ -57,6 +57,9 @@ App running on https://127.0.0.1:8050
 
 Visit the documentation to [learn more](https://explainx-documentation.netlify.app/)
 
+### Models Supported
+CatBoost, XGBoost, Scikit-learn Models, SVM, Neural Networks
+
 ## Video Tutorial
 
 Please click on the image below to load the tutorial.
