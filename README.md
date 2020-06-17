@@ -11,8 +11,10 @@ explainX.ai helps data scientists understand, explain and validate any machine l
 Checkout explainx.ai to learn more.
 
 
+Open your Jupyter Notebook and follow this example to get started with explainx in less than five mins.
 ```bash
-pip install explainx``
+!pip install explainx
+``
 
 ## Usage
 
