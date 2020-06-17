@@ -20,7 +20,7 @@ Visit explainx.ai website to learn more; https://www.explainx.ai
 
 * **Desktop**: You can use explainX in your Jupyter Notebook in under a minute. Just run the following command in your code block.
 
-```bash
+```jupyter
 !pip install explainx
 ```
 
@@ -30,13 +30,13 @@ Once you have install explainX, you can simply follow the example below to use i
 
 Import **explainx**
 
-```bash
+```python
 from explainx import *
 ```
 
 Load Dataset & pass X_Data, Y_Data as numpy arrays in your XGBoost Model
 
-```bash
+```python
 X_data, Y_data = explainx.dataset_boston()
 
 model = xgboost.train({"learning_rate": 0.01}, xgboost.DMatrix(X, label=Y_data), 100)
@@ -44,13 +44,13 @@ model = xgboost.train({"learning_rate": 0.01}, xgboost.DMatrix(X, label=Y_data),
 
 One line of code to **use the explainx module**
 
-```bash
+```python
 explainx.ai(X_Data, Y_Data, model, model_name="xgboost")
 ```
 
 Click on the link to view the dashboard
 
-```bash
+```jupyter
 App running on https://127.0.0.1:8050
 ```
 
