@@ -18,7 +18,12 @@ Visit explainx.ai website to learn more; https://www.explainx.ai
 
 ### Installation
 
-* **Desktop**: You can use explainX in your Jupyter Notebook in under a minute. Just run the following command in your code block.
+* **Desktop**: You can use explainX on your own computer in under a minute. If you already have a python environment setup, just run the following command.
+
+```python
+pip install explainx
+```
+* **Jupyter Notebook**: You can also install explainx via Jupyter Notebook. Just run the following command:
 
 ```python
 !pip install explainx
@@ -34,7 +39,7 @@ Import **explainx**
 from explainx import *
 ```
 
-Load Dataset & pass X_Data, Y_Data as numpy arrays in your XGBoost Model
+Load dataset as a dataframe & pass X_Data, Y_Data as numpy arrays in your XGBoost Model
 
 ```python
 X_data, Y_data = explainx.dataset_boston()
