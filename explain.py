@@ -1,14 +1,14 @@
 import os
-#
-# path= os.path.join(os.getcwd(),"explainx/lib")
-
-
-from pathlib import Path
-path= Path(__file__).parent.absolute()
-path= os.path.join(path, "lib")
 import sys
+from pathlib import Path
+
+
+path= Path(__file__).parent.absolute()
+path_dataset= os.path.join(path, "datasets")
+path= os.path.join(path, "lib")
+
 sys.path.append(path)
-print(path)
+
 
 from imports import *
 from dashboard import *
@@ -65,7 +65,7 @@ class explain():
 
 
     def dataset_heloc(self):
-        dataset= pd.read_csv("explainx/datasets/heloc_dataset.csv")
+        dataset= pd.read_csv(path_dataset+"/heloc_dataset.csv")
 
         map_riskperformance= {"RiskPerformance": {"Good":1, "Bad":0}}
         dataset.replace(map_riskperformance, inplace=True)
