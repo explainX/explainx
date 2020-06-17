@@ -14,14 +14,11 @@ Checkout explainx.ai to learn more.
 Open your Jupyter Notebook and follow this example to get started with explainx in less than five mins.
 ```bash
 !pip install explainx
-```
 
 ## Usage
 
 #Import the library
-```bash
 from explainx import *
-```
 
 #Load Dataset
 X_data, Y_data = explainx.dataset_boston()
