@@ -29,11 +29,13 @@ Visit explainx.ai website to learn more; https://www.explainx.ai
 Once you have install explainX, you can simply follow the example below to use it:
 
 Import **explainx**
+
 ```bash
 from explainx import *
 ```
 
-Load Dataset & Pass X_Data, Y_Data as numpy arrays in your XGBoost Model
+Load Dataset & pass X_Data, Y_Data as numpy arrays in your XGBoost Model
+
 ```bash
 X_data, Y_data = explainx.dataset_boston()
 
@@ -41,11 +43,13 @@ model = xgboost.train({"learning_rate": 0.01}, xgboost.DMatrix(X, label=Y_data),
 ```
 
 One line of code to **use the explainx module**
+
 ```bash
 explainx.ai(X_Data, Y_Data, model, model_name="xgboost")
 ```
 
 Click on the link to view the dashboard
+
 ```bash
 App running on https://127.0.0.1:8050
 ```
@@ -53,10 +57,19 @@ App running on https://127.0.0.1:8050
 
 Visit the documentation to [learn more](https://explainx-documentation.netlify.app/)
 
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+## Video Tutorial
 
+Please click on the image below to load the tutorial.
+
+## Contributing
+Pull requests are welcome. In order to make changes to explainx, the ideal approach is to fork the repository than clone the fork locally.
+
+For major changes, please open an issue first to discuss what you would like to change.
 Please make sure to update tests as appropriate.
+
+## Report Issues
+
+Please help us by [reporting any issues](https://github.com/explainX/explainx/issues/new) you may have while using explainX.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
