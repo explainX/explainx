@@ -19,6 +19,7 @@ Visit explainx.ai website to learn more: https://www.explainx.ai
 * [Working Examples](https://explainx-documentation.netlify.app/working-example/)
 * [explainX Dashboard Features](https://explainx-documentation.netlify.app/analyze-dashboard/)
 * [Documentation](https://explainx-documentation.netlify.app/)
+* [Provide Feedback to Improve explainX.ai](https://forms.gle/5Q1xaHd7s6UQkRzf8)
 
 ### Installation
 
