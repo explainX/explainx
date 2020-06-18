@@ -67,7 +67,8 @@ Click on the link to view the dashboard:
 App running on https://127.0.0.1:8050
 ```
 
-Learn to analyze the dashboard by following this link: * [explainX Dashboard Features](https://explainx-documentation.netlify.app/analyze-dashboard/t)
+Learn to analyze the dashboard by following this link: [explainX Dashboard Features](https://explainx-documentation.netlify.app/analyze-dashboard/t)
+
 Visit the documentation to [learn more](https://explainx-documentation.netlify.app/)
 
 ### Models Supported
