@@ -64,6 +64,13 @@ class explain():
         return X,y
 
 
+    def dataset_iris(self):
+        # load JS visualization code to notebook
+        shap.initjs()
+        X, y = shap.datasets.iris()
+        return X,y
+
+
     def dataset_heloc(self):
         dataset= pd.read_csv(path_dataset+"/heloc_dataset.csv")
 

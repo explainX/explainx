@@ -149,6 +149,15 @@ class calculate_shap():
         elif model_name == "neuralnetwork":
             df2 = self.kernel_shap(model, df)
             return df2
+        elif model_name=="gradientboostingregressor":
+            df2 = self.xgboost_shap(model, df)
+            return df2
+        elif "gradientboosting" in model_name:
+            df2 = self.xgboost_shap(model, df)
+            return df2
+        else:
+            df2 = self.kernel_shap(model, df)
+            return df2
 
 
 
