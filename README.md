@@ -17,8 +17,9 @@ Visit explainx.ai website to learn more: https://www.explainx.ai
 
 * [Installing explainX](https://explainx-documentation.netlify.app/)
 * [Working Examples](https://explainx-documentation.netlify.app/working-example/)
-* [explainX Dashboard Features](https://explainx-documentation.netlify.app/analyze-dashboard/t)
+* [explainX Dashboard Features](https://explainx-documentation.netlify.app/analyze-dashboard/)
 * [Documentation](https://explainx-documentation.netlify.app/)
+* [Provide Feedback to Improve explainX.ai](https://forms.gle/5Q1xaHd7s6UQkRzf8)
 
 ### Installation
 
@@ -61,12 +62,13 @@ One line of code to **use the explainx module**
 explainx.ai(X_Data, Y_Data, model, model_name="xgboost")
 ```
 
-Click on the link to view the dashboard
+Click on the link to view the dashboard:
 
 ```jupyter
 App running on https://127.0.0.1:8050
 ```
 
+Learn to analyze the dashboard by following this link: [explainX Dashboard Features](https://explainx-documentation.netlify.app/analyze-dashboard/)
 
 Visit the documentation to [learn more](https://explainx-documentation.netlify.app/)
 
