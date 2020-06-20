@@ -7,9 +7,6 @@ ExplainX.ai is a fast, scalable & state-of-the-art explainable AI platform. Expl
 
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Explain%20any%20black-box%20Machine%20Learning%20model%20in%20just%20one%20line%20of%20code%21&url=https://www.explainx.ai&hashtags=xai,explainable_ai,explainable_machine_learning,trust_in_ai,transparent_ai)
 
-<a href="https://pypi.org/project/explainx/"><img src="https://img.shields.io/pypi/dm/explainx" alt="PyPi Downloads"></a>
-
-
 #### Why we need explainability & interpretibility?
 
 Essential for:
