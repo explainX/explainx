@@ -7,7 +7,7 @@ ExplainX.ai is a fast, scalable & state-of-the-art explainable AI platform. Expl
 
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Explain%20any%20black-box%20Machine%20Learning%20model%20in%20just%20one%20line%20of%20code%21&url=https://www.explainx.ai&hashtags=xai,explainable_ai,explainable_machine_learning,trust_in_ai,transparent_ai)
 
-Why we need explainability & interpretibility?
+#### Why we need explainability & interpretibility?
 
 Essential for:
 1. Model debugging - Why did my model make a mistake? How can I improve the accuracy of the model?
