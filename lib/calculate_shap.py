@@ -36,7 +36,9 @@ class calculate_shap():
 
         pd_shap.columns = shap_columns
 
-        Y = X.join(pd_shap)
+        Y = X.copy()
+        for c in shap_columns:
+            Y[c] = list(pd_shap[c])
 
         return Y
 
@@ -62,9 +64,16 @@ class calculate_shap():
 
         # append the results with the original file
 
-        final_df = df.join(shap_values)
+        # final_df = df.join(shap_values)
 
-        return final_df
+        shap_columns= shap_values.columns
+
+        Y = df.copy()
+        for c in shap_columns:
+            Y[c] = list(shap_values[c])
+
+
+        return Y
 
     def kernel_shap(self, model, X_train):
         # use Kernel SHAP to explain test set predictions
@@ -80,7 +89,12 @@ class calculate_shap():
             shap_columns.append(i + "_impact")
         pd_shap.columns = shap_columns
 
-        Y = X_train.join(pd_shap)
+
+
+        Y = X_train.copy()
+        for c in shap_columns:
+            Y[c] = list(pd_shap[c])
+
         return Y
 
 
@@ -93,7 +107,13 @@ class calculate_shap():
 
 
         pd_shap.columns = [f"{y}_impact" for y in all_columns]
-        Y = X.join(pd_shap)
+
+        shap_columns = shap_values.columns
+
+        Y = X.copy()
+        for c in shap_columns:
+            Y[c] = list(pd_shap[c])
+
 
         return Y
 
