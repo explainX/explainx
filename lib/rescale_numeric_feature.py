@@ -99,9 +99,10 @@ class rescale_numeric_features():
 
         for nc in numeric_columns:
             # get min and max
-            mini, maxi = self.get_min_max(df_describe, nc)
+            if nc in df_describe:
+                mini, maxi = self.get_min_max(df_describe, nc)
 
-            df[nc + "_rescaled"] = (df[nc] - mini) / (maxi - mini) * 10
+                df[nc + "_rescaled"] = (df[nc] - mini) / (maxi - mini) * 10
 
         for cc in categorical_columns:
             df[cc + "_rescaled"] = 0
