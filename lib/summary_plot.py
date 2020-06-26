@@ -33,13 +33,11 @@ class summary_plot():
         df_final = pd.DataFrame()
 
         for v in self.original_columns:
-            try:
-                df_single = df_re[[v, v + '_rescaled', v + '_impact']]
-                df_single["variable_name"] = v
-                df_single.columns = ['hover', 'color', 'xaxis', 'yaxis']
-                df_final = pd.concat([df_final, df_single])
-            except Exception as e:
-                pass
+            df_single = df_re[[v, v + '_rescaled', v + '_impact']]
+            df_single["variable_name"] = v
+            df_single.columns = ['hover', 'color', 'xaxis', 'yaxis']
+            df_final = pd.concat([df_final, df_single])
+
         return df_final
 
 
