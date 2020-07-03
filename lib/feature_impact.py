@@ -20,7 +20,7 @@ class feature_impact():
         variables = [col for col in df.columns if '_impact' in col]
         y = []
         for i in range(len(variables)):
-            p = df[variables[i]].sum()
+            p = df[variables[i]].mean()
             y.append(p)
         res = {variables[i]: y[i] for i in range(len(y))}
         res2 = {k: v for k, v in sorted(res.items(), key=lambda item: item[1])}

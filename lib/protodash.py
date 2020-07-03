@@ -99,7 +99,7 @@ class protodash():
         #make a dataframe
         dfs = pd.DataFrame.from_records(data[S, 0:].astype('double'))
         dfs.columns = self.actual_variables
-        dfs["Weight(%)"] = (np.around(W, 5) / np.sum(np.around(W, 5)))*100
+        dfs["Weight(%)"] = ((np.around(W, 5) / np.sum(np.around(W, 5)))*100)
         dfs = self.decode_categorical_var(dfs)
         return dfs
 

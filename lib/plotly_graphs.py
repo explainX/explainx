@@ -24,7 +24,7 @@ class plotly_graphs():
 
         df2["VariableName"] = new_names
 
-        feature_importance = px.bar(df2, x='Impact_Value', y="VariableName", orientation='h', title='Feature Importance',)
+        feature_importance = px.bar(df2, x='Impact_Value', y="VariableName", orientation='h')
         return feature_importance, df2
 
     def feature_impact(self, df):
@@ -39,21 +39,21 @@ class plotly_graphs():
         df2["VariableName"] = new_names
 
         # Feature Impact Plot
-        feature_impact = px.bar(df2, x='Impact_Value', y="VariableName", orientation='h', title='Global Feature Impact',
-                                )
+        feature_impact = px.bar(df2, x='Impact_Value', y="VariableName", orientation='h')
         return feature_impact, df2
 
     def summary_plot(self, df):
         df2 = self.data.summary_plot(df)
 
-        summary_plot = px.scatter(df2, x="xaxis", y="yaxis", color="color", hover_data=["hover"])
+        summary_plot = px.scatter(df2, x="Feature Impact on Outcome", y="Feature Name", color="Rescaled Feature Value", hover_data=["Original Feature Value"],color_continuous_scale="RdBu" )
 
         return summary_plot, df2
 
     def partial_dependence_plot(self, df, v1, v2, v3):
         pdp = shap_pdp()
         df = pdp.find(df)
-        g= px.scatter(df, x=v1, y=v2, color=v3)
+        #add if and else so we can colors to discrete variables
+        g= px.scatter(df, x=v1, y=v2, color=v3, color_continuous_scale="RdBu", color_discrete_sequence=px.colors.sequential.Plasma_r)
         return g, df
 
 

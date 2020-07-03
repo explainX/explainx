@@ -34,8 +34,8 @@ class summary_plot():
 
         for v in self.original_columns:
             df_single = df_re[[v, v + '_rescaled', v + '_impact']]
-            df_single["variable_name"] = v
-            df_single.columns = ['hover', 'color', 'xaxis', 'yaxis']
+            df_single["Variable Name"] = v
+            df_single.columns = ['Original Feature Value', 'Rescaled Feature Value', 'Feature Impact on Outcome', 'Feature Name']
             df_final = pd.concat([df_final, df_single])
 
         return df_final

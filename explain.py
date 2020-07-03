@@ -25,7 +25,7 @@ Input:
 class explain():
     def __init__(self):
         super(explain, self).__init__()
-        self.param= None
+        self.param= {}
 
     # is classification function?
 
@@ -47,8 +47,6 @@ class explain():
         y_variable_predict= "y_prediction"
 
 
-        # is classification?
-        is_classification= self.is_classification_given_y_array(y)
 
         # If yes, then different shap functuions are required.
         # get the shap value based on predcton and make a new dataframe.
@@ -66,10 +64,14 @@ class explain():
         else:
             prediction_col = model.predict(df.to_numpy())
 
+        # is classification?
+        is_classification = self.is_classification_given_y_array(prediction_col)
+
+
 
         #shap
         c = calculate_shap()
-        self.df_final = c.find(model, df, prediction_col, is_classification, model_name=model_name)
+        self.df_final, self.explainer = c.find(model, df, prediction_col, is_classification, model_name=model_name)
 
         #prediction col
         self.df_final[y_variable_predict] = prediction_col
@@ -78,8 +80,43 @@ class explain():
 
         self.df_final[y_variable] = y
 
+
+        #additional inputs.
+        if is_classification==True:
+            # find and add probabilities in the dataset.
+            prediction_col_prob = model.predict_proba(df.to_numpy())
+            pd_prediction_col_prob = pd.DataFrame(prediction_col_prob)
+
+            for c in pd_prediction_col_prob.columns:
+                self.df_final["probability_of_predicting_class_" + str(c)] = list(pd_prediction_col_prob[c])
+
+            classes = []
+            for c in pd_prediction_col_prob.columns:
+                classes.append(str(c))
+            self.param["classes"]=classes
+
+            try:
+                expected_values_by_class = self.explainer.expected_value
+            except:
+                expected_values_by_class=[]
+                for c in range(len(classes)):
+                    expected_values_by_class.append(1/len(classes))
+
+
+            self.param["expected_values"]= expected_values_by_class
+        else:
+            try:
+                expected_values = self.explainer.expected_value
+                self.param["expected_values"] = [expected_values]
+            except:
+                expected_value = [round(np.array(y).mean(),2)]
+                self.param["expected_values"] = expected_value
+
+
+        self.param["is_classification"]= is_classification
+
         d= dashboard()
-        d.find(self.df_final, y_variable, y_variable_predict, mode)
+        d.find(self.df_final, y_variable, y_variable_predict, mode, self.param)
 
         return True
 

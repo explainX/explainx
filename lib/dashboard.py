@@ -1,6 +1,9 @@
 from imports import *
 from plotly_graphs import *
 from protodash import *
+from insights import *
+from plotly_css import *
+
 """
 This class calculates feature importance
 
@@ -13,22 +16,25 @@ Input:
 class dashboard():
     def __init__(self):
         super(dashboard, self).__init__()
-        self.param= None
+        self.param = None
 
-    def find(self,  df, y_variable,y_variable_predict, mode):
-        self.available_columns= available_columns = list(df.columns)
+    def find(self, df, y_variable, y_variable_predict, mode, param):
+        self.available_columns = available_columns = list(df.columns)
         original_variables = [col for col in df.columns if '_impact' in col]
         self.impact_variables = [col for col in original_variables if not '_rescaled' in col]
-        self.y_variable= y_variable
-        self.y_variable_predict= y_variable_predict
+        self.y_variable = y_variable
+        self.y_variable_predict = y_variable_predict
+        self.param = param
 
-        d= self.dash(df, mode)
+        self.insights = insights(self.param)
+
+        d = self.dash(df, mode)
 
         return True
 
     def dash(self, df, mode):
-        y_variable= self.y_variable
 
+        y_variable = self.y_variable
 
         g = plotly_graphs()
         y_variables = [col for col in df.columns if '_impact' in col]
@@ -97,16 +103,7 @@ class dashboard():
 
                 dbc.Collapse(html.Div([
                     html.H4('Data',
-                            style={'backgroundColor': '#fff',
-                                   'color': 'black',
-                                   'border-radius': '15px 15px 0px 0px ',
-                                   'textAlign': 'left',
-                                   'height': "50px",
-                                   'margin': 'auto',
-                                   'padding-left': '70px',
-                                   "font-family": "Helvetica, Arial, sans-serif",
-
-                                   }),
+                            style=style1),
                     html.Div([
                         dash_table.DataTable(
                             id='datatable-interactivity',
@@ -124,17 +121,8 @@ class dashboard():
                             page_action="native",
                             page_current=0,
                             page_size=10,
-                            style_table={'overflowX': 'auto',
-                                         'margin': 'auto',
-                                         "padding-left": '10px',
-                                         'width': '90%'},
-                            style_header={
-                                'backgroundColor': '#0984e3',
-                                'fontWeight': 'normal',
-                                "fontSize": "15px",
-                                'marginLeft': "10px",
-                                'color': 'white'
-                            },
+                            style_table=style2,
+                            style_header=style3,
                             style_cell={
                                 "font-family": "Helvetica, Arial, sans-serif",
                                 "fontSize": "11px",
@@ -159,107 +147,103 @@ class dashboard():
                     ])
 
                 ], style={'marginTop': 0}), id="collapse")],
-                style={'backgroundColor': "#fff", 'marginTop': 20, 'marginBottom': 20}),
+                style=style4),
 
             # end of collapsable div
-            dcc.Tabs([
-                dcc.Tab(label='Global Explanation', children=[
+            dcc.Tabs(id="tabs-styled-with-inline", value='tab-1', children=[
+                dcc.Tab(label='Global Explanation', value='tab-1', children=[
 
                     # Global Feature Impact & Importance
                     html.Div(id='datatable-interactivity-container', children=[
                         html.Div([
                             html.Div([
                                 html.H4('Global Feature Importance',
-                                        style={'backgroundColor': '#fff',
-                                               'color': 'black',
-                                               'border-radius': '15px 15px 15px 15px ',
-                                               'textAlign': 'left',
-                                               'height': "50px",
-                                               'margin': 'auto',
-                                               'padding-left': '70px',
-                                               'padding-top': '20px'
-
-                                               }),
+                                        style=style5),
                                 html.P(
                                     'Feature importance assign a score to input features based on how useful they are at predicting a target variable. ',
-                                    style={'backgroundColor': '#fff',
-                                           'color': 'black',
-                                           'border-radius': '15px 15px 0px 0px ',
-                                           'textAlign': 'left',
-                                           'height': "50px",
-                                           'margin': 'auto',
-                                           'padding-left': '70px',
-                                           'padding-top': '20px',
-                                           "font-family": "Helvetica, Arial, sans-serif",
-
-                                           })
+                                    style=style6)
                                 ,
                                 dcc.Loading(
                                     id="loading-1",
                                     type="circle",
-                                    children=dcc.Graph(
-                                        id="global_feature_importance",
-                                        style={'marginLeft': 50, 'marginTop': 0, 'height': '500px'}
+                                    children=dbc.Row(
+                                        [
+                                            dbc.Col(html.Div(dcc.Graph(id="global_feature_importance",
+                                                                       style={'marginLeft': 50, 'marginTop': 0,
+                                                                              'height': '500px'}
+                                                                       )), width=9),
+                                            dbc.Col(
+                                                [
+                                                    html.Div([
+                                                        html.H2("How to read this graph?"),
+                                                        html.P(
+                                                            "This graph helps you identify which features in your dataset have the greatest effect on the outcomes of your machine learning model")
+                                                    ]),
+                                                    html.Div([
+                                                        html.H2("Insights"),
+                                                        html.P(id='global_message_1'),
+                                                        html.P(id='global_message_2'),
+                                                        html.P(id='global_message_3'),
+                                                        html.P(id='global_message_4'),
+                                                        html.P(id='global_message_5')
 
-                                    )
+                                                    ]
+
+                                                    )]
+                                            )
+
+                                        ])
+
                                 )
-                                , ], style={'backgroundColor': "#fff", "minHeight": "400px",
-                                            'border-radius': '15px 15px 15px 15px',
-                                            'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
-                                            'border-right': '1px solid #2c3e50', 'border-bottom': '1px solid #2c3e50'},
+                                , ], style=style7,
                             ),
 
                             html.Div([
                                 html.H4('Global Feature Impact',
-                                        style={'backgroundColor': '#fff',
-                                               'color': 'black',
-                                               'border-radius': '15px 15px 15px 15px ',
-                                               'textAlign': 'left',
-                                               'height': "50px",
-                                               'margin': 'auto',
-                                               'padding-left': '70px',
-                                               'padding-top': '20px'
-
-                                               }),
+                                        style=style8),
                                 html.P(
                                     'Feature impact identifies which features (also known as columns or inputs) in a dataset have the greatest positive or negative effect on the outcomes of a machine learning model.',
-                                    style={'backgroundColor': '#fff',
-                                           'color': 'black',
-                                           'border-radius': '15px 15px 0px 0px ',
-                                           'textAlign': 'left',
-                                           'height': "50px",
-                                           'margin': 'auto',
-                                           'padding-left': '70px',
-                                           'padding-top': '20px',
-                                           "font-family": "Helvetica, Arial, sans-serif",
-
-                                           }),
+                                    style=style9),
                                 dcc.Loading(
                                     id="loading-2",
                                     type="circle",
-                                    children=dcc.Graph(id='global_feature_impact',
-                                                       style={'marginLeft': 50, 'marginTop': 0, 'height': '500px'})
+                                    children=dbc.Row(
+                                        [
+                                            dbc.Col(html.Div(dcc.Graph(id='global_feature_impact',
+                                                                       style={'marginLeft': 50, 'marginTop': 0,
+                                                                              'height': '500px'})), width=9),
+                                            dbc.Col(
+                                                [
+                                                    html.Div([
+                                                        html.H2("How to read this graph?"),
+                                                        html.P(
+                                                            "This tells you which features have positive impact and which features have negative impact on the output of the decision")
+                                                    ]),
+                                                    html.Div([
+                                                        html.H2("Insights"),
+                                                        html.P(id='message_1'),
+                                                        html.P(id='message_2'),
+                                                        html.P(id='message_3')
+                                                    ]
+
+                                                    )]
+                                            )
+
+                                        ])
+
                                 )
 
                             ],
-                                style={'backgroundColor': "#fff", "minHeight": "400px",
-                                       'border-radius': '15px 15px 15px 15px',
-                                       'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
-                                       'border-right': '1px solid #2c3e50', 'border-bottom': '1px solid #2c3e50',
-                                       'marginTop': 50},
+                                style=style10,
                             ),
                         ],
 
-                            style={
-                                "marginTop": 50,
-                                'border-radius': '15px 15px 15px 15px',
-
-                            }
+                            style=style11
                         )
                     ], style={'height': '400'})
                 ]),
 
-                dcc.Tab(label='Feature Interaction', children=[
+                dcc.Tab(label='Feature Interaction', value='tab-2', children=[
 
                     dcc.Loading(
                         id="feature_interaction_load",
@@ -267,29 +251,10 @@ class dashboard():
                         children=html.Div([
                             html.Div([
                                 html.H4('Partial Dependence Plot',
-                                        style={'backgroundColor': '#fff',
-                                               'color': 'black',
-                                               'border-radius': '15px 15px 15px 15px ',
-                                               'textAlign': 'left',
-                                               'height': "50px",
-                                               'margin': 'auto',
-                                               'padding-left': '70px',
-                                               'padding-top': '20px'
-
-                                               }),
+                                        style=style12),
                                 html.P(
                                     'The partial dependence plot (short PDP or PD plot) shows the marginal effect one or two features have on the predicted outcome of a machine learning model',
-                                    style={'backgroundColor': '#fff',
-                                           'color': 'black',
-                                           'border-radius': '15px 15px 0px 0px ',
-                                           'textAlign': 'left',
-                                           'height': "50px",
-                                           'margin': 'auto',
-                                           'padding-left': '70px',
-                                           'padding-top': '20px',
-                                           "font-family": "Helvetica, Arial, sans-serif",
-
-                                           }),
+                                    style=style13),
                                 html.Div([
                                     html.P('Variable Name'),
                                     dcc.Dropdown(
@@ -300,7 +265,7 @@ class dashboard():
                                     ),
 
                                 ],
-                                    style={'width': '25%', 'marginLeft': 70, 'float': 'left',
+                                    style={'width': '20%', 'marginLeft': 70, 'float': 'left',
                                            'display': 'inline-block'}),
 
                                 html.Div([
@@ -312,7 +277,7 @@ class dashboard():
                                         clearable=False
                                     ),
 
-                                ], style={'width': '25%', 'float': 'center', 'display': 'inline-block'}),
+                                ], style=style14),
 
                                 html.Div([
                                     html.P('3rd Variable'),
@@ -323,8 +288,18 @@ class dashboard():
                                         clearable=False
                                     ),
 
-                                ], style={'width': '25%', 'marginRight': 10, 'float': 'center',
-                                          'display': 'inline-block'}),
+                                ], style=style15),
+                                #                          html.Div([
+                                #                             html.P('Bubble Size'),
+                                #                             dcc.Dropdown(
+                                #                                 id='fourth-axis',
+                                #                                 options=[{'label': i, 'value': i} for i in original_variables],
+                                #                                 value=original_variables[-3],
+                                #                                 clearable=False
+                                #                             ),
+
+                                #                         ], style={'width': '20%', 'marginRight': 10, 'float': 'center',
+                                #                                   'display': 'inline-block'})
 
                             ]),
                             dcc.Loading(
@@ -333,11 +308,7 @@ class dashboard():
                                 children=dcc.Graph(id='indicator-graphic', style={'marginLeft': 50})
                             ),
                         ],
-                            style={'backgroundColor': "#fff", "minHeight": "600px",
-                                   'border-radius': '15px 15px 15px 15px',
-                                   'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
-                                   'border-right': '1px solid #2c3e50', 'border-bottom': '1px solid #2c3e50',
-                                   'marginTop': 50, 'width': '95%'}),
+                            style=style16),
                     ),
 
                     dcc.Loading(
@@ -346,29 +317,10 @@ class dashboard():
                         children=html.Div([
                             html.Div([
                                 html.H4('Summary Plot',
-                                        style={'backgroundColor': '#fff',
-                                               'color': 'black',
-                                               'border-radius': '15px 15px 15px 15px ',
-                                               'textAlign': 'left',
-                                               'height': "50px",
-                                               'margin': 'auto',
-                                               'padding-left': '70px',
-                                               'padding-top': '20px'
-
-                                               }),
+                                        style=style17),
                                 html.P(
                                     'In the summary plot, we see first indications of the relationship between the value of a feature and the impact on the prediction',
-                                    style={'backgroundColor': '#fff',
-                                           'color': 'black',
-                                           'border-radius': '15px 15px 0px 0px ',
-                                           'textAlign': 'left',
-                                           'height': "50px",
-                                           'margin': 'auto',
-                                           'padding-left': '70px',
-                                           'padding-top': '20px',
-                                           "font-family": "Helvetica, Arial, sans-serif",
-
-                                           })
+                                    style=style18)
                                 ,
                                 dcc.Loading(
                                     id="loading-3",
@@ -377,38 +329,22 @@ class dashboard():
 
                                 ),
 
-                            ], style={'backgroundColor': "#fff", "minHeight": "600px",
-                                      'border-radius': '15px 15px 15px 15px',
-                                      'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
-                                      'border-right': '1px solid #2c3e50', 'border-bottom': '1px solid #2c3e50',
-                                      'marginTop': 50, }),
-                        ], style={'marginBottom': 50,
-                                  'marginTop': 50,
-                                  'marginLeft': "1%",
-                                  'width': '95%', })
+                            ], style=style19),
+                        ], style=style20)
                     )
 
                 ]),
 
                 # tab 3:Distribution
 
-                dcc.Tab(label='Distribution', children=[
+                dcc.Tab(label='Distribution',value='tab-3',  children=[
 
                     html.Div([
 
                         html.Div([
                             html.Div([
                                 html.H4('Distributions',
-                                        style={'backgroundColor': '#fff',
-                                               'color': 'black',
-                                               'border-radius': '15px 15px 15px 15px ',
-                                               'textAlign': 'left',
-                                               'height': "50px",
-                                               'margin': 'auto',
-                                               'padding-left': '70px',
-                                               'padding-top': '20px'
-
-                                               }),
+                                        style=style21),
                                 html.Div([
                                     html.P('Variable Name'),
                                     dcc.Dropdown(
@@ -417,8 +353,7 @@ class dashboard():
                                         value=original_variables[0]
                                     ),
                                 ],
-                                    style={'width': '25%', 'marginLeft': 70, 'float': 'left',
-                                           'display': 'inline-block'}),
+                                    style=style22),
                                 html.Div([
                                     html.P('Plot Type'),
                                     dcc.Dropdown(
@@ -428,29 +363,21 @@ class dashboard():
                                         value='Histogram'
                                     ),
                                 ],
-                                    style={'width': '25%', 'marginLeft': 70, 'float': 'left',
-                                           'display': 'inline-block'}),
+                                    style=style23),
 
                             ]),
 
                             dcc.Graph(id='indicator-graphic2',
                                       style={'marginLeft': 50, 'marginTop': 100, 'height': '500px'}),
                         ],
-                            style={'backgroundColor': "#fff", "minHeight": "700px",
-                                   'border-radius': '15px 15px 15px 15px',
-                                   'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
-                                   'border-right': '1px solid #2c3e50', 'border-bottom': '1px solid #2c3e50',
-                                   'marginTop': 50}),
+                            style=style24),
 
-                    ], style={'marginBottom': 50,
-                              'marginTop': 50,
-                              'marginLeft': "1%",
-                              'width': '95%', })
+                    ], style=style25)
 
                 ]),
                 # tab 4:Local Explanation
 
-                dcc.Tab(label='Local Explanation', children=[
+                dcc.Tab(label='Local Explanation', value='tab-4', children=[
 
                     html.Div([
 
@@ -459,17 +386,7 @@ class dashboard():
 
                             html.Div([
                                 html.H4('Data',
-                                        style={'backgroundColor': '#fff',
-                                               'color': 'black',
-                                               'border-radius': '15px 15px 0px 0px ',
-                                               'textAlign': 'left',
-                                               'height': "50px",
-                                               'margin': 'auto',
-                                               'padding-left': '70px',
-                                               'padding-top': '20px',
-                                               "font-family": "Helvetica, Arial, sans-serif",
-
-                                               }),
+                                        style=style26),
                                 html.I("Index of Row That You Want To Explain.", style={'padding-left': '70px'}),
 
                                 dcc.Input(id="row_number", type="number", value=1,
@@ -491,13 +408,7 @@ class dashboard():
                                         page_size=1,
                                         style_table={'overflowX': 'auto', 'margin': 'auto', "padding-left": '50px',
                                                      'width': '90%'},
-                                        style_header={
-                                            'backgroundColor': '#0984e3',
-                                            'fontWeight': 'normal',
-                                            "fontSize": "15px",
-                                            'marginLeft': "10px",
-                                            'color': 'white'
-                                        },
+                                        style_header=style27,
                                         style_cell={
                                             "font-family": "Helvetica, Arial, sans-serif",
                                             "fontSize": "11px",
@@ -523,11 +434,7 @@ class dashboard():
                                     )
                                 ], style={'marginLeft': '-30px'})
 
-                            ], style={'backgroundColor': "#fff", "minHeight": "200px",
-                                      'border-radius': '15px 15px 15px 15px',
-                                      'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
-                                      'border-right': '1px solid #2c3e50', 'border-bottom': '1px solid #2c3e50',
-                                      'marginTop': 50}),
+                            ], style=style28),
 
                         ]),  # End of Input & Data Div
 
@@ -536,91 +443,52 @@ class dashboard():
 
                                 html.Div(id='datatable-interactivity-container2', children=[
                                     html.Div([
-                                        html.Div([
-                                            html.H4('Local Feature Importance',
-                                                    style={'backgroundColor': '#fff',
-                                                           'color': 'black',
-                                                           'border-radius': '15px 15px 15px 15px ',
-                                                           'textAlign': 'left',
-                                                           'height': "50px",
-                                                           'margin': 'auto',
-                                                           'padding-left': '70px',
-                                                           'padding-top': '20px'
-
-                                                           }),
-                                            html.P(
-                                                'Feature importance assign a score to input features based on how useful they are at predicting a target variable. ',
-                                                style={'backgroundColor': '#fff',
-                                                       'color': 'black',
-                                                       'border-radius': '15px 15px 0px 0px ',
-                                                       'textAlign': 'left',
-                                                       'height': "50px",
-                                                       'margin': 'auto',
-                                                       'padding-left': '70px',
-                                                       'padding-top': '20px',
-                                                       "font-family": "Helvetica, Arial, sans-serif",
-
-                                                       })
-                                            ,
-                                            dcc.Loading(
-                                                id="local_feature_importance_1",
-                                                type="circle",
-                                                children=dcc.Graph(
-                                                    id="local_feature_importance",
-                                                    style={'marginLeft': 50, 'marginTop': 0, 'height': '500px'})
-                                            )
-                                            , ], style={'backgroundColor': "#fff", "minHeight": "400px",
-                                                        'border-radius': '15px 15px 15px 15px',
-                                                        'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
-                                                        'border-right': '1px solid #2c3e50',
-                                                        'border-bottom': '1px solid #2c3e50'},
-                                        ),
 
                                         html.Div([
                                             html.H4('Local Feature Impact',
-                                                    style={'backgroundColor': '#fff',
-                                                           'color': 'black',
-                                                           'border-radius': '15px 15px 15px 15px ',
-                                                           'textAlign': 'left',
-                                                           'height': "50px",
-                                                           'margin': 'auto',
-                                                           'padding-left': '70px',
-                                                           'padding-top': '20px'
-
-                                                           }),
+                                                    style=style29),
                                             html.P(
                                                 'Local Feature impact identifies which features have the greatest positive or negative effect on the outcome of a machine learning model for a specific row.',
-                                                style={'backgroundColor': '#fff',
-                                                       'color': 'black',
-                                                       'border-radius': '15px 15px 0px 0px ',
-                                                       'textAlign': 'left',
-                                                       'height': "50px",
-                                                       'margin': 'auto',
-                                                       'padding-left': '70px',
-                                                       'padding-top': '20px',
-                                                       "font-family": "Helvetica, Arial, sans-serif",
-
-                                                       }),
+                                                style=style30),
                                             dcc.Loading(
                                                 id="local_feature_impact_1",
                                                 type="circle",
-                                                children=dcc.Graph(id='local_feature_impact',
-                                                                   style={'marginLeft': 50, 'marginTop': 0,
-                                                                          'height': '500px'})
-                                            )
+                                                children=dbc.Row(
+                                                    [
+                                                        dbc.Col(html.Div(dcc.Graph(id='local_feature_impact',
+                                                                                   style={'marginLeft': 50,
+                                                                                          'marginTop': 0,
+                                                                                          'height': '500px'})),
+                                                                width=8),
+                                                        dbc.Col(
+                                                            [
+                                                                html.Div([
+                                                                    html.H2("How to read this graph?"),
+                                                                    html.P(
+                                                                        "According to the model, the features are most important in explaining the target variable. Most importance is on the top.")
+                                                                ]),
+                                                                html.Div([
+                                                                    html.H2("Insights"),
+                                                                    html.P(id='local_message_1'),
+                                                                    html.P(id='local_message_2'),
+                                                                    html.P(id='local_message_3')
+                                                                ]),
+                                                                html.Div([
+                                                                    html.H2("Next Steps"),
+                                                                    html.P(
+                                                                        "Click on the similar profile tabs and explore profiles that had similar attributes"),
+                                                                ])
+                                                            ]
+                                                            , width=4),
+
+                                                    ]))
 
                                         ],
-                                            style={'backgroundColor': "#fff", "minHeight": "400px",
-                                                   'border-radius': '15px 15px 15px 15px',
-                                                   'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
-                                                   'border-right': '1px solid #2c3e50',
-                                                   'border-bottom': '1px solid #2c3e50', 'marginTop': 50},
+                                            style=style31,
                                         ),
                                     ],
 
-                                        style={
-                                            "marginTop": 50,
-                                            'border-radius': '15px 15px 15px 15px'})], style={'height': '400'})
+                                        style=style32)], style={'height': '400'})
 
                             ]),
 
@@ -628,43 +496,14 @@ class dashboard():
 
                                 html.Div([
                                     html.H4('Similar Profiles',
-                                            style={'backgroundColor': '#fff',
-                                                   'color': 'black',
-                                                   'border-radius': '15px 15px 0px 0px ',
-                                                   'textAlign': 'left',
-                                                   'height': "50px",
-                                                   'margin': 'auto',
-                                                   'padding-left': '70px',
-                                                   'padding-top': '20px',
-                                                   "font-family": "Helvetica, Arial, sans-serif",
-
-                                                   }),
+                                            style=style33),
 
                                     html.Button('Display Similar Profiles', id='btn-nclicks-1', n_clicks=0,
-                                                style={'backgroundColor': '#fff',
-                                                       'color': 'black',
-                                                       'border-radius': '15px 15px 15px 15px ',
-                                                       'textAlign': 'left',
-                                                       'height': "50px",
-                                                       'margin': 'auto',
-                                                       'margin-left': '70px',
-                                                       "font-family": "Helvetica, Arial, sans-serif",
-
-                                                       }),
+                                                style=style34),
 
                                     html.P(
                                         'Display similar  profiles and the extent to which they are similar to the chosen applicant as indicated by the last row in the table below labelled as "Weight"',
-                                        style={'backgroundColor': '#fff',
-                                               'color': 'black',
-                                               'border-radius': '15px 15px 0px 0px ',
-                                               'textAlign': 'left',
-                                               'height': "50px",
-                                               'margin': 'auto',
-                                               'padding-left': '70px',
-                                               'padding-top': '20px',
-                                               "font-family": "Helvetica, Arial, sans-serif",
-
-                                               }),
+                                        style=style35),
                                     html.Div([
                                         dcc.Loading(
                                             id="table",
@@ -680,16 +519,8 @@ class dashboard():
                                                 page_action="native",
                                                 page_current=0,
                                                 page_size=len(original_variables) + 1,
-                                                style_table={'overflowX': 'scroll', 'margin': 'auto',
-                                                             "padding-left": '30px', 'width': '95%'},
-                                                style_header={
-                                                    'backgroundColor': '#0984e3',
-                                                    'fontWeight': 'bold',
-                                                    "fontSize": "15px",
-                                                    'marginLeft': "10px",
-                                                    'textAlign': 'center',
-                                                    'color': 'white'
-                                                },
+                                                style_table=style36,
+                                                style_header=style37,
                                                 style_cell={
                                                     "font-family": "Helvetica, Arial, sans-serif",
                                                     "fontSize": "15px",
@@ -719,11 +550,7 @@ class dashboard():
 
                                     ])
 
-                                ], style={'backgroundColor': "#fff", "minHeight": "800px",
-                                          'border-radius': '15px 15px 15px 15px',
-                                          'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
-                                          'border-right': '1px solid #2c3e50', 'border-bottom': '1px solid #2c3e50',
-                                          'marginTop': 50, 'width': '100%'}),
+                                ], style=style39),
 
                             ])
 
@@ -731,12 +558,9 @@ class dashboard():
 
                 ])
 
-            ]), ], style={'marginBottom': 50,
-                          'marginTop': 10,
-                          'marginLeft': "1%",
-                          'marginRight': "1%",
-                          'width': '97%'})
+            ]), ], style=style40)
 
+        # Callbacks transferred
         @app.callback(
             Output('datatable-interactivity', 'style_data_conditional'),
             [Input('datatable-interactivity', 'selected_columns')]
@@ -759,29 +583,40 @@ class dashboard():
 
         # Global Feature Importance
         @app.callback(
-            Output('global_feature_importance', "figure"),
+            [Output('global_feature_importance', "figure"),
+             Output('global_message_1', "children"),
+             Output('global_message_2', "children"),
+             Output('global_message_3', "children"),
+             Output('global_message_4', "children"),
+             Output('global_message_5', "children")],
             [Input('datatable-interactivity', "derived_virtual_data"),
              Input('datatable-interactivity', "derived_virtual_selected_rows")])
         def update_graphs(rows, derived_virtual_selected_rows):
             dff = df if rows is None else pd.DataFrame(rows)
             g = plotly_graphs()
-            fig, __ = g.feature_importance(dff)
+            figure, data = g.feature_importance(dff)
+            message = self.insights.insight_1_feature_imp(data)
             time.sleep(1)
-            return fig
+            if len(message) == 4:
+                return figure, message[0], message[1], message[2], message[3], ""
+            return figure, message[0], message[1], message[2], message[3], message[4]
 
+        # Global Feature Impact
         @app.callback(
-            Output('global_feature_impact', "figure"),
+            [Output('global_feature_impact', "figure"),
+             Output('message_1', "children"),
+             Output('message_2', "children"),
+             Output('message_3', "children")],
             [Input('datatable-interactivity', "derived_virtual_data"),
              Input('datatable-interactivity', "derived_virtual_selected_rows")])
         def update_graphs(rows, derived_virtual_selected_rows):
             dff = df if rows is None else pd.DataFrame(rows)
             g = plotly_graphs()
-            fig, __ = g.feature_impact(dff)
-            time.sleep(1)
-            return fig
+            figure, data = g.feature_impact(dff)
+            message = self.insights.insight_2_global_feature_impact(data)
+            return figure, message[0], message[1], message[2]
 
         # Local Eeature Importance
-
         @app.callback(
             Output(component_id='data_table_row', component_property='data'),
             [Input(component_id='row_number', component_property='value')])
@@ -801,59 +636,33 @@ class dashboard():
              Input('third-axis', 'value'),
              Input('datatable-interactivity', "derived_virtual_data"),
              Input('datatable-interactivity', "derived_virtual_selected_rows")
+                # ,Input('tabs-styled-with-inline', "value")
              ])
         def update_graph(xaxis_column_name, yaxis_column_name, third_axis_name, rows, derived_virtual_selected_rows):
+            # if tab=='tab-2':
             df3 = df if rows is None else pd.DataFrame(rows)
-            fig = {
-                'data': [dict(
-                    x=df3[xaxis_column_name],
-                    y=df3[yaxis_column_name],
-                    text=df3[third_axis_name],
-                    mode='markers',
-                    marker={
-                        'size': 15,
-                        'opacity': 1,
-                        'line': {'width': 2, 'color': 'DarkSlateGrey'},
-                        'color': df3[third_axis_name],
-                    }
-                )],
-                'layout': dict(
-                    xaxis={
-                        'title': xaxis_column_name,
-                        'margin': {'l': 40, 'b': 20, 't': 300, 'r': 0},
-                    },
-                    yaxis={
-                        'title': yaxis_column_name,
+            g = plotly_graphs()
+            fig, __ = g.partial_dependence_plot(df3, df3[xaxis_column_name], df3[yaxis_column_name],
+                                                    df3[third_axis_name])
 
-                    },
-                    margin={'l': 40, 'b': 140, 't': 50, 'r': 140},
-                    hovermode='closest',
-                    legend={'x': 0, 'y': 1},
-                    color_continuous_scale=px.colors.cyclical.IceFire,
-                    color_discrete_sequence=["red", "blue"]
-                )
-            }
-            time.sleep(1)
             return fig
+            # else:
+            #     return {}
 
-        # Local Feature Importance & Impact
+
+        # Local Feature Impact Graph
         @app.callback(
-            Output('local_feature_importance', "figure"),
+            [Output('local_feature_impact', "figure"),
+             Output('local_message_1', "children"),
+             Output('local_message_2', "children"),
+             Output('local_message_3', "children")],
             [Input('data_table_row', "data")])
         def update_impact_graph(data):
             data = pd.DataFrame(data)
-            fig, __ = g.feature_importance(data)
-            time.sleep(1)
-            return fig
-
-        @app.callback(
-            Output('local_feature_impact', "figure"),
-            [Input('data_table_row', "data")])
-        def update_impact_graph(data):
-            data = pd.DataFrame(data)
-            fig, __ = g.feature_impact(data)
-            time.sleep(1)
-            return fig
+            figure, dat = g.feature_impact(data)
+            message = self.insights.insight_2_local_feature_impact(dat)
+            
+            return figure, message[0], message[1], message[2]
 
         # Prototypical Analysis
         @app.callback(
@@ -901,23 +710,27 @@ class dashboard():
                     num_variables.append(i)
 
             if plot_type == "Histogram":
-                group_labels = ['xxaxis_column_name']
+                # group_labels = ['xxaxis_column_name']
                 return px.histogram(df3, x=xaxis_column_name, marginal="box")
             else:
                 for i in cat_variables:
                     return px.violin(df3, x=xaxis_column_name, box=True, points='all')
                 else:
-                    return px.violin(df3, y=xaxis_column_name, box=True, points='all')
+                    return px.violin(df3, y=xaxis_column_name, box=True, points='all', )
 
-        if mode=="inline":
+        if mode == "inline":
             app.run_server(mode="inline")
         else:
-            app.run_server()
+            try:
+                app.run_server(host='0.0.0.0', port=8080)
+            except:
+                # if port is not available
+                app.run_server(host='0.0.0.0', port=self.find_free_port())
 
         return True
 
-
-
-
-
-
+    def find_free_port(self):
+        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+            s.bind(('', 0))
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            return s.getsockname()[1]

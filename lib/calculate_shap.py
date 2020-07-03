@@ -40,7 +40,7 @@ class calculate_shap():
         for c in shap_columns:
             Y[c] = list(pd_shap[c])
 
-        return Y
+        return Y, explainer
 
     def catboost_shap(self, model, df, y_variable=None):
         # explain the model's predictions using SHAP
@@ -96,7 +96,7 @@ class calculate_shap():
         for c in shap_columns:
             Y[c] = list(pd_shap[c])
 
-        return Y
+        return Y, explainer
 
     def kernel_shap_classification(self, model, X_train,prediction_col):
         # use Kernel SHAP to explain test set predictions
@@ -118,7 +118,7 @@ class calculate_shap():
         for c in shap_columns:
             Y[c] = list(pd_shap[c])
 
-        return Y
+        return Y, explainer
 
     def select_row_shap_values(self, shap_values,prediction_col):
 
@@ -156,7 +156,7 @@ class calculate_shap():
             Y[c] = list(pd_shap[c])
 
 
-        return Y
+        return Y, explainer
 
 
     def randomforest_shap(self, model, X):
@@ -177,7 +177,7 @@ class calculate_shap():
             Y[c] = list(pd_shap[c])
 
 
-        return Y
+        return Y, explainer
 
 
     def get_shap_values(self, x_array, model, x_variable, cat_index):
@@ -195,73 +195,74 @@ class calculate_shap():
     def find(self, model, df,prediction_col,is_classification, model_name="xgboost"):
 
         if model_name == "xgboost":
-            df2 = self.xgboost_shap(model, df)
-            return df2
+            df2 , explainer= self.xgboost_shap(model, df)
+            return df2, explainer
 
         elif model_name == "lightgbm":
-            df2 = self.xgboost_shap(model, df)
+            df2 , explainer= self.xgboost_shap(model, df)
 
-            return df2
+            return df2, explainer
 
         elif model_name == "catboost":
             df2 = self.catboost_shap(model, df)
-            return df2
+            explainer= None
+            return df2, explainer
 
 
         elif model_name == "randomforest":
             if is_classification:
-                df2 = self.randomforest_shap_classification(model, df, prediction_col)
+                df2 , explainer= self.randomforest_shap_classification(model, df, prediction_col)
             else:
-                df2 = self.randomforest_shap(model, df)
-            return df2
+                df2 , explainer= self.randomforest_shap(model, df)
+            return df2, explainer
 
         elif model_name == "svm":
             if is_classification:
-                df2 = self.kernel_shap_classification(model, df,prediction_col)
+                df2 , explainer= self.kernel_shap_classification(model, df,prediction_col)
             else:
-                df2 = self.kernel_shap(model, df)
-            return df2
+                df2, explainer = self.kernel_shap(model, df)
+            return df2, explainer
 
         elif model_name == "knn":
             if is_classification:
-                df2 = self.kernel_shap_classification(model, df,prediction_col)
+                df2, explainer = self.kernel_shap_classification(model, df,prediction_col)
             else:
-                df2 = self.kernel_shap(model, df)
-            return df2
+                df2 , explainer= self.kernel_shap(model, df)
+            return df2, explainer
 
         elif model_name == "logisticregression":
             if is_classification:
-                df2 = self.kernel_shap_classification(model, df,prediction_col)
+                df2 , explainer= self.kernel_shap_classification(model, df,prediction_col)
             else:
-                df2 = self.kernel_shap(model, df)
-            return df2
+                df2, explainer = self.kernel_shap(model, df)
+            return df2, explainer
 
         elif model_name == "decisiontree":
             if is_classification:
-                df2 = self.kernel_shap_classification(model, df,prediction_col)
+                df2, explainer = self.kernel_shap_classification(model, df,prediction_col)
             else:
-                df2 = self.kernel_shap(model, df)
-            return df2
+                df2, explainer = self.kernel_shap(model, df)
+            return df2, explainer
 
         elif model_name == "neuralnetwork":
             if is_classification:
-                df2 = self.kernel_shap_classification(model, df,prediction_col)
+                df2, explainer = self.kernel_shap_classification(model, df,prediction_col)
             else:
-                df2 = self.kernel_shap(model, df)
-            return df2
+                df2, explainer = self.kernel_shap(model, df)
+            return df2, explainer
 
         elif model_name=="gradientboostingregressor":
-            df2 = self.xgboost_shap(model, df)
-            return df2
+            df2 , explainer= self.xgboost_shap(model, df)
+            return df2, explainer
         elif "gradientboosting" in model_name:
-            df2 = self.xgboost_shap(model, df)
-            return df2
+            df2, explainer = self.xgboost_shap(model, df)
+            return df2, explainer
         else:
             if is_classification:
-                df2 = self.kernel_shap_classification(model, df,prediction_col)
+                df2 , explainer= self.kernel_shap_classification(model, df,prediction_col)
             else:
-                df2 = self.kernel_shap(model, df)
-            return df2
+                df2 , explainer= self.kernel_shap(model, df)
+            return df2, explainer
 
 
 
