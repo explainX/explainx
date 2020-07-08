@@ -52,7 +52,10 @@ Import **explainx**
 ```python
 from explainx import *
 ```
-
+Go to [www.explainx.ai/](https://www.explainx.ai/) and get the API key.
+```python
+explainx.init(key="gnNz6otBEccQK3zEK2", secret="4cfb1fdadad312d2f")
+```
 Load dataset as X_Data, Y_Data in your XGBoost Model
 
 ```python
@@ -89,7 +92,7 @@ CatBoost, XGBoost, Scikit-learn Models, SVM, Neural Networks
 Please click on the image below to load the tutorial.
 
 ## Contributing
-Pull requests are welcome. In order to make changes to explainx, the ideal approach is to fork the repository then clone the fork locally.
+Pull requests are welcome. In order to make changes to explainx, the ideal approach is to fork the repository than clone the fork locally.
 
 For major changes, please open an issue first to discuss what you would like to change.
 Please make sure to update tests as appropriate.
