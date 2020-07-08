@@ -67,11 +67,11 @@ class insight_regression():
                          top_positive_variables[0] + ", " +
                          top_positive_variables[1] + ",and " +
                          top_positive_variables[2] + " " +
-                         "will increase the average model outcome(" + str(expected_values) + ")" +
+                         "will change the average model outcome(" + str(expected_values) + ")" +
                          " by " +
-                         str(round(average_shap_values_positive[0], 2)) + "%," +
-                         str(round(average_shap_values_positive[1], 2)) + "%, and " +
-                         str(round(average_shap_values_positive[2], 2)) + "% respectively.")
+                         str(round(average_shap_values_positive[0], 2)) + ", " +
+                         str(round(average_shap_values_positive[1], 2)) + ", and " +
+                         str(round(average_shap_values_positive[2], 2)) + " respectively.")
 
         sentences.append("On average, the variable " +
                          top_negative_variables[0] + ", " +
@@ -79,9 +79,9 @@ class insight_regression():
                          top_negative_variables[2] + " " +
                          "will change the average model outcome(" + str(expected_values) + ")" +
                          " by " +
-                         str(round(average_shap_values_negative[0], 2)) + "%," +
-                         str(round(average_shap_values_negative[1], 2)) + "%, and" +
-                         str(round(average_shap_values_negative[2], 2)) + "% respectively.")
+                         str(round(average_shap_values_negative[0], 2)) + ", " +
+                         str(round(average_shap_values_negative[1], 2)) + ", and" +
+                         str(round(average_shap_values_negative[2], 2)) + " respectively.")
 
         sentences.append("")
 
