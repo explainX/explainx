@@ -22,5 +22,5 @@ import shap
 import socket
 from contextlib import closing
 
-import xgboost
+import requests
 import shap

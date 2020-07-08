@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
-
+import colorlover as cl
 
 
 class clf_performance():
@@ -76,9 +76,7 @@ class clf_performance():
     
     def performance_metrics(self):
        
-            # Log Loss
-        log_loss = sklearn.metrics.log_loss(self.y_true, self.y_pred)
-
+        
             # Area Under the Curve
         fpr, tpr, thresholds = sklearn.metrics.roc_curve(self.y_true, self.y_pred)
         auc = metrics.auc(fpr, tpr)
@@ -96,15 +94,107 @@ class clf_performance():
     
        
         # Make DataFrames
-        metric = ['Accuracy','Cross-Entropy Loss','Area Under Curve','MAE','MSE','Matthews Corrcoef']
-        values = [accuracy, log_loss, auc, mae, mse,matthews_corrcoef]
+        metric = ['Accuracy','Area Under Curve','MAE','MSE','Matthews Corrcoef']
+        values = [accuracy, auc, mae, mse,matthews_corrcoef]
         performance_dataframe = pd.DataFrame({'metric': metric, 'values': values})
         
         
    
         return performance_dataframe
         
+    def y_score(self, model, X_test):
+        y_score = model.predict_proba(X_test)[:,1]
+        
+        return y_score
     
+    def fp_fn_table(self):
+        tn, fp, fn, tp = np.array(clf_performance(self.y_true, self.y_pred).matrix()).ravel()
+
+        f1 = clf_performance(self.y_true, self.y_pred).f1_score()
+        accuracy = clf_performance(self.y_true, self.y_pred).accuracy()
+
+        total = fp + fn + tp + tn
+
+        fp_fn_table = pd.DataFrame(dict({'False Possitives (%)': [(fp / total * 100).round(2)],
+             'False Negatives (%)': [(fn / total * 100).round(2)],
+             'Accuracy (%)': accuracy.round(2),
+             'F1': f1.round(2)}))
+        
+        return fp_fn_table   
+        
+        
+        
+    def F_pos_F_neg(self):
+    
+        tn, fp, fn, tp = np.array(clf_performance(self.y_true, self.y_pred).matrix()).ravel()
+
+        predicted_yes = [tp,fp]
+        predicted_no = [fn,tn]
+
+        index_names = ['Actual Yes', 'Actual No']
+        total = predicted_yes + predicted_no
+
+        df = pd.DataFrame({'Predicted Yes': predicted_yes,
+                     'Predicted No': predicted_no}, index = index_names)
+
+
+        df['Total'] = df['Predicted Yes'] + df['Predicted No']
+        df.loc['Total'] = df.sum(axis=0) 
+
+
+        df['Predicted Yes2']  = (df['Predicted Yes'] / df['Total'] *100).round(1)
+        df['Predicted No2']  = (df['Predicted No'] / df['Total'] * 100).round(1)
+        total_sum = df.Total.iloc[:-1].sum()
+        df['Total2'] = (df['Total'] / total_sum * 100).round(1)
+
+        PY = [f'{str(j)}{"%"} ({str(x)}) ' for x, j in zip(df['Predicted Yes'], df['Predicted Yes2'])]
+        PrN = [f'{str(j)}{"%"} ({str(x)}) ' for x, j in zip(df['Predicted No'], df['Predicted No2'])]
+        Tt = [f'{str(j)}{"%"} ({str(x)}) ' for x, j in zip(df['Total'], df['Total2'])]
+
+        df['Predicted Yes'] = PY
+        df['Predicted No'] = PrN
+        df['Total'] = Tt
+        df['*'] = ['Actual Yes', 'Actual No', 'Total']
+
+        RP_FN = df[['*','Predicted Yes', 'Predicted No', 'Total']]
+        RP_FN.style.applymap('font-weight: bold', subset=['Index'])
+
+        return RP_FN
+    
+    
+    def plot_roc_curve(self, model, X_test):
+        decision_test = clf_performance(self.y_true, self.y_pred).y_score(model, X_test)
+        fpr, tpr, threshold = metrics.roc_curve(self.y_true, decision_test)
+
+            # AUC Score
+        auc_score = metrics.roc_auc_score(y_true=self.y_true, y_score=decision_test)
+
+        trace0 = go.Scatter(x=fpr,y=tpr,name='ROC',)
+        layout = go.Layout(title=f'ROC Curve (AUC = {auc_score:.3f})',xaxis=dict(title='False Positive Rate'),
+        yaxis=dict(title='True Positive Rate'))
+
+        figure = go.Figure(data=trace0, layout=layout)
+
+        return figure
+
+    def plot_precision_recall(self, model, X_test):
+        y_score=clf_performance(self.y_true, self.y_pred).y_score(model, X_test)
+        decision_test = clf_performance(self.y_true, self.y_pred).y_score(model, X_test)
+        precision, recall, thresholds = sklearn.metrics.precision_recall_curve(self.y_true, y_score)
+        auc_score = metrics.roc_auc_score(y_true=self.y_true, y_score=decision_test)
+
+        trace0 = go.Scatter(x=recall,y=precision,name='ROC',)
+
+
+        layout = go.Layout(title=f'PR Curve (AUC = {auc_score:.3f})',xaxis=dict(title='Recall'),
+        yaxis=dict(title='Precision'))
+
+        figure = go.Figure(data=trace0, layout=layout)
+
+
+
+        return figure
+
     def plot_metrics(self):
   
         performance_data = clf_performance(self.y_true, self.y_pred).performance_metrics()
@@ -183,6 +273,43 @@ class clf_performance():
 
         return fig_report
     
+    def plot_pie(self):
+        
+        tn, fp, fn, tp = np.array(clf_performance(self.y_true, self.y_pred).matrix()).ravel()
+
+        label_text = ["True Positive",
+                          "False Negative",
+                          "False Positive",
+                          "True Negative"]
+        labels = ["TP", "FN", "FP", "TN"]
+        blue = cl.flipper()['seq']['9']['Blues']
+        red = cl.flipper()['seq']['9']['Reds']
+        colors = [blue[4], blue[1], red[1], red[4]]
+
+        trace0 = go.Pie(
+        labels=label_text,
+        values=[tp, fn, fp, tn],
+        hoverinfo='label+value+percent',
+        textinfo='text+value',
+        text=labels,
+        sort=False,
+        marker=dict(
+        colors=colors
+        )
+        )
+
+        layout = go.Layout(
+        title=f'TP, TN, FP, FN',
+        margin=dict(l=10, r=10, t=60, b=10),
+        legend=dict(
+        bgcolor='rgba(255,255,255,0)',
+        orientation='h'
+        )
+        )
+
+        data = [trace0]
+        figure = go.Figure(data=data, layout=layout)
+        return figure
     
     def plot_matrix(self):
         

@@ -13,19 +13,14 @@ sys.path.append(path)
 from imports import *
 from dashboard import *
 from calculate_shap import *
-"""
-This class calculates feature importance
-
-Input: 
-
-
-"""
-
 
 class explain():
     def __init__(self):
         super(explain, self).__init__()
         self.param= {}
+        print("Get you API key here https://www.explainx.ai/.")
+        self.key=""
+        self.secret=""
 
     # is classification function?
 
@@ -56,6 +51,7 @@ class explain():
         prediction_col=[]
 
         if model_name == "xgboost":
+            import xgboost
             prediction_col = model.predict(xgboost.DMatrix(df))
 
         elif model_name == "catboost":
@@ -115,7 +111,11 @@ class explain():
 
         self.param["is_classification"]= is_classification
 
-        d= dashboard()
+        d= dashboard(self.key, self.secret)
+        allowed= d.increate_counter(model_name)
+        if allowed==False:
+            print("API key and secret are not correct. Please signup to access the API key here https://www.explainx.ai/.")
+            return False
         d.find(self.df_final, y_variable, y_variable_predict, mode, self.param)
 
         return True
@@ -142,6 +142,10 @@ class explain():
         y= list(dataset["RiskPerformance"])
         X= dataset.drop("RiskPerformance", axis=1)
         return X,y
+
+    def init(self, key="", secret=""):
+        self.key=key
+        self.secret= secret
 
 
 

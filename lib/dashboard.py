@@ -3,20 +3,39 @@ from plotly_graphs import *
 from protodash import *
 from insights import *
 from plotly_css import *
-
-"""
-This class calculates feature importance
-
-Input: 
-
-
-"""
-
+import time
+import performance_metrics
+from performance_metrics import *
+from explainx import explain
 
 class dashboard():
-    def __init__(self):
+    def __init__(self, key, secret):
         super(dashboard, self).__init__()
         self.param = None
+        self.key=key
+        self.secret= secret
+
+
+
+
+    def increate_counter(self,model_name):
+        # call api call here
+
+        url = 'https://us-central1-explainx-25b88.cloudfunctions.net/increaseCounter'
+        params = {
+
+        }
+        data = {
+            "key": self.key,
+            "secret": self.secret,
+            "model": model_name
+
+        }
+        r = requests.post(url, params=params, json=data)
+        if r.json()["message"]=="200":
+            return True
+        else:
+            return False
 
     def find(self, df, y_variable, y_variable_predict, mode, param):
         self.available_columns = available_columns = list(df.columns)
@@ -94,15 +113,53 @@ class dashboard():
 
         app.layout = html.Div([
             navbar,
-            html.Div([
-                dbc.Button(
-                    "View Data",
-                    id="collapse-button",
-                    className="mb-3",
-                    color="primary"),
+    #         html.Div([
+    #             dbc.Card(
+    #     [
+    #         dbc.CardHeader(
+    #             html.H2(
+    #                 dbc.Button(
+    #                 "View Model Metrics",
+    #                 id="collapse-button-2",
+    #                 color="link", 
+    #                 style={'fontSize':'14px'})
+    #             )
+    #         ),
+    #         dbc.Collapse(html.Div([
+    #                 html.H4('',
+    #                         style=style1),
+    #                 html.Div([
+    #                     dbc.Row(
+    #                     [
+    #                         dbc.Col(html.Div([
+                                
+    #                            html.Div(id='classification_metrics_1',style={'marginTop':"20px", 'marginBottom':"5px"})
 
-                dbc.Collapse(html.Div([
-                    html.H4('Data',
+    #                         ])),
+                            
+    #                         dbc.Col(html.Div([
+    #                             html.Div(id="roc_curve")
+    #                         ])),
+    #                         dbc.Col(html.Div("One of three columns")),
+    #                     ], style={'margin':20, 'marginTop':'-20px'} )])
+    #             ], style={'marginTop': 0}), id="collapse-2"),
+    #     ]
+    # ),],style=style4),
+    #End of collapsable div 2
+            html.Div([
+                dbc.Card(
+        [
+            dbc.CardHeader(
+                html.H2(
+                    dbc.Button(
+                    "View Your Data",
+                    id="collapse-button",
+                    color="link", 
+                    style={'fontSize':'14px'})
+                )
+            ),
+            dbc.Collapse(html.Div([
+                    html.H4('',
                             style=style1),
                     html.Div([
                         dash_table.DataTable(
@@ -146,8 +203,9 @@ class dashboard():
                                 }])
                     ])
 
-                ], style={'marginTop': 0}), id="collapse")],
-                style=style4),
+                ], style={'marginTop': 0}), id="collapse"),
+        ]
+    ),],style=style4),
 
             # end of collapsable div
             dcc.Tabs(id="tabs-styled-with-inline", value='tab-1', children=[
@@ -289,18 +347,6 @@ class dashboard():
                                     ),
 
                                 ], style=style15),
-                                #                          html.Div([
-                                #                             html.P('Bubble Size'),
-                                #                             dcc.Dropdown(
-                                #                                 id='fourth-axis',
-                                #                                 options=[{'label': i, 'value': i} for i in original_variables],
-                                #                                 value=original_variables[-3],
-                                #                                 clearable=False
-                                #                             ),
-
-                                #                         ], style={'width': '20%', 'marginRight': 10, 'float': 'center',
-                                #                                   'display': 'inline-block'})
-
                             ]),
                             dcc.Loading(
                                 id="loading-5",
@@ -320,8 +366,9 @@ class dashboard():
                                         style=style17),
                                 html.P(
                                     'In the summary plot, we see first indications of the relationship between the value of a feature and the impact on the prediction',
-                                    style=style18)
-                                ,
+                                    style=style18),
+
+                                    html.Button('Display Summary Plot', id='btn-nclicks-2', n_clicks=0, style=style34),
                                 dcc.Loading(
                                     id="loading-3",
                                     type="circle",
@@ -372,6 +419,66 @@ class dashboard():
                         ],
                             style=style24),
 
+                        html.Div([
+
+                            html.Div([
+                                    html.H4('Multi-Level EDA', style=style21),
+                            html.Div([
+                                html.P('X-Axis Variable'),
+                                dcc.Dropdown(
+                                    id='x_axis',
+                                    options=[{'label':i, 'value':i} for i in original_variables],
+                                    value=original_variables[0]
+                                ),
+                            ], style=style22),
+                            html.Div([
+                                html.P('Y-Axis Variable'),
+                                dcc.Dropdown(
+                                    id='y_axis',
+                                    options=[{'label':i, 'value':i} for i in original_variables],
+                                    value=original_variables[1]
+                                ),
+                            ], style=style22),
+                            html.Div([
+                                html.P('Size'),
+                                dcc.Dropdown(
+                                    id='size',
+                                    options=[{'label':i, 'value':i} for i in original_variables],
+                                    # value=original_variables[0]
+                                    placeholder="Choose a variable"
+                                ),
+                            ], style=style22),
+                            html.Div([
+                                html.P('Color'),
+                                dcc.Dropdown(
+                                    id='color',
+                                    options=[{'label':i, 'value':i} for i in original_variables],
+                                    placeholder="Choose a variable"
+                                ),
+                            ], style=style22),
+                            html.Div([
+                                html.P('Drill-down by Column'),
+                                dcc.Dropdown(
+                                    id='facet_col',
+                                    options=[{'label':i, 'value':i} for i in original_variables],
+                                    placeholder="Select a categorical variable"
+                                    # value=original_variables[0]
+                                ),
+                            ], style=style22),
+                            html.Div([
+                                html.P('Drill-down by Row'),
+                                dcc.Dropdown(
+                                    id='facet_row',
+                                    options=[{'label':i, 'value':i} for i in original_variables],
+                                    placeholder="Select a categorical variable"
+                                ),
+                            ], style=style22)
+                            ]),
+                             dcc.Graph(id='multi_level_eda',
+                                      style={'marginLeft': 50, 'marginTop': 200, 'height': '700px'})
+                            
+                        ], style=style24)
+
                     ], style=style25)
 
                 ]),
@@ -392,49 +499,11 @@ class dashboard():
                                 dcc.Input(id="row_number", type="number", value=1,
                                           placeholder="Enter a Row Number e.g. 1, 4, 5",
                                           style={'text-align': 'center'}),
-                                html.Div([
-                                    dash_table.DataTable(
-                                        id='data_table_row',
-                                        columns=[
-                                            {"name": i, "id": i, "deletable": False, "selectable": True} for i in
-                                            df.columns
-                                        ],
-                                        data=[],
-                                        editable=True,
-                                        sort_mode="multi",
-                                        row_deletable=False,
-                                        page_action="native",
-                                        page_current=0,
-                                        page_size=1,
-                                        style_table={'overflowX': 'auto', 'margin': 'auto', "padding-left": '50px',
-                                                     'width': '90%'},
-                                        style_header=style27,
-                                        style_cell={
-                                            "font-family": "Helvetica, Arial, sans-serif",
-                                            "fontSize": "11px",
-                                            'width': '{}%'.format(len(df.columns)),
-                                            'textOverflow': 'ellipsis',
-                                            'overflow': 'hidden',
-                                            'textAlign': 'left',
-                                            'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-                                        },
-                                        css=[
-                                            {
-                                                'selector': '.dash-spreadsheet td div',
-
-                                                'rule': '''
-                            line-height: 15px;
-                            max-height: 20px; min-height: 20px; height: 20px;
-                            display: block;
-                            overflow-y: hidden;
-
-                        '''
-                                            }],
-
-                                    )
-                                ], style={'marginLeft': '-30px'})
-
-                            ], style=style28),
+                                
+                                html.Div(id='local_data_table',style={'marginTop':"20px", 'marginBottom':"5px"}),
+                                          
+                        
+                            ]),
 
                         ]),  # End of Input & Data Div
 
@@ -581,6 +650,17 @@ class dashboard():
                 return not is_open
             return is_open
 
+        # #second collapse
+        # @app.callback(
+        #     Output("collapse-2", "is_open"),
+        #     [Input("collapse-button-2", "n_clicks")],
+        #     [State("collapse-2", "is_open")],
+        # )
+        # def toggle_collapse(n, is_open):
+        #     if n:
+        #         return not is_open
+        #     return is_open
+
         # Global Feature Importance
         @app.callback(
             [Output('global_feature_importance', "figure"),
@@ -592,11 +672,12 @@ class dashboard():
             [Input('datatable-interactivity', "derived_virtual_data"),
              Input('datatable-interactivity', "derived_virtual_selected_rows")])
         def update_graphs(rows, derived_virtual_selected_rows):
+            
             dff = df if rows is None else pd.DataFrame(rows)
             g = plotly_graphs()
             figure, data = g.feature_importance(dff)
             message = self.insights.insight_1_feature_imp(data)
-            time.sleep(1)
+           
             if len(message) == 4:
                 return figure, message[0], message[1], message[2], message[3], ""
             return figure, message[0], message[1], message[2], message[3], message[4]
@@ -616,17 +697,67 @@ class dashboard():
             message = self.insights.insight_2_global_feature_impact(data)
             return figure, message[0], message[1], message[2]
 
-        # Local Eeature Importance
+        #Classification Metrics
+        # @app.callback(
+        #     Output(component_id='classification_metrics_1', component_property='children'),
+        #     [Input('datatable-interactivity', "derived_virtual_data")])
+        # def update_classification(rows):
+        #     data = df 
+        #     figure = clf_performance(data.y_actual, data.y_prediction).F_pos_F_neg()
+        #     figure_a = clf_performance(data.y_actual, data.y_prediction).fp_fn_table()
+        #     figure2 = dbc.Table.from_dataframe(figure, striped=True, bordered=True, hover=True, responsive=True, size='lg', style={'font-size': '12px'})
+        #     figure3 = dbc.Table.from_dataframe(figure_a, striped=True, bordered=True, hover=True, responsive=True, size='lg', style={'font-size': '12px'})
+
+            
+        #     return figure3, figure2
+        
+        #ROC curnve
+        # @app.callback(
+        #     Output(component_id="roc_curve", component_property='children'),
+        #     [Input('datatable-interactivity', 'derived_virtual_data')])
+        # def update_roc_curve(rows):
+        #     data = df
+        #     init = explain.explain()
+        #     figure = clf_performance(data.y_actual, data.y_prediction).plot_roc_curve(init.model, init.X_test)
+        #     return figure
+
+
         @app.callback(
-            Output(component_id='data_table_row', component_property='data'),
+            Output(component_id='local_data_table', component_property='children'),
             [Input(component_id='row_number', component_property='value')])
-        def update_table(row_number):
+        def update_local_table(row_number):
             i = 0
             if type(row_number) == type(1):
                 i = row_number
             array = df[i:i + 1]
-            array = array.to_dict('records')
-            return array
+            array1 = array
+            impact_variables = [col for col in array if '_impact' in col]
+            for col in impact_variables:
+                array1.drop([col], axis=1, inplace=True)
+            figure = dbc.Table.from_dataframe(array1, striped=True, bordered=True, hover=True, responsive=True, size='lg', style={'font-size': '12px'})
+            #data = pd.DataFrame(df.iloc[row_number])
+            return figure
+
+         # Local Feature Impact Graph
+        @app.callback(
+            [Output('local_feature_impact', "figure"),
+             Output('local_message_1', "children"),
+             Output('local_message_2', "children"),
+             Output('local_message_3', "children")],
+            [Input(component_id='row_number', component_property='value')
+                #  Input('data_table_row', "data")
+                 ])
+        def update_impact_graph(row_number):
+            i = 0
+            if type(row_number) == type(1):
+                i = row_number
+            array = df[i:i + 1]
+            #data = pd.DataFrame(data)
+            figure, dat = g.feature_impact(array)
+            message = self.insights.insight_2_local_feature_impact(dat)
+            return figure, message[0], message[1], message[2]
+
+
 
         # Partial Dependence Plot Graph
         @app.callback(
@@ -650,20 +781,6 @@ class dashboard():
             #     return {}
 
 
-        # Local Feature Impact Graph
-        @app.callback(
-            [Output('local_feature_impact', "figure"),
-             Output('local_message_1', "children"),
-             Output('local_message_2', "children"),
-             Output('local_message_3', "children")],
-            [Input('data_table_row', "data")])
-        def update_impact_graph(data):
-            data = pd.DataFrame(data)
-            figure, dat = g.feature_impact(data)
-            message = self.insights.insight_2_local_feature_impact(dat)
-            
-            return figure, message[0], message[1], message[2]
-
         # Prototypical Analysis
         @app.callback(
             Output(component_id='prototype_data', component_property='data'),
@@ -684,13 +801,17 @@ class dashboard():
         # Summary Plot
         @app.callback(
             Output('summary_plot', 'figure'),
-            [Input('datatable-interactivity', "derived_virtual_data")
+            [Input('datatable-interactivity', "derived_virtual_data"),
+            Input('btn-nclicks-2', 'n_clicks')
              ])
-        def update_graph2(rows):
-            dff = df if rows is None else pd.DataFrame(rows)
-            sp, __ = g.summary_plot(dff)
-            time.sleep(1)
-            return sp
+        def update_graph2(rows,btn):
+            changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+            if 'btn-nclicks-2' in changed_id:
+                dff = df if rows is None else pd.DataFrame(rows)
+                sp, __ = g.summary_plot(dff)
+                return sp
+            else:
+                return {}
 
         # Distributions
         @app.callback(
@@ -718,14 +839,35 @@ class dashboard():
                 else:
                     return px.violin(df3, y=xaxis_column_name, box=True, points='all', )
 
+        #Multi Level EDA
+        @app.callback(
+            Output('multi_level_eda', 'figure'),
+            [Input('x_axis','value'),
+            Input('y_axis', 'value'),
+            Input('size','value'),
+            Input('color','value'),
+            Input('facet_col','value'),
+            Input('facet_row','value')]
+        )
+        def multi_level(x_axis, y_axis,size,color, facet_col,facet_row):
+            df3 = df
+            return px.scatter(df3, x=x_axis, y=y_axis, size=size, color=color, facet_col=facet_col,facet_row=facet_row, facet_col_wrap=4)
+
+       
+    #Port Finder
         if mode == "inline":
             app.run_server(mode="inline")
         else:
             try:
-                app.run_server(host='0.0.0.0', port=8080)
+                try:
+                    app.run_server(host='0.0.0.0', port=8080)
+                except:
+                    app.run_server(host='0.0.0.0', port=self.find_free_port())
             except:
-                # if port is not available
-                app.run_server(host='0.0.0.0', port=self.find_free_port())
+                try:
+                    app.run_server(port=8080)
+                except:
+                    app.run_server(port=self.find_free_port())
 
         return True
 
