@@ -67,7 +67,7 @@ class insight_regression():
                          top_positive_variables[0] + ", " +
                          top_positive_variables[1] + ",and " +
                          top_positive_variables[2] + " " +
-                         "will change the average model outcome(" + str(expected_values) + ")" +
+                         "will increase the average model outcome(" + str(expected_values) + ")" +
                          " by " +
                          str(round(average_shap_values_positive[0], 2)) + ", " +
                          str(round(average_shap_values_positive[1], 2)) + ", and " +

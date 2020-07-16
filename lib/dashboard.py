@@ -3,39 +3,124 @@ from plotly_graphs import *
 from protodash import *
 from insights import *
 from plotly_css import *
-import time
-import performance_metrics
-from performance_metrics import *
-from explainx import explain
+import pandasql as psql
+import string
+import random
+import os
+
 
 class dashboard():
-    def __init__(self, key, secret):
+    def __init__(self):
         super(dashboard, self).__init__()
         self.param = None
-        self.key=key
-        self.secret= secret
+        self.query_dict = dict()
+        self.filtered_dataframe = dict()
+        self.feature_importance = dict()
+        self.pdp = dict()
+        self.summary_plot = dict()
+        self.feature_impact = dict()
+        self.multi_level_eda = dict()
 
+    def create_dir(self, dir_name):
+        if not os.path.exists(dir_name):
+            os.mkdir(dir_name)
 
+    def random_string_generator(self):
+        random_str = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
+        return random_str
 
+    def caching_data_exist_in_dict(self, sql_query, graph_type):
+        if graph_type == 'feature_importance':
+            if sql_query in self.feature_importance:
+                return True, self.feature_importance[sql_query]
+            return False, None
+        elif graph_type == 'pdp':
+            if sql_query in self.pdp:
+                return True, self.pdp[sql_query]
+            return False, None
+        elif graph_type == 'summary_plot':
+            if sql_query in self.summary_plot:
+                return True, self.summary_plot[sql_query]
+            return False, None
+        elif graph_type == 'feature_impact':
+            if sql_query in self.feature_impact:
+                return True, self.feature_impact[sql_query]
+            return False, None
+        elif graph_type == 'multi_level_eda':
+            if sql_query in self.multi_level_eda:
+                return True, self.multi_level_eda[sql_query]
+            return False, None
+        elif graph_type == 'filtered_df':
+            if sql_query in self.query_dict:
+                return True, self.query_dict[sql_query]
+            return False, None
 
-    def increate_counter(self,model_name):
-        # call api call here
+    def caching_exists_in_file(self, sql_query, graph_type):
+        self.create_dir("data_storage")
+        self.create_dir("data_storage/{}".format(graph_type))
 
-        url = 'https://us-central1-explainx-25b88.cloudfunctions.net/increaseCounter'
-        params = {
+        try:
+            dictionary_csv = pd.read_csv("./data_storage/filtered_df/dictionary_bkp.csv")
+            random_id = dictionary_csv[(dictionary_csv['sql'] == sql_query) & (dictionary_csv['type'] == graph_type)
+                                       & (dictionary_csv['instance_id'] == self.instance_id)]
 
-        }
-        data = {
-            "key": self.key,
-            "secret": self.secret,
-            "model": model_name
+            random_id.drop_duplicates(['sql'], keep='last', inplace=True)
+            if not random_id.empty:
+                result = random_id['random_id'].iloc[0]
+                dff = pd.read_csv("./data_storage/{}/{}.csv".format(graph_type, result))
+                print("{}  {}  {}".format(graph_type, "file exists", result))
+                return True, True, dff
+            return False, True, None
 
-        }
-        r = requests.post(url, params=params, json=data)
-        if r.json()["message"]=="200":
-            return True
+        except Exception as e:
+            return False, False, None
+
+    def creating_filtered_backup_file(self, sql_query, random_str, graph_type):
+        dict_bkp = pd.DataFrame(data={"sql": [sql_query], "random_id": [random_str], "type": [graph_type],
+                                      "instance_id": [self.instance_id]})
+        return dict_bkp
+
+    def store_data_in_csv(self, df, graph_type, random_str):
+        df.to_csv("./data_storage/{}/{}.csv".format(graph_type, random_str), index=False)
+
+    def store_data_in_dict(self, df, sql_query, graph_type):
+        if graph_type == 'feature_importance':
+            self.feature_importance[sql_query] = df
+        elif graph_type == 'pdp':
+            self.pdp[sql_query] = df
+        elif graph_type == 'summary_plot':
+            self.summary_plot[sql_query] = df
+        elif graph_type == 'feature_impact':
+            self.feature_impact[sql_query] = df
+        elif graph_type == 'multi_level_eda':
+            self.multi_level_eda[sql_query] = df
+        elif graph_type == 'filtered_df':
+            self.query_dict[sql_query] = df
+
+    def caching_data_manager(self, df, sql_query, graph_type, calculated_funct=None, details_dict=None):
+        status_file, file_exist, dff = self.caching_exists_in_file(sql_query, graph_type)
+        if status_file:
+            print("{}/{}".format(graph_type, "exist in file"))
+
+            return dff
         else:
-            return False
+            print("{}/{}".format(graph_type, "don't exists"))
+            random_str = self.random_string_generator()
+            dict_bkp = self.creating_filtered_backup_file(sql_query, random_str, graph_type)
+            dff = psql.sqldf(sql_query, locals())
+            self.create_dir("data_storage/filtered_df")
+            dict_bkp.to_csv("./data_storage/{}/dictionary_bkp.csv".format("filtered_df"), mode='a',
+                            header=file_exist is False,
+                            index=False)
+            dff.to_csv("./data_storage/filtered_df/{}.csv".format(random_str), mode='w',
+                       header=file_exist is False,
+                       index=False)
+
+            results = dff
+            if graph_type != 'filtered_df':
+                results = calculated_funct(dff)
+            self.store_data_in_csv(results, graph_type, random_str)
+            return results
 
     def find(self, df, y_variable, y_variable_predict, mode, param):
         self.available_columns = available_columns = list(df.columns)
@@ -44,11 +129,26 @@ class dashboard():
         self.y_variable = y_variable
         self.y_variable_predict = y_variable_predict
         self.param = param
+        self.instance_id = self.random_string_generator()
+        self.create_dir("data_storage")
+        self.create_dir("data_storage/user")
+        self.user_id = None
+        try:
+            user_id = pd.read_csv("data_storage/user/user_id.csv")
+            user_id.drop_duplicates(['id'], keep='first', inplace=True)
+            user_id = user_id['id'].iloc[0]
+            self.user_id = user_id
+        except Exception as e:
+            print("inside user track" )
+            user_id_val = self.random_string_generator()
+            user_id_csv = pd.DataFrame(data={"id": [user_id_val]})
+            user_id_csv.to_csv("data_storage/user/user_id.csv", index=False)
+            self.user_id= user_id_val
 
+
+            
         self.insights = insights(self.param)
-
         d = self.dash(df, mode)
-
         return True
 
     def dash(self, df, mode):
@@ -60,6 +160,7 @@ class dashboard():
         original_variables = [col for col in df.columns if not '_impact' in col]
         original_variables = [col for col in original_variables if not '_rescaled' in col]
         array = []
+        PAGE_SIZE = 10
 
         row_number = 1
         # y_variable = "predict"
@@ -90,7 +191,7 @@ class dashboard():
                         align="center",
                         no_gutters=True,
                     ),
-                    href="https://plot.ly",
+                    href="https://explainx.ai",
                 ),
 
                 html.A(
@@ -102,7 +203,7 @@ class dashboard():
                         align="center",
                         no_gutters=True,
                     ),
-                    href="https://plot.ly",
+                    href="https://explainx.ai",
                 ),
                 dbc.NavbarToggler(id="navbar-toggler"),
 
@@ -113,99 +214,103 @@ class dashboard():
 
         app.layout = html.Div([
             navbar,
-    #         html.Div([
-    #             dbc.Card(
-    #     [
-    #         dbc.CardHeader(
-    #             html.H2(
-    #                 dbc.Button(
-    #                 "View Model Metrics",
-    #                 id="collapse-button-2",
-    #                 color="link", 
-    #                 style={'fontSize':'14px'})
-    #             )
-    #         ),
-    #         dbc.Collapse(html.Div([
-    #                 html.H4('',
-    #                         style=style1),
-    #                 html.Div([
-    #                     dbc.Row(
-    #                     [
-    #                         dbc.Col(html.Div([
-                                
-    #                            html.Div(id='classification_metrics_1',style={'marginTop':"20px", 'marginBottom':"5px"})
-
-    #                         ])),
-                            
-    #                         dbc.Col(html.Div([
-    #                             html.Div(id="roc_curve")
-    #                         ])),
-    #                         dbc.Col(html.Div("One of three columns")),
-    #                     ], style={'margin':20, 'marginTop':'-20px'} )])
-    #             ], style={'marginTop': 0}), id="collapse-2"),
-    #     ]
-    # ),],style=style4),
-    #End of collapsable div 2
             html.Div([
                 dbc.Card(
-        [
-            dbc.CardHeader(
-                html.H2(
-                    dbc.Button(
-                    "View Your Data",
-                    id="collapse-button",
-                    color="link", 
-                    style={'fontSize':'14px'})
-                )
-            ),
-            dbc.Collapse(html.Div([
-                    html.H4('',
-                            style=style1),
-                    html.Div([
-                        dash_table.DataTable(
-                            id='datatable-interactivity',
-                            columns=[
-                                {"name": i, "id": i, "deletable": False, "selectable": True} for i in df.columns
-                            ],
-                            data=df.to_dict('records'),
-                            editable=True,
-                            filter_action="native",
-                            sort_mode="multi",
-                            row_selectable="multi",
-                            row_deletable=False,
-                            selected_columns=[],
-                            selected_rows=[],
-                            page_action="native",
-                            page_current=0,
-                            page_size=10,
-                            style_table=style2,
-                            style_header=style3,
-                            style_cell={
-                                "font-family": "Helvetica, Arial, sans-serif",
-                                "fontSize": "11px",
-                                'width': '{}%'.format(len(df.columns)),
-                                'textOverflow': 'ellipsis',
-                                'overflow': 'hidden',
-                                'textAlign': 'left',
-                                'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-                            },
-                            css=[
-                                {
-                                    'selector': '.dash-spreadsheet td div',
+                    [
+                        dbc.CardHeader(
+                            html.H2(
+                                dbc.Button(
+                                    "Analyze using SQL",
+                                    id="collapse-button-2",
+                                    color="link",
+                                    style={'fontSize': '14px'})
+                            )
+                        ),
+                        dbc.Collapse(html.Div([
+                            html.Div(dcc.Input(
+                                id='input-on-submit',
+                                type='text',
+                                placeholder="SELECT * FROM df",
+                                value="SELECT * FROM df",
+                                style={'height': '200px', 'width': '700px', 'fontSize': '15px'})),
 
-                                    'rule': '''
+                            html.Button('Execute Query', id='submit-val', n_clicks=0),
+                            html.Div(id='sql-query-button',
+                                     children='Enter a value and press submit',
+                                     style={'display': 'none'}
+                                     )
+
+                        ], style={'marginTop': 0}), id="collapse-2"),
+                    ]
+                ),
+
+            ], style=style4),
+
+            html.Div([
+                dbc.Card(
+                    [
+                        dbc.CardHeader(
+                            html.H2(
+                                dbc.Button(
+                                    "View Your Data",
+                                    id="collapse-button",
+                                    color="link",
+                                    style={'fontSize': '14px'})
+                            )
+                        ),
+                        dbc.Collapse(html.Div([
+                            html.H4('',
+                                    style=style1),
+                            html.Div([
+                                dash_table.DataTable(
+                                    id='datatable-interactivity',
+                                    columns=[
+                                        {"name": i, "id": i, "deletable": False, "selectable": True} for i in df.columns
+                                    ],
+                                    # data=df.to_dict('records'),
+                                    editable=True,
+
+                                    sort_mode="multi",
+
+                                    # selected_columns=[],
+                                    # selected_rows=[],
+                                    # page_action="native",
+                                    page_current=0,
+                                    page_size=PAGE_SIZE,
+                                    row_selectable='multi',
+                                    page_action='custom',
+                                    style_table=style2,
+                                    style_header=style3,
+
+                                    style_cell={
+                                        "font-family": "Helvetica, Arial, sans-serif",
+                                        "fontSize": "11px",
+                                        'width': '{}%'.format(len(df.columns)),
+                                        'textOverflow': 'ellipsis',
+                                        'overflow': 'hidden',
+                                        'textAlign': 'left',
+                                        'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
+                                    },
+                                    css=[
+                                        {
+                                            'selector': '.dash-spreadsheet td div',
+
+                                            'rule': '''
                                     line-height: 15px;
                                     max-height: 20px; min-height: 20px; height: 20px;
                                     display: block;
                                     overflow-y: hidden;
 
                                 '''
-                                }])
-                    ])
+                                        }])
+                            ])
 
-                ], style={'marginTop': 0}), id="collapse"),
-        ]
-    ),],style=style4),
+                        ], style={'marginTop': 0}), id="collapse"),
+                    ]
+                ),
+
+            ],
+                style=style4),
 
             # end of collapsable div
             dcc.Tabs(id="tabs-styled-with-inline", value='tab-1', children=[
@@ -347,6 +452,7 @@ class dashboard():
                                     ),
 
                                 ], style=style15),
+
                             ]),
                             dcc.Loading(
                                 id="loading-5",
@@ -366,9 +472,8 @@ class dashboard():
                                         style=style17),
                                 html.P(
                                     'In the summary plot, we see first indications of the relationship between the value of a feature and the impact on the prediction',
-                                    style=style18),
-
-                                    html.Button('Display Summary Plot', id='btn-nclicks-2', n_clicks=0, style=style34),
+                                    style=style18)
+                                ,
                                 dcc.Loading(
                                     id="loading-3",
                                     type="circle",
@@ -384,7 +489,7 @@ class dashboard():
 
                 # tab 3:Distribution
 
-                dcc.Tab(label='Distribution',value='tab-3',  children=[
+                dcc.Tab(label='Distribution', value='tab-3', children=[
 
                     html.Div([
 
@@ -422,61 +527,61 @@ class dashboard():
                         html.Div([
 
                             html.Div([
-                                    html.H4('Multi-Level EDA', style=style21),
-                            html.Div([
-                                html.P('X-Axis Variable'),
-                                dcc.Dropdown(
-                                    id='x_axis',
-                                    options=[{'label':i, 'value':i} for i in original_variables],
-                                    value=original_variables[0]
-                                ),
-                            ], style=style22),
-                            html.Div([
-                                html.P('Y-Axis Variable'),
-                                dcc.Dropdown(
-                                    id='y_axis',
-                                    options=[{'label':i, 'value':i} for i in original_variables],
-                                    value=original_variables[1]
-                                ),
-                            ], style=style22),
-                            html.Div([
-                                html.P('Size'),
-                                dcc.Dropdown(
-                                    id='size',
-                                    options=[{'label':i, 'value':i} for i in original_variables],
-                                    # value=original_variables[0]
-                                    placeholder="Choose a variable"
-                                ),
-                            ], style=style22),
-                            html.Div([
-                                html.P('Color'),
-                                dcc.Dropdown(
-                                    id='color',
-                                    options=[{'label':i, 'value':i} for i in original_variables],
-                                    placeholder="Choose a variable"
-                                ),
-                            ], style=style22),
-                            html.Div([
-                                html.P('Drill-down by Column'),
-                                dcc.Dropdown(
-                                    id='facet_col',
-                                    options=[{'label':i, 'value':i} for i in original_variables],
-                                    placeholder="Select a categorical variable"
-                                    # value=original_variables[0]
-                                ),
-                            ], style=style22),
-                            html.Div([
-                                html.P('Drill-down by Row'),
-                                dcc.Dropdown(
-                                    id='facet_row',
-                                    options=[{'label':i, 'value':i} for i in original_variables],
-                                    placeholder="Select a categorical variable"
-                                ),
-                            ], style=style22)
+                                html.H4('Multi-Level EDA', style=style21),
+                                html.Div([
+                                    html.P('X-Axis Variable'),
+                                    dcc.Dropdown(
+                                        id='x_axis',
+                                        options=[{'label': i, 'value': i} for i in original_variables],
+                                        value=original_variables[0]
+                                    ),
+                                ], style=style22),
+                                html.Div([
+                                    html.P('Y-Axis Variable'),
+                                    dcc.Dropdown(
+                                        id='y_axis',
+                                        options=[{'label': i, 'value': i} for i in original_variables],
+                                        value=original_variables[1]
+                                    ),
+                                ], style=style22),
+                                html.Div([
+                                    html.P('Size'),
+                                    dcc.Dropdown(
+                                        id='size',
+                                        options=[{'label': i, 'value': i} for i in original_variables],
+                                        # value=original_variables[0]
+                                        placeholder="Choose a variable"
+                                    ),
+                                ], style=style22),
+                                html.Div([
+                                    html.P('Color'),
+                                    dcc.Dropdown(
+                                        id='color',
+                                        options=[{'label': i, 'value': i} for i in original_variables],
+                                        placeholder="Choose a variable"
+                                    ),
+                                ], style=style22),
+                                html.Div([
+                                    html.P('Drill-down by Column'),
+                                    dcc.Dropdown(
+                                        id='facet_col',
+                                        options=[{'label': i, 'value': i} for i in original_variables],
+                                        placeholder="Select a categorical variable"
+                                        # value=original_variables[0]
+                                    ),
+                                ], style=style22),
+                                html.Div([
+                                    html.P('Drill-down by Row'),
+                                    dcc.Dropdown(
+                                        id='facet_row',
+                                        options=[{'label': i, 'value': i} for i in original_variables],
+                                        placeholder="Select a categorical variable"
+                                    ),
+                                ], style=style22)
                             ]),
-                             dcc.Graph(id='multi_level_eda',
+                            dcc.Graph(id='multi_level_eda',
                                       style={'marginLeft': 50, 'marginTop': 200, 'height': '700px'})
-                            
+
                         ], style=style24)
 
                     ], style=style25)
@@ -499,10 +604,9 @@ class dashboard():
                                 dcc.Input(id="row_number", type="number", value=1,
                                           placeholder="Enter a Row Number e.g. 1, 4, 5",
                                           style={'text-align': 'center'}),
-                                
-                                html.Div(id='local_data_table',style={'marginTop':"20px", 'marginBottom':"5px"}),
-                                          
-                        
+
+                                html.Div(id='local_data_table', style={'marginTop': "20px", 'marginBottom': "5px"}),
+
                             ]),
 
                         ]),  # End of Input & Data Div
@@ -629,16 +733,14 @@ class dashboard():
 
             ]), ], style=style40)
 
-        # Callbacks transferred
         @app.callback(
-            Output('datatable-interactivity', 'style_data_conditional'),
-            [Input('datatable-interactivity', 'selected_columns')]
-        )
-        def update_styles(selected_columns):
-            return [{
-                'if': {'column_id': i},
-                'background_color': '#D2F3FF'
-            } for i in selected_columns]
+            Output('datatable-interactivity', 'data'),
+            [Input('datatable-interactivity', "page_current"),
+             Input('datatable-interactivity', "page_size")])
+        def update_table(page_current, page_size):
+            return df.iloc[
+                   page_current * page_size:(page_current + 1) * page_size
+                   ].to_dict('records')
 
         @app.callback(
             Output("collapse", "is_open"),
@@ -650,16 +752,25 @@ class dashboard():
                 return not is_open
             return is_open
 
-        # #second collapse
-        # @app.callback(
-        #     Output("collapse-2", "is_open"),
-        #     [Input("collapse-button-2", "n_clicks")],
-        #     [State("collapse-2", "is_open")],
-        # )
-        # def toggle_collapse(n, is_open):
-        #     if n:
-        #         return not is_open
-        #     return is_open
+        @app.callback(
+            Output("collapse-2", "is_open"),
+            [Input("collapse-button-2", "n_clicks")],
+            [State("collapse-2", "is_open")],
+        )
+        def toggle_collapse(n, is_open):
+            if n:
+                return not is_open
+            return is_open
+
+        @app.callback(
+            dash.dependencies.Output('sql-query-button', 'children'),
+            [dash.dependencies.Input('submit-val', 'n_clicks')],
+            [dash.dependencies.State('input-on-submit', 'value')])
+        def update_output(n_clicks, value):
+            # sql_query = f'SELECT * FROM df {value}'
+            sql_query = f'{value}'
+
+            return sql_query
 
         # Global Feature Importance
         @app.callback(
@@ -669,18 +780,20 @@ class dashboard():
              Output('global_message_3', "children"),
              Output('global_message_4', "children"),
              Output('global_message_5', "children")],
-            [Input('datatable-interactivity', "derived_virtual_data"),
-             Input('datatable-interactivity', "derived_virtual_selected_rows")])
-        def update_graphs(rows, derived_virtual_selected_rows):
-            
-            dff = df if rows is None else pd.DataFrame(rows)
-            g = plotly_graphs()
-            figure, data = g.feature_importance(dff)
-            message = self.insights.insight_1_feature_imp(data)
-           
-            if len(message) == 4:
-                return figure, message[0], message[1], message[2], message[3], ""
-            return figure, message[0], message[1], message[2], message[3], message[4]
+            [Input('sql-query-button', 'children'),
+             Input('tabs-styled-with-inline', 'value')])
+        def update_graphs(sql_query, tab):
+            if tab == "tab-1":
+                g = plotly_graphs()
+                graph_type = "feature_importance"
+                dff = self.caching_data_manager(df, sql_query, graph_type, g.feature_importance)
+                figure = g.feature_importance_graph(dff)
+                message = self.insights.insight_1_feature_imp(dff)
+                if len(message) == 4:
+                    return figure, message[0], message[1], message[2], message[3], ""
+                return figure, message[0], message[1], message[2], message[3], message[4]
+            else:
+                return {}, '', '', '', '', ''
 
         # Global Feature Impact
         @app.callback(
@@ -688,39 +801,18 @@ class dashboard():
              Output('message_1', "children"),
              Output('message_2', "children"),
              Output('message_3', "children")],
-            [Input('datatable-interactivity', "derived_virtual_data"),
-             Input('datatable-interactivity', "derived_virtual_selected_rows")])
-        def update_graphs(rows, derived_virtual_selected_rows):
-            dff = df if rows is None else pd.DataFrame(rows)
-            g = plotly_graphs()
-            figure, data = g.feature_impact(dff)
-            message = self.insights.insight_2_global_feature_impact(data)
-            return figure, message[0], message[1], message[2]
-
-        #Classification Metrics
-        # @app.callback(
-        #     Output(component_id='classification_metrics_1', component_property='children'),
-        #     [Input('datatable-interactivity', "derived_virtual_data")])
-        # def update_classification(rows):
-        #     data = df 
-        #     figure = clf_performance(data.y_actual, data.y_prediction).F_pos_F_neg()
-        #     figure_a = clf_performance(data.y_actual, data.y_prediction).fp_fn_table()
-        #     figure2 = dbc.Table.from_dataframe(figure, striped=True, bordered=True, hover=True, responsive=True, size='lg', style={'font-size': '12px'})
-        #     figure3 = dbc.Table.from_dataframe(figure_a, striped=True, bordered=True, hover=True, responsive=True, size='lg', style={'font-size': '12px'})
-
-            
-        #     return figure3, figure2
-        
-        #ROC curnve
-        # @app.callback(
-        #     Output(component_id="roc_curve", component_property='children'),
-        #     [Input('datatable-interactivity', 'derived_virtual_data')])
-        # def update_roc_curve(rows):
-        #     data = df
-        #     init = explain.explain()
-        #     figure = clf_performance(data.y_actual, data.y_prediction).plot_roc_curve(init.model, init.X_test)
-        #     return figure
-
+            [Input('sql-query-button', 'children'),
+             Input('tabs-styled-with-inline', 'value')])
+        def update_graphs(sql_query, tab):
+            if tab == 'tab-1':
+                g = plotly_graphs()
+                graph_type = "feature_impact"
+                dff = self.caching_data_manager(df, sql_query, graph_type, g.feature_impact)
+                figure = g.feature_impact_graph(dff)
+                message = self.insights.insight_2_global_feature_impact(dff)
+                return figure, message[0], message[1], message[2]
+            else:
+                return {}, '', '', ''
 
         @app.callback(
             Output(component_id='local_data_table', component_property='children'),
@@ -734,30 +826,29 @@ class dashboard():
             impact_variables = [col for col in array if '_impact' in col]
             for col in impact_variables:
                 array1.drop([col], axis=1, inplace=True)
-            figure = dbc.Table.from_dataframe(array1, striped=True, bordered=True, hover=True, responsive=True, size='lg', style={'font-size': '12px'})
-            #data = pd.DataFrame(df.iloc[row_number])
+            figure = dbc.Table.from_dataframe(array1, striped=True, bordered=True, hover=True, responsive=True,
+                                              size='lg', style={'font-size': '12px'})
             return figure
 
-         # Local Feature Impact Graph
+        # Local Feature Impact Graph
         @app.callback(
             [Output('local_feature_impact', "figure"),
              Output('local_message_1', "children"),
              Output('local_message_2', "children"),
              Output('local_message_3', "children")],
-            [Input(component_id='row_number', component_property='value')
-                #  Input('data_table_row', "data")
-                 ])
-        def update_impact_graph(row_number):
-            i = 0
-            if type(row_number) == type(1):
-                i = row_number
-            array = df[i:i + 1]
-            #data = pd.DataFrame(data)
-            figure, dat = g.feature_impact(array)
-            message = self.insights.insight_2_local_feature_impact(dat)
-            return figure, message[0], message[1], message[2]
-
-
+            [Input(component_id='row_number', component_property='value'),
+             Input('tabs-styled-with-inline', 'value')])
+        def update_impact_graph(row_number, tab):
+            if tab == 'tab-4':
+                i = 0
+                if type(row_number) == type(1):
+                    i = row_number
+                array = df[i:i + 1]
+                figure, dat = g.feature_impact_old(array)
+                message = self.insights.insight_2_local_feature_impact(dat)
+                return figure, message[0], message[1], message[2]
+            else:
+                return {}, '', '', ''
 
         # Partial Dependence Plot Graph
         @app.callback(
@@ -765,21 +856,18 @@ class dashboard():
             [Input('xaxis-column', 'value'),
              Input('yaxis-column', 'value'),
              Input('third-axis', 'value'),
-             Input('datatable-interactivity', "derived_virtual_data"),
-             Input('datatable-interactivity', "derived_virtual_selected_rows")
-                # ,Input('tabs-styled-with-inline', "value")
-             ])
-        def update_graph(xaxis_column_name, yaxis_column_name, third_axis_name, rows, derived_virtual_selected_rows):
-            # if tab=='tab-2':
-            df3 = df if rows is None else pd.DataFrame(rows)
-            g = plotly_graphs()
-            fig, __ = g.partial_dependence_plot(df3, df3[xaxis_column_name], df3[yaxis_column_name],
-                                                    df3[third_axis_name])
-
-            return fig
-            # else:
-            #     return {}
-
+             Input('sql-query-button', 'children'),
+             Input('tabs-styled-with-inline', 'value')])
+        def update_graph(xaxis_column_name, yaxis_column_name, third_axis_name, sql_query, tab):
+            if tab == 'tab-2':
+                g = plotly_graphs()
+                graph_type = 'pdp'
+                df3 = self.caching_data_manager(df, sql_query, graph_type, g.partial_dependence_plot)
+                fig = g.pdp_plot(df3, df3[xaxis_column_name], df3[yaxis_column_name],
+                                 df3[third_axis_name])
+                return fig
+            else:
+                return {}
 
         # Prototypical Analysis
         @app.callback(
@@ -801,15 +889,15 @@ class dashboard():
         # Summary Plot
         @app.callback(
             Output('summary_plot', 'figure'),
-            [Input('datatable-interactivity', "derived_virtual_data"),
-            Input('btn-nclicks-2', 'n_clicks')
-             ])
-        def update_graph2(rows,btn):
-            changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-            if 'btn-nclicks-2' in changed_id:
-                dff = df if rows is None else pd.DataFrame(rows)
-                sp, __ = g.summary_plot(dff)
-                return sp
+            [Input('sql-query-button', 'children'),
+             Input('tabs-styled-with-inline', 'value')])
+        def update_graph2(sql_query, tab):
+            if tab == 'tab-2':
+                graph_type = 'summary_plot'
+                g = plotly_graphs()
+                dff = self.caching_data_manager(df, sql_query, graph_type, g.summary_plot)
+                fig = g.summary_plot_graph(dff)
+                return fig
             else:
                 return {}
 
@@ -817,11 +905,14 @@ class dashboard():
         @app.callback(
             Output('indicator-graphic2', 'figure'),
             [Input('xaxis-column-name', 'value'),
-             Input('plot_type', 'value')
+             Input('plot_type', 'value'),
+             Input('sql-query-button', 'children'),
+
              ])
-        def update_graph2(xaxis_column_name, plot_type):
-            df3 = df
-            # For categorical variables only
+        def update_graph2(xaxis_column_name, plot_type, sql_query):
+
+            graph_type = 'filtered_df'
+            df3 = self.caching_data_manager(df, sql_query, graph_type)
             cat_variables = []
             num_variables = []
             for i in original_variables:
@@ -839,35 +930,42 @@ class dashboard():
                 else:
                     return px.violin(df3, y=xaxis_column_name, box=True, points='all', )
 
-        #Multi Level EDA
+        # Multi Level EDA
         @app.callback(
             Output('multi_level_eda', 'figure'),
-            [Input('x_axis','value'),
-            Input('y_axis', 'value'),
-            Input('size','value'),
-            Input('color','value'),
-            Input('facet_col','value'),
-            Input('facet_row','value')]
+            [Input('x_axis', 'value'),
+             Input('y_axis', 'value'),
+             Input('size', 'value'),
+             Input('color', 'value'),
+             Input('facet_col', 'value'),
+             Input('facet_row', 'value'),
+             Input('sql-query-button', 'children'),
+             ]
         )
-        def multi_level(x_axis, y_axis,size,color, facet_col,facet_row):
-            df3 = df
-            return px.scatter(df3, x=x_axis, y=y_axis, size=size, color=color, facet_col=facet_col,facet_row=facet_row, facet_col_wrap=4)
+        def multi_level(x_axis, y_axis, size, color, facet_col, facet_row, sql_query):
+            graph_type = 'filtered_df'
+            df3 = self.caching_data_manager(df, sql_query, graph_type)
+            return px.scatter(df3, x=x_axis, y=y_axis, size=size, color=color, facet_col=facet_col, facet_row=facet_row,
+                              facet_col_wrap=4)
 
-       
-    #Port Finder
+        # Port Finder
         if mode == "inline":
             app.run_server(mode="inline")
         else:
             try:
-                try:
-                    app.run_server(host='0.0.0.0', port=8080)
-                except:
-                    app.run_server(host='0.0.0.0', port=self.find_free_port())
+                app.run_server(host='127.0.0.1', port=8080)
             except:
-                try:
-                    app.run_server(port=8080)
-                except:
-                    app.run_server(port=self.find_free_port())
+                # if port is not available
+                app.run_server(host='127.0.0.1', port=self.find_free_port())
+
+                # app.run_server(host='0.0.0.0', port=self.find_free_port())
+
+        #update counter here
+        try:
+            self.increate_counter()
+        except:
+            pass
+
 
         return True
 
@@ -876,3 +974,21 @@ class dashboard():
             s.bind(('', 0))
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             return s.getsockname()[1]
+
+    def increate_counter(self):
+        # call api call here
+
+        url = 'https://us-central1-explainx-25b88.cloudfunctions.net/increaseCounter'
+        params = {
+
+        }
+        data = {
+            "user_id": self.user_id,
+            "model": self.param["model_name"]
+
+        }
+        r = requests.post(url, params=params, json=data)
+        if r.json()["message"]=="200":
+            return True
+        else:
+            return False

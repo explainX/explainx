@@ -1,286 +1,218 @@
-
-from sklearn import *
-import sklearn
+# Import modules
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go
-import plotly.figure_factory as ff
+import sklearn
+from sklearn import *
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import label_binarize
+from sklearn.metrics import * 
+from itertools import cycle
 import colorlover as cl
+import plotly.figure_factory as ff
+import plotly.graph_objects as go
 
-
-class clf_performance():
-    def __init__(self, y_true, y_pred):
-        super(clf_performance, self).__init__()
+class performance_metrics():
+    def __init__(self, y_test, y_pred):
+        super(performance_metrics, self).__init__()
         self.param = None
-        self.y_true = y_true
+        self.y_test = y_test
         self.y_pred = y_pred
-        
-    def accuracy(self):
-            # Acuracy_score
-        accuracy = sklearn.metrics.accuracy_score(self.y_true, self.y_pred)
-        return accuracy
-    
-    
-    def f1_score(self):
-            # F1-score
-        f1_score = sklearn.metrics.f1_score(self.y_true, self.y_pred)
-        return f1_score
-    
-    def recall_score(self):
-            # Log Loss
-        recall_score = sklearn.metrics.recall_score(self.y_true, self.y_pred)
-        return recall_score
-    
-    def matthews_corrcoef(self):
-            # Matthews Corrcoef
-        matthews_corrcoef = sklearn.metrics.matthews_corrcoef(self.y_true, self.y_pred)
-        return matthews_corrcoef
-    
-    def mae(self):
-            # MAE
-        mae = sklearn.metrics.mean_absolute_error(self.y_true, self.y_pred)
-        return mae
-     
-    def mse(self):
-            # MSE
-        mse = sklearn.metrics.mean_squared_error(self.y_true, self.y_pred)
-        return mse
-    
-    
-    def auc(self):
-            # Area Under the Curve
-        fpr, tpr, thresholds = sklearn.metrics.roc_curve(self.y_true, self.y_pred)
-        auc = metrics.auc(fpr, tpr)
-        return auc
-        
-        
-    def log_loss(self):
-            # Log Loss
-        log_loss = sklearn.metrics.log_loss(self.y_true, self.y_pred)
-        return log_loss
-        
 
-    def matrix(self):
-            # Confusion Matrix
-        matrix = sklearn.metrics.confusion_matrix(self.y_true, self.y_pred)
-        matrix_dataframe = pd.DataFrame(matrix)
-        return matrix_dataframe
-    
-    
-    def report(self):
-             # Precision, Recall, F1-score, Support
-        report = sklearn.metrics.classification_report(self.y_true, self.y_pred,output_dict=True)
-        report_dataframe = pd.DataFrame(report)
-        report_dataframe = report_dataframe.transpose().drop('accuracy', axis=0)
-        return report_dataframe
-    
-    def performance_metrics(self):
-       
-        
-            # Area Under the Curve
-        fpr, tpr, thresholds = sklearn.metrics.roc_curve(self.y_true, self.y_pred)
-        auc = metrics.auc(fpr, tpr)
 
-            # MAE
-        mae = sklearn.metrics.mean_absolute_error(self.y_true, self.y_pred) 
-            # MSE
-        mse = sklearn.metrics.mean_squared_error(self.y_true, self.y_pred)
-         
-            
-        accuracy = sklearn.metrics.accuracy_score(self.y_true, self.y_pred)   
-            
+    def false_possitives_negatives(self):
         
-        matthews_corrcoef = sklearn.metrics.matthews_corrcoef(self.y_true, self.y_pred)
+        f1 = f1_score(self.y_test, self.y_pred, average='micro')
+        accuracy = accuracy_score(self.y_test, self.y_pred)
+        cnf_matrix = confusion_matrix(self.y_test, self.y_pred)
+
+        FP = cnf_matrix.sum(axis=0) - np.diag(cnf_matrix) 
+        FN = cnf_matrix.sum(axis=1) - np.diag(cnf_matrix)
+        TP = np.diag(cnf_matrix)
+        TN = cnf_matrix.sum() - (FP + FN + TP)
+        FP = FP.astype(float).sum()
+        FN = FN.astype(float).sum()
+        TP = TP.astype(float).sum()
+        TN = TN.astype(float).sum()
+
+        # Sensitivity, hit rate, recall, or true positive rate
+        TPR = TP/(TP+FN)
+        # Specificity or true negative rate
+        TNR = TN/(TN+FP) 
+        # Precision or positive predictive value
+        PPV = TP/(TP+FP)
+        # Negative predictive value
+        NPV = TN/(TN+FN)
+        # Fall out or false positive rate
+        FPR = FP/(FP+TN)
+        # False negative rate
+        FNR = FN/(TP+FN)
+        # False discovery rate
+        FDR = FP/(TP+FP)
+        # Overall accuracy for each class
+        ACC = (TP+TN)/(TP+FP+FN+TN)
+
+
+        fp_fn_table = pd.DataFrame(dict({'False Possitives (%)': [(FPR * 100).round(2)],
+                                         'False Negatives (%)': [(FNR * 100).round(2)],
+                                         'Accuracy (%)': accuracy.round(2)* 100,
+                                         'F1': f1.round(2)}))
+        
+        fig_metrics_table = ff.create_table(fp_fn_table, height_constant=15)
+        
+        return fig_metrics_table    
     
-       
-        # Make DataFrames
-        metric = ['Accuracy','Area Under Curve','MAE','MSE','Matthews Corrcoef']
-        values = [accuracy, auc, mae, mse,matthews_corrcoef]
-        performance_dataframe = pd.DataFrame({'metric': metric, 'values': values})
         
         
-   
-        return performance_dataframe
-        
-    def y_score(self, model, X_test):
-        y_score = model.predict_proba(X_test)[:,1]
-        
-        return y_score
     
-    def fp_fn_table(self):
-        tn, fp, fn, tp = np.array(clf_performance(self.y_true, self.y_pred).matrix()).ravel()
-
-        f1 = clf_performance(self.y_true, self.y_pred).f1_score()
-        accuracy = clf_performance(self.y_true, self.y_pred).accuracy()
-
-        total = fp + fn + tp + tn
-
-        fp_fn_table = pd.DataFrame(dict({'False Possitives (%)': [(fp / total * 100).round(2)],
-             'False Negatives (%)': [(fn / total * 100).round(2)],
-             'Accuracy (%)': accuracy.round(2),
-             'F1': f1.round(2)}))
+    def get_matrix(self):
+        y_test = label_binarize(self.y_test, classes=list(set(self.y_test.flatten())))
+        n_classes = y_test.shape[1]
+        conf_matrix = confusion_matrix(y_test.argmax(axis=1), self.y_pred.argmax(axis=1))
         
-        return fp_fn_table   
-        
-        
-        
-    def F_pos_F_neg(self):
-    
-        tn, fp, fn, tp = np.array(clf_performance(self.y_true, self.y_pred).matrix()).ravel()
-
-        predicted_yes = [tp,fp]
-        predicted_no = [fn,tn]
-
-        index_names = ['Actual Yes', 'Actual No']
-        total = predicted_yes + predicted_no
-
-        df = pd.DataFrame({'Predicted Yes': predicted_yes,
-                     'Predicted No': predicted_no}, index = index_names)
-
-
-        df['Total'] = df['Predicted Yes'] + df['Predicted No']
-        df.loc['Total'] = df.sum(axis=0) 
-
-
-        df['Predicted Yes2']  = (df['Predicted Yes'] / df['Total'] *100).round(1)
-        df['Predicted No2']  = (df['Predicted No'] / df['Total'] * 100).round(1)
-        total_sum = df.Total.iloc[:-1].sum()
-        df['Total2'] = (df['Total'] / total_sum * 100).round(1)
-
-        PY = [f'{str(j)}{"%"} ({str(x)}) ' for x, j in zip(df['Predicted Yes'], df['Predicted Yes2'])]
-        PrN = [f'{str(j)}{"%"} ({str(x)}) ' for x, j in zip(df['Predicted No'], df['Predicted No2'])]
-        Tt = [f'{str(j)}{"%"} ({str(x)}) ' for x, j in zip(df['Total'], df['Total2'])]
-
-        df['Predicted Yes'] = PY
-        df['Predicted No'] = PrN
-        df['Total'] = Tt
-        df['*'] = ['Actual Yes', 'Actual No', 'Total']
-
-        RP_FN = df[['*','Predicted Yes', 'Predicted No', 'Total']]
-        RP_FN.style.applymap('font-weight: bold', subset=['Index'])
-
-        return RP_FN
+        return conf_matrix 
     
     
-    def plot_roc_curve(self, model, X_test):
-        decision_test = clf_performance(self.y_true, self.y_pred).y_score(model, X_test)
-        fpr, tpr, threshold = metrics.roc_curve(self.y_true, decision_test)
+    def plot_roc(self):
+    
+        y_test = label_binarize(self.y_test, classes=list(set(self.y_test.flatten())))
+        n_classes = y_test.shape[1]
 
-            # AUC Score
-        auc_score = metrics.roc_auc_score(y_true=self.y_true, y_score=decision_test)
+        # Compute ROC curve and ROC area for each class
+        fpr = dict()
+        tpr = dict()
+        roc_auc = dict()
+        for i in range(n_classes):
+            fpr[i], tpr[i], _ = roc_curve(y_test[:, i], self.y_pred[:, i])
+            roc_auc[i] = auc(fpr[i], tpr[i])
 
-        trace0 = go.Scatter(x=fpr,y=tpr,name='ROC',)
-        layout = go.Layout(title=f'ROC Curve (AUC = {auc_score:.3f})',xaxis=dict(title='False Positive Rate'),
-        yaxis=dict(title='True Positive Rate'))
+        # Compute micro-average ROC curve and ROC area
+        fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), self.y_pred.ravel())
+        roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
 
-        figure = go.Figure(data=trace0, layout=layout)
+        # Compute macro-average ROC curve and ROC area
 
-        return figure
+        # First aggregate all false positive rates
+        all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
 
-    def plot_precision_recall(self, model, X_test):
-        y_score=clf_performance(self.y_true, self.y_pred).y_score(model, X_test)
-        decision_test = clf_performance(self.y_true, self.y_pred).y_score(model, X_test)
-        precision, recall, thresholds = sklearn.metrics.precision_recall_curve(self.y_true, y_score)
-        auc_score = metrics.roc_auc_score(y_true=self.y_true, y_score=decision_test)
+        # Then interpolate all ROC curves at this points
+        mean_tpr = np.zeros_like(all_fpr)
+        for i in range(n_classes):
+            mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
 
-        trace0 = go.Scatter(x=recall,y=precision,name='ROC',)
+        # Finally average it and compute AUC
+        mean_tpr /= n_classes
+
+        fpr["macro"] = all_fpr
+        tpr["macro"] = mean_tpr
+        roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+
+        # Plot all ROC curves
+        data = []
+        trace1 = go.Scatter(x=fpr["micro"], y=tpr["micro"], mode='lines', 
+                            line=dict(color='deeppink', width=2, dash='dot'),
+                            name='micro-average ROC curve (area = {0:0.2f})'
+                                   ''.format(roc_auc["micro"]))
+        data.append(trace1)
+
+        trace2 = go.Scatter(x=fpr["macro"], y=tpr["macro"], mode='lines', 
+                            line=dict(color='navy', width=2, dash='dot'),
+                            name='macro-average ROC curve (area = {0:0.2f})'
+                                  ''.format(roc_auc["macro"]))
+        data.append(trace2)
+
+        colors = cycle(['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52'])
+
+        for i, color in zip(range(n_classes), colors):
+            trace3 = go.Scatter(x=fpr[i], y=tpr[i],
+                                mode='lines', 
+                                line=dict(color=color, width=2),
+                                name='ROC curve of class {0} (area = {1:0.2f})'
+                                ''.format(i, roc_auc[i]))
+            data.append(trace3)
+
+        trace4 = go.Scatter(x=[0, 1], y=[0, 1], 
+                            mode='lines', 
+                            line=dict(color='black', width=2, dash='dash'),
+                            showlegend=False)
 
 
-        layout = go.Layout(title=f'PR Curve (AUC = {auc_score:.3f})',xaxis=dict(title='Recall'),
-        yaxis=dict(title='Precision'))
+        layout = go.Layout(title='Receiver operating characteristic',
+                           xaxis=dict(title='False Positive Rate'),
+                           yaxis=dict(title='True Positive Rate'),
+                           margin=dict(pad=25))
 
-        figure = go.Figure(data=trace0, layout=layout)
+        fig = go.Figure(data=data, layout=layout)
 
-
-
-        return figure
-
-    def plot_metrics(self):
-  
-        performance_data = clf_performance(self.y_true, self.y_pred).performance_metrics()
-        # Initialize a figure with ff.create_table(table_data)
-        fig_metrics = ff.create_table(performance_data, height_constant=60)
-
-
-        # Use the hovertext kw argument for hover text
-        fig_metrics = go.Figure(data=[go.Bar(x=performance_data['metric'], y= performance_data['values'],
-                    hovertext=[])])
-        # Customize aspect
-        fig_metrics.update_traces(marker_color='rgb(158,202,225)', marker_line_color='rgb(8,48,107)',
-                          marker_line_width=1.5, opacity=0.6)
-        fig_metrics.update_layout(title_text='Classification Metrics')
-        return fig_metrics  
+        return fig
     
     
-    def plot_metrics_table(self):
-
-   
-        performance_data = clf_performance(self.y_true, self.y_pred).performance_metrics()
-        fig_metrics_table = ff.create_table(performance_data, height_constant=60)
+    def plot_pr(self):
         
-        return fig_metrics_table
+        colors = cycle(['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A',
+                        '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52'])
+
+        # Binarize the output
+        y_test = label_binarize(self.y_test, classes=list(set(self.y_test.flatten())))
+        n_classes = y_test.shape[1]
+
+        # Compute Precision-Recall and plot curve
+        precision = dict()
+        recall = dict()
+        average_precision = dict()
+        
+        for i in range(n_classes):
+            precision[i], recall[i], _ = precision_recall_curve(y_test[:, i], self.y_pred[:, i])
+            average_precision[i] = average_precision_score(y_test[:, i], self.y_pred[:, i])
+
+        # Compute micro-average ROC curve and ROC area
+        precision["micro"], recall["micro"], _ = precision_recall_curve(y_test.ravel(),
+            self.y_pred.ravel())
+        average_precision["micro"] = average_precision_score(y_test, self.y_pred,
+                                                             average="micro")
+
+
+        data = []
+        trace2 = go.Scatter(x=recall["micro"], y=precision["micro"], 
+                            mode='lines',
+                            line=dict(color='gold', width=2),
+                            name='micro-average Precision-recall curve (area = {0:0.2f})'
+                                  ''.format(average_precision["micro"]))
+        data.append(trace2)
+        
+        for i, color in zip(range(n_classes), colors):
+            trace3 = go.Scatter(x=recall[i], y=precision[i],
+                                mode='lines',
+                                line=dict(color=color, width=2),
+                                name='Precision-recall curve of class {0} (area = {1:0.2f})'
+                                      ''.format(i, average_precision[i]))
+            data.append(trace3)
+
+        layout = go.Layout(title='Precision-Recall curve',
+                           xaxis=dict(title='Recall'),
+                           yaxis=dict(title='Precision'),
+                           margin=dict(pad=25))
+
+        fig = go.Figure(data=data, layout=layout)
+        
+        return fig
     
-
-    def plot_report(self):
-       
-        # Add table data
-        report_data = clf_performance(self.y_true, self.y_pred).report()
-        report_data.reset_index(inplace = True)
-        # Initialize a figure with ff.create_table(table_data)
-        fig_report = ff.create_table(report_data, height_constant=60)
-
-         # Add graph data
-
-
-        # Make traces for graph
-        trace1 = go.Bar(x=report_data['index'], y=report_data['precision'], xaxis='x2', yaxis='y2',
-                        marker=dict(color='#8A2BE2'),
-                        name='prescision')
-        trace2 = go.Bar(x=report_data['index'], y=report_data['recall'], xaxis='x2', yaxis='y2',
-                        marker=dict(color='#000000'),
-                        name='recall')
-
-        trace3 = go.Bar(x=report_data['index'], y=report_data['f1-score'], xaxis='x2', yaxis='y2',
-                        marker=dict(color='#00BFFF'),
-                        name='f1score')
-
-        # Add trace data to figure
-        fig_report.add_traces([trace1, trace2,trace3])
-
-        # initialize xaxis2 and yaxis2
-        fig_report['layout']['xaxis2'] = {}
-        fig_report['layout']['yaxis2'] = {}
-
-        # Edit layout for subplots
-        fig_report.layout.yaxis.update({'domain': [0, .45]})
-
-
-        fig_report.layout.yaxis2.update({'domain': [.6, 1]})
-
-        # The graph's yaxis2 MUST BE anchored to the graph's xaxis2 and vice versa
-        fig_report.layout.yaxis2.update({'anchor': 'x2'})
-        fig_report.layout.xaxis2.update({'anchor': 'y2'})
-        fig_report.layout.yaxis2.update({'title': 'Value'})
-
-
-        # Update the margins to add a title and see graph x-labels.
-        fig_report.layout.margin.update({'t':50, 'b':100})
-        fig_report.layout.update({'title': 'Precision, Recall, f-1 Score'})
-
-        # Update the height because adding a graph vertically will interact with
-        # the plot height calculated for the table
-        fig_report.layout.update({'height':900})
-
-        return fig_report
     
     def plot_pie(self):
         
-        tn, fp, fn, tp = np.array(clf_performance(self.y_true, self.y_pred).matrix()).ravel()
+        cnf_matrix = confusion_matrix(self.y_test, self.y_pred)
 
-        label_text = ["True Positive",
-                          "False Negative",
-                          "False Positive",
-                          "True Negative"]
+        FP = cnf_matrix.sum(axis=0) - np.diag(cnf_matrix) 
+        FN = cnf_matrix.sum(axis=1) - np.diag(cnf_matrix)
+        TP = np.diag(cnf_matrix)
+        TN = cnf_matrix.sum() - (FP + FN + TP)
+        fp = FP.astype(float).sum()
+        fn = FN.astype(float).sum()
+        tp = TP.astype(float).sum()
+        tn = TN.astype(float).sum()
+        
+        
+        label_text = ["True Positive", "False Negative","False Positive","True Negative"]
         labels = ["TP", "FN", "FP", "TN"]
         blue = cl.flipper()['seq']['9']['Blues']
         red = cl.flipper()['seq']['9']['Reds']
@@ -294,26 +226,23 @@ class clf_performance():
         text=labels,
         sort=False,
         marker=dict(
-        colors=colors
-        )
-        )
+        colors=colors))
 
         layout = go.Layout(
         title=f'TP, TN, FP, FN',
         margin=dict(l=10, r=10, t=60, b=10),
         legend=dict(
         bgcolor='rgba(255,255,255,0)',
-        orientation='h'
-        )
-        )
+        orientation='h'))
 
         data = [trace0]
         figure = go.Figure(data=data, layout=layout)
         return figure
     
+    
     def plot_matrix(self):
         
-        matrix_data =  clf_performance(self.y_true, self.y_pred).matrix()
+        matrix_data =  pd.DataFrame(confusion_matrix(self.y_test, self.y_pred))
         matrix_data = matrix_data.astype('float') / matrix_data.sum(axis=1)[:, np.newaxis]*100
 
         z = np.array(matrix_data).round(2)
@@ -328,130 +257,110 @@ class clf_performance():
         fig_matrix = ff.create_annotated_heatmap(z, x=x, y=y, annotation_text=z_text, colorscale='Viridis')
 
         # add title
-        fig_matrix.update_layout(title_text='<i><b>Confusion matrix</b></i>',
+        fig_matrix.update_layout(title_text='<i><b>Confusion matrix (%)</b></i>',
                           xaxis = dict(title='Predicted Label'),
-                          yaxis = dict(title='True Label')
-                         )
-
-
-
-
+                          yaxis = dict(title='True Label'))
 
         # adjust margins to make room for yaxis title
         fig_matrix.update_layout(margin=dict(t=50, l=200))
 
         # add colorbar
         fig_matrix['data'][0]['showscale'] = True
+        
         return fig_matrix
     
     
-    
-    
-class reg_performance():
-    def __init__(self, y_true, y_pred):
-        super(reg_performance, self).__init__()
-        self.param = None
-        self.y_true = y_true
-        self.y_pred = y_pred
+    def metrics_table(self):
+       
         
-    def maxerror(self):
-            # max_error metric calculates the maximum residual error.
-        maxerror = sklearn.metrics.max_error(self.y_true, self.y_pred)
-        return maxerror
-    
-    
-    def mae(self):
-            # Mean absolute error
-        mae = sklearn.metrics.mean_absolute_error(self.y_true, self.y_pred)
-        return mae
+                 # AUC score
+        lb = preprocessing.LabelBinarizer()
+        lb.fit(self.y_test)
+        y_test_roc = lb.transform(self.y_test)
+        y_pred_roc = lb.transform(self.y_pred)
+        auc = roc_auc_score(y_test_roc, y_pred_roc, average="macro").round(2)
 
-    def mse(self):
-            # Mean squared error regression
-        mse = sklearn.metrics.mean_squared_error(self.y_true, self.y_pred)
-        return mse
-    
-    
-    def r2(self):
-            # # R^2 (coefficient of determination) 
-        r2 = sklearn.metrics.r2_score(self.y_true, self.y_pred)
-        return r2
-    
-    
-    def mape(self):
-            # Mean absolute percentage error
-            
-            
-        def mean_absolute_percentage_error(y_true, y_pred): 
-            y_true, y_pred = np.array(y_true), np.array(y_pred)
-            return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+                    # MAE
+        mae = mean_absolute_error(self.y_test, self.y_pred).round(2)
+                # MSE
+        mse = mean_squared_error(self.y_test, self.y_pred).round(2)
 
-        mape = mean_absolute_percentage_error(self.y_true, self.y_pred)    
-        return mape   
-            
-  
+        # Accuracy
+        accuracy = accuracy_score(self.y_test, self.y_pred).round(2)   
+
+        # matthews_corrcoef
+        matthews_corrcoe = matthews_corrcoef(self.y_test, self.y_pred).round(2)
+
     
-  
-    
-    
+       
+        # Make DataFrames
+        metric = ['Accuracy','Area Under Curve','MAE','MSE','Matthews Corrcoef']
+        values = [accuracy, auc, mae, mse,matthews_corrcoe]
+        metrics_tab = pd.DataFrame({'metric': metric, 'values': values})
+        
+        fig_metrics_table = ff.create_table(metrics_tab, height_constant=15)
+        
    
-    def performance_metrics(self):
-        
-        
-        
-        maxerror = sklearn.metrics.max_error(self.y_true, self.y_pred)
+        return fig_metrics_table
 
-        mae = sklearn.metrics.mean_absolute_error(self.y_true, self.y_pred)
+
+
+    def performance_metrics_regression(self):
+        
+        
+        
+        maxerror = max_error(self.y_test, self.y_pred).round(2) 
+
+        mae = mean_absolute_error(self.y_test, self.y_pred).round(2) 
       
-        mse = sklearn.metrics.mean_squared_error(self.y_true, self.y_pred) 
+        mse = mean_squared_error(self.y_test, self.y_pred).round(2) 
 
-        r2 = sklearn.metrics.r2_score(self.y_true, self.y_pred)
+        r2 = r2_score(self.y_test, self.y_pred).round(2) 
      
     
         def mean_absolute_percentage_error(y_true, y_pred): 
             y_true, y_pred = np.array(y_true), np.array(y_pred)
             return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
-        mape = mean_absolute_percentage_error(self.y_true, self.y_pred)
+        mape = mean_absolute_percentage_error(self.y_test, self.y_pred).round(2) 
+    
         
         # Make DataFrames
         metric = ['Max Error','R squared','MAE','MSE','MAPE']
         values = [maxerror, r2, mae, mse, mape]
         metrics_dataframe = pd.DataFrame({'metric': metric, 'values': values})
-        
+        metrics_dataframe = ff.create_table(metrics_dataframe, height_constant=15)
         return metrics_dataframe
 
-    
-    def plot_metrics(self):
+    def actuals(self):
         
         
-       
-     
-        performance_data = reg_performance(self.y_true, self.y_pred).performance_metrics()
-        # Initialize a figure with ff.create_table(table_data)
-        fig_metrics = ff.create_table(performance_data, height_constant=60)
-        
+        cnf_matrix = confusion_matrix(self.y_test, self.y_pred)
 
-        # Use the hovertext kw argument for hover text
-        fig_metrics = go.Figure(data=[go.Bar(x=performance_data['metric'], y= performance_data['values'],
-                    hovertext=[])])
-        # Customize aspect
-        fig_metrics.update_traces(marker_color='rgb(158,202,225)', marker_line_color='rgb(8,48,107)',
-                          marker_line_width=1.5, opacity=0.6)
-        fig_metrics.update_layout(title_text='Classification Metrics')
-        
-        return fig_metrics
-    
-    
-    def plot_metrics_table(self):
-        
-        
-       
-     
-        performance_data = reg_performance(self.y_true, self.y_pred).performance_metrics()
-        fig_metrics_table = ff.create_table(performance_data, height_constant=60)
-        
-        return fig_metrics_table
-    
-        
-        
-  
+        FP = cnf_matrix.sum(axis=0) - np.diag(cnf_matrix) 
+        FN = cnf_matrix.sum(axis=1) - np.diag(cnf_matrix)
+        TP = np.diag(cnf_matrix)
+        TN = cnf_matrix.sum() - (FP + FN + TP)
+        fp = FP.astype(float).sum().round()
+        fn = FN.astype(float).sum().round()
+        tp = TP.astype(float).sum().round()
+        tn = TN.astype(float).sum().round()
+
+        total = tn + fn + fp + tp
+
+        predicted_no = [tn,fn]
+        predicted_yes = [fp,tp]
+
+
+        data = {'Predicted No':predicted_no, 'Predicted Yes':predicted_yes} 
+
+        # Creates pandas DataFrame. 
+        df = pd.DataFrame(data, index =['No', 'Yes'])
+        df['Total'] = df.sum(axis=1)
+        df.loc['Total',:]= df.sum(axis=0)
+        df.reset_index(inplace=True)
+        df.rename({"index" : 'Actual'}, axis=1, inplace=True)
+
+        actuals_table = ff.create_table(df, height_constant=15)
+
+        return actuals_table

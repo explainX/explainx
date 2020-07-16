@@ -13,14 +13,13 @@ style2 = {'overflowX': 'auto',
           'width': '90%'}
 
 style3 = {
-    'backgroundColor': '#0984e3',
-    'fontWeight': 'normal',
     "fontSize": "15px",
     'marginLeft': "10px",
-    'color': 'white'
-}
+    'color': 'black',
+    'backgroundColor': 'rgb(230, 230, 230)',
+    'fontWeight': 'bold'}
 
-style4 = {'backgroundColor': "#fff", 'marginTop': 20, 'marginBottom': 20}
+style4 = {'backgroundColor': "#fff", 'marginTop': 10, 'marginBottom': 10}
 
 style5 = {'backgroundColor': '#fff',
           'color': 'black',

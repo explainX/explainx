@@ -140,7 +140,7 @@ class calculate_shap():
 
     def randomforest_shap_classification(self, model, X,prediction_col):
         explainer = shap.TreeExplainer(model)
-        shap_values = explainer.shap_values(X)
+        shap_values = explainer.shap_values(X,approximate=True)
 
 
         pd_shap = self.select_row_shap_values(shap_values,prediction_col)
@@ -161,7 +161,7 @@ class calculate_shap():
 
     def randomforest_shap(self, model, X):
         explainer = shap.TreeExplainer(model)
-        shap_values = explainer.shap_values(X)
+        shap_values = explainer.shap_values(X,approximate=True)
 
 
         pd_shap = pd.DataFrame(shap_values)
