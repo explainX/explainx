@@ -68,7 +68,7 @@ class dashboard():
             if not random_id.empty:
                 result = random_id['random_id'].iloc[0]
                 dff = pd.read_csv("./data_storage/{}/{}.csv".format(graph_type, result))
-                print("{}  {}  {}".format(graph_type, "file exists", result))
+                #print("{}  {}  {}".format(graph_type, "file exists", result))
                 return True, True, dff
             return False, True, None
 
@@ -100,11 +100,11 @@ class dashboard():
     def caching_data_manager(self, df, sql_query, graph_type, calculated_funct=None, details_dict=None):
         status_file, file_exist, dff = self.caching_exists_in_file(sql_query, graph_type)
         if status_file:
-            print("{}/{}".format(graph_type, "exist in file"))
+            #print("{}/{}".format(graph_type, "exist in file"))
 
             return dff
         else:
-            print("{}/{}".format(graph_type, "don't exists"))
+            #print("{}/{}".format(graph_type, "don't exists"))
             random_str = self.random_string_generator()
             dict_bkp = self.creating_filtered_backup_file(sql_query, random_str, graph_type)
             dff = psql.sqldf(sql_query, locals())
@@ -139,7 +139,7 @@ class dashboard():
             user_id = user_id['id'].iloc[0]
             self.user_id = user_id
         except Exception as e:
-            print("inside user track" )
+            #print("inside user track" )
             user_id_val = self.random_string_generator()
             user_id_csv = pd.DataFrame(data={"id": [user_id_val]})
             user_id_csv.to_csv("data_storage/user/user_id.csv", index=False)
