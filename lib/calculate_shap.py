@@ -1,10 +1,7 @@
 from imports import *
 from rescale_numeric_feature import *
 
-import catboost
-from catboost import CatBoostClassifier,Pool
-from catboost import CatBoostRegressor
-from catboost.utils import get_confusion_matrix
+
 
 """
 This class calculates feature importance
@@ -43,6 +40,10 @@ class calculate_shap():
         return Y, explainer
 
     def catboost_shap(self, model, df, y_variable=None):
+        import catboost
+        from catboost import CatBoostClassifier, Pool
+        from catboost import CatBoostRegressor
+        from catboost.utils import get_confusion_matrix
         # explain the model's predictions using SHAP
         if y_variable != None:
             try:
