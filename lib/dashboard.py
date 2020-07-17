@@ -949,16 +949,30 @@ class dashboard():
                               facet_col_wrap=4)
 
         # Port Finder
+
         if mode == "inline":
-            app.run_server(mode="inline")
+            try:
+                app.run_server(mode="inline")
+            except:
+                app.run_server(mode="inline",port=self.find_free_port())
         else:
             try:
-                app.run_server(host='127.0.0.1', port=8080)
+                app.run_server(host='0.0.0.0', port=8080)
             except:
-                # if port is not available
-                app.run_server(host='127.0.0.1', port=self.find_free_port())
+                # try different ip in case 0.0.0.0 does not work
+                try:
+                    try:
+                        app.run_server(host='0.0.0.0', port=self.find_free_port())
+                    except:
+                        app.run_server(host='0.0.0.0', port=self.find_free_port())
+                except:
+                    try:
+                        app.run_server(host='127.0.0.1', port=self.find_free_port())
+                    except:
+                        print("Please restart Jupyter Notebook or Python IDE.")
+                        return False
 
-                # app.run_server(host='0.0.0.0', port=self.find_free_port())
+
 
         #update counter here
         try:
