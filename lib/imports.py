@@ -20,5 +20,6 @@ import time
 import dash_editor_components
 import socket
 from contextlib import closing
+import requests
 
 import shap

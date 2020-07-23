@@ -56,6 +56,7 @@ class explain():
         prediction_col=[]
 
         if model_name == "xgboost":
+            import xgboost
             if xgboost.__version__ in ['1.1.0', '1.1.1', '1.1.0rc2', '1.1.0rc1']:
                 print("Current Xgboost version is not supported. Please install Xgboost using 'pip install xgboost==1.0.2'")
                 return False
