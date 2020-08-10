@@ -3,7 +3,7 @@
 	<br>
 </h1>
 
-ExplainX.ai is a fast, scalable & state-of-the-art explainable AI platform. ExplainX.ai helps data scientists understand, explain, debug and validate any machine learning model - in just one line of code. [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Explain%20any%20black-box%20Machine%20Learning%20model%20in%20just%20one%20line%20of%20code%21&url=https://www.explainx.ai&hashtags=xai,explainable_ai,explainable_machine_learning,trust_in_ai,transparent_ai)
+ExplainX.ai is a fast, light-weight and scalable Explainable AI framework for data scientists. It enables you to explain, debug and monitor state of the art machine learning models in as simple as one line of code. [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Explain%20any%20black-box%20Machine%20Learning%20model%20in%20just%20one%20line%20of%20code%21&url=https://www.explainx.ai&hashtags=xai,explainable_ai,explainable_machine_learning,trust_in_ai,transparent_ai)
 
 <img width="600" src="https://i.ibb.co/w4SF1GJ/Group-2-1.png" alt="explainX.ai">
 
