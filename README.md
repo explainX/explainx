@@ -40,6 +40,8 @@ Visit explainx.ai website to learn more: https://www.explainx.ai
 
 * **Desktop**: You can use explainX on your own computer in under a minute. If you already have a python environment setup, just run the following command.
 
+Python 3.5+ | Linux, Mac, Windows
+
 ```python
 pip install explainx
 ```
