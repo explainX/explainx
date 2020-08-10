@@ -3,6 +3,14 @@
 	<br>
 </h1>
 
+<p align="center">
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.6%20|%203.7|%203.8-brightgreen.svg" alt="Python supported"></a>
+   <a href="https://pypi.org/project/explainx/"><img src="https://badge.fury.io/py/explainx.svg" alt="PyPi Version"></a>
+  <!-- <a href="https://pypi.org/project/explainx/"><img src="https://img.shields.io/pypi/dm/explainx" alt="PyPi Downloads"></a> -->
+  <a href="https://www.explainx.ai/"><img src="https://img.shields.io/website?url=https%3A%2F%2Fwww.explainx.ai%2F" alt="explainx.ai website"></a>
+</p>
+
+
 ExplainX.ai is a fast, light-weight and scalable Explainable AI framework for data scientists. It enables you to explain, debug and monitor state of the art machine learning models in as simple as one line of code. [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Explain%20any%20black-box%20Machine%20Learning%20model%20in%20just%20one%20line%20of%20code%21&url=https://www.explainx.ai&hashtags=xai,explainable_ai,explainable_machine_learning,trust_in_ai,transparent_ai)
 
 <img width="600" src="https://i.ibb.co/w4SF1GJ/Group-2-1.png" alt="explainX.ai">
@@ -17,7 +25,7 @@ Essential for:
 5. High-risk applications - Healthcare, Financial Services, FinTech, Judicial, Security etc,.
 
 Visit explainx.ai website to learn more: https://www.explainx.ai     
-<a href="https://www.explainx.ai/"><img src="https://img.shields.io/website?url=https%3A%2F%2Fwww.explainx.ai%2F" alt="explainx.ai website"></a>
+
 
 
 ## Try it out
