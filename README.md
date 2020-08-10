@@ -90,9 +90,14 @@ Visit the documentation to [learn more](https://explainx-documentation.netlify.a
 ### Models Supported
 CatBoost, XGBoost, Scikit-learn Models, SVM, Neural Networks
 
+
 ## Video Tutorial
 
-Please click on the image below to load the tutorial.
+Please click on the image below to load the tutorial:
+
+[![here](https://github.com/explainX/explainx/blob/master/explainx_video_img.png)](https://youtu.be/X3fk-r2G15k)  
+
+(Note: Please manually set it to 720p or greater to have the text appear clearly)
 
 ## Contributing
 Pull requests are welcome. In order to make changes to explainx, the ideal approach is to fork the repository then clone the fork locally.
