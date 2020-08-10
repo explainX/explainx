@@ -95,7 +95,7 @@ CatBoost, XGBoost, Scikit-learn Models, SVM, Neural Networks
 
 Please click on the image below to load the tutorial:
 
-[![here](https://github.com/explainX/explainx/blob/master/explainx_video_img.png)](https://youtu.be/X3fk-r2G15k)  
+[![here](https://github.com/explainX/explainx/blob/master/explain_video_img.png)](https://youtu.be/X3fk-r2G15k)  
 
 (Note: Please manually set it to 720p or greater to have the text appear clearly)
 
