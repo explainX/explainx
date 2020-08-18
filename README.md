@@ -61,6 +61,12 @@ Import **explainx**
 from explainx import *
 ```
 
+Runnning **explainx** for the first time? Run this function.
+
+```python
+explainx.run_only_first_time()
+```
+
 Load dataset as X_Data, Y_Data in your XGBoost Model
 
 ```python

@@ -949,30 +949,35 @@ class dashboard():
                               facet_col_wrap=4)
 
         # Port Finder
-
+        port =8080
         if mode == "inline":
             try:
-                app.run_server(mode="inline")
+                app.run_server(mode="inline", port=port)
             except:
-                app.run_server(mode="inline",port=self.find_free_port())
+                port= self.find_free_port()
+                app.run_server(mode="inline",port=port)
         else:
             try:
-                app.run_server(host='0.0.0.0', port=8080)
+                app.run_server(host='0.0.0.0', port=port)
+
             except:
                 # try different ip in case 0.0.0.0 does not work
                 try:
                     try:
-                        app.run_server(host='0.0.0.0', port=self.find_free_port())
+                        port=self.find_free_port()
+                        app.run_server(host='0.0.0.0', port=port)
                     except:
-                        app.run_server(host='0.0.0.0', port=self.find_free_port())
+                        port = self.find_free_port()
+                        app.run_server(host='0.0.0.0', port=port)
                 except:
                     try:
-                        app.run_server(host='127.0.0.1', port=self.find_free_port())
+                        port = self.find_free_port()
+                        app.run_server(host='127.0.0.1', port=port)
                     except:
                         print("Please restart Jupyter Notebook or Python IDE.")
                         return False
 
-
+        localtunnel(port)
 
         #update counter here
         try:
@@ -1006,3 +1011,20 @@ class dashboard():
             return True
         else:
             return False
+
+
+def localtunnel(port):
+    # subdomain= 'explainx-'+ get_random_string(10)
+    task = subprocess.Popen(['lt', '-h', '"https://serverless.social"', '-p', str(port)],
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=os.setsid)
+
+    outpt= task.stdout.readline()
+    outpt_string= outpt.decode("utf-8").split("is:")
+    print('Explainx.ai is running @ '+outpt_string[1])
+
+
+def get_random_string(length):
+    letters = string.ascii_lowercase+ string.ascii_uppercase
+    result_str = ''.join(random.choice(letters) for i in range(length))
+    return result_str
+

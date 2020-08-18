@@ -1,7 +1,8 @@
 import os
 import sys
 from pathlib import Path
-
+from sys import platform
+import subprocess
 
 path= Path(__file__).parent.absolute()
 path_dataset= os.path.join(path, "datasets")
@@ -149,11 +150,42 @@ class explain():
         return X,y
 
 
+    def run_only_first_time(self):
 
+        if platform == "linux" or platform == "linux2":
+            try:
+                run_command("sudo apt install nodejs")
+                run_command("sudo apt install npm")
+            except:
+                run_command("sudo yum install nodejs")
+                run_command("sudo yum install npm")
+            run_command("npm install -g localtunnel")
+
+        elif platform == "darwin":
+            run_command("xcode-select --install")
+            run_command("brew install nodejs")
+            run_command("npm install -g localtunnel")
+
+        elif platform == "win32":
+            print("Please install nodejs, npm, and localtunnel manually")
+            run_command("npm install -g localtunnel")
+        elif platform == "win64":
+            print("Please install nodejs, npm, and localtunnel manually")
+            run_command("npm install -g localtunnel")
 
 
 explainx=explain()
 
+
+def run_command(command):
+    # subdomain= 'explainx-'+ get_random_string(10)
+    command_arr = command.split(" ")
+
+    task = subprocess.Popen(command_arr,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=os.setsid)
+
+    for line in iter(task.stdout.readline, b''):
+        print('{0}'.format(line.decode('utf-8')), end='')
 
 
 
