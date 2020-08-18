@@ -36,14 +36,14 @@ Visit explainx.ai website to learn more: https://www.explainx.ai
 * [Documentation](https://explainx-documentation.netlify.app/)
 * [Provide Feedback to Improve explainX.ai](https://forms.gle/5Q1xaHd7s6UQkRzf8)
 
-### Installation
+## Installation
 
 * **Desktop**: You can use explainX on your own computer in under a minute. If you already have a python environment setup, just run the following command.
 
 * Make sure you have **Python 3.5+**
 * Install **nodejs** and **localtunnel** using the following instructions.
 
-##### To install **nodejs** and **localtunnel** on **MAC OS**
+### To install **nodejs** and **localtunnel** on **MAC OS**
 * Open the terminal.
 * Install Xcode Command Line Tools using the following.
 ```python
@@ -61,7 +61,7 @@ brew install nodejs
 ```python
 npm install -g localtunnel
 ```
-##### To install **nodejs** and **localtunnel** on **Ubuntu**
+### To install **nodejs** and **localtunnel** on **Ubuntu**
 * Open the terminal.
 * Install **nodejs** using the following.
 ```python
@@ -75,7 +75,7 @@ sudo apt install npm
 ```python
 npm install -g localtunnel
 ```
-##### To install **nodejs** and **localtunnel** on **CentOS**
+### To install **nodejs** and **localtunnel** on **CentOS**
 * Open the terminal.
 * Install **nodejs** using the following.
 ```python
@@ -89,7 +89,7 @@ sudo yum install npm
 ```python
 npm install -g localtunnel
 ```
-##### To install **nodejs** and **localtunnel** on **Windows**
+### To install **nodejs** and **localtunnel** on **Windows**
 * Install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) found [here](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
 * Install [Nodejs](https://nodejs.org/en/download/) found [here](https://nodejs.org/en/download/).
 * Open the terminal and run the following to install **localtunnel**.
@@ -97,7 +97,7 @@ npm install -g localtunnel
 npm install -g localtunnel
 ```
 
-##### Lastly, install **ExplainX** using the following.
+### Lastly, install **ExplainX** using the following.
 
 ```python
 pip install explainx
@@ -108,7 +108,7 @@ pip install explainx
 !pip install explainx
 ```
 
-### Usage
+## Usage
 
 Once you have install explainX, you can simply follow the example below to use it:
 
@@ -152,7 +152,7 @@ Learn to analyze the dashboard by following this link: [explainX Dashboard Featu
 
 Visit the documentation to [learn more](https://explainx-documentation.netlify.app/)
 
-### Models Supported
+## Models Supported
 CatBoost, XGBoost, Scikit-learn Models, SVM, Neural Networks
 
 
