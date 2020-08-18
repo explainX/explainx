@@ -40,7 +40,64 @@ Visit explainx.ai website to learn more: https://www.explainx.ai
 
 * **Desktop**: You can use explainX on your own computer in under a minute. If you already have a python environment setup, just run the following command.
 
-Python 3.5+ | Linux, Mac, Windows
+* Make sure you have **Python 3.5+**
+* Install **nodejs** and **localtunnel** using the following instructions.
+
+#####To install **nodejs** and **localtunnel** on **MAC OS**
+* Open the terminal.
+* Install Xcode Command Line Tools using the following.
+```python
+xcode-select --install
+```
+* Install **brew** using the following.
+```python
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" 
+```
+* Install **nodejs** using the following.
+```python
+brew install nodejs
+```
+* Install **localtunnel** using the following.
+```python
+npm install -g localtunnel
+```
+#####To install **nodejs** and **localtunnel** on **Ubuntu**
+* Open the terminal.
+* Install **nodejs** using the following.
+```python
+sudo apt install nodejs
+```
+* Install **npm** using the following.
+```python
+sudo apt install npm
+```
+* Install **localtunnel** using the following.
+```python
+npm install -g localtunnel
+```
+#####To install **nodejs** and **localtunnel** on **CentOS**
+* Open the terminal.
+* Install **nodejs** using the following.
+```python
+sudo yum install nodejs
+```
+* Install **npm** using the following.
+```python
+sudo yum install npm
+```
+* Install **localtunnel** using the following.
+```python
+npm install -g localtunnel
+```
+#####To install **nodejs** and **localtunnel** on **Windows**
+* Install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) found [here](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
+* Install [Nodejs](https://nodejs.org/en/download/) found [here](https://nodejs.org/en/download/).
+* Open the terminal and run the following to install **localtunnel**.
+```python
+npm install -g localtunnel
+```
+
+#####Lastly, install **ExplainX** using the following.
 
 ```python
 pip install explainx

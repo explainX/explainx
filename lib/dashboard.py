@@ -714,6 +714,86 @@ class dashboard():
                                                         "backgroundColor": "green",
                                                         'color': 'white'
 
+                                                    },
+
+                                                    {
+
+                                                        'if': {
+
+                                                            'filter_query': '{0_color} =1',
+
+                                                            'column_id': '0'
+
+                                                        },
+
+                                                        'backgroundColor': 'tomato',
+
+                                                        'color': 'white'
+
+                                                    },
+
+                                                    {
+
+                                                        'if': {
+
+                                                            'filter_query': '{1_color} =1',
+
+                                                            'column_id': '1'
+
+                                                        },
+
+                                                        'backgroundColor': 'tomato',
+
+                                                        'color': 'white'
+
+                                                    },
+
+                                                    {
+
+                                                        'if': {
+
+                                                            'filter_query': '{2_color} =1',
+
+                                                            'column_id': '2'
+
+                                                        },
+
+                                                        'backgroundColor': 'tomato',
+
+                                                        'color': 'white'
+
+                                                    },
+
+                                                    {
+
+                                                        'if': {
+
+                                                            'filter_query': '{3_color} =1',
+
+                                                            'column_id': '3'
+
+                                                        },
+
+                                                        'backgroundColor': 'tomato',
+
+                                                        'color': 'white'
+
+                                                    },
+
+                                                    {
+
+                                                        'if': {
+
+                                                            'filter_query': '{4_color} =1',
+
+                                                            'column_id': '4'
+
+                                                        },
+
+                                                        'backgroundColor': 'tomato',
+
+                                                        'color': 'white'
+
                                                     }
 
                                                 ],
@@ -877,12 +957,48 @@ class dashboard():
         def update_table(row_number, btn1):
             changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
             if 'btn-nclicks-1' in changed_id:
+
                 p = protodash()
                 p.preprocess_data(df, y_variable)
-                dfs = p.find_prototypes(row_number)
+
+                dfs, sample_row = p.find_prototypes(row_number)
+
                 dat = dfs.T.reset_index()
+
+                print("sample row columns")
+
+                sample_row = sample_row.to_frame()
+
+                sample_row.rename(columns={sample_row.columns[0]: "orig"}, inplace=True)
+
+                sample_row.reset_index(inplace=True)
+
+                print(sample_row.columns)
+
+                dat = pd.merge(dat, sample_row, on=['index'], how='left')
+
+                dat['orig'] = dat['orig'].astype(float)
+
+                for i in list(dat.columns):
+
+                    dat[str(i) + '_color'] = np.nan
+
+                    if i != 'index':
+
+                        dat[i] = dat[i].astype(float)
+
+                        dat[str(i) + '_color'] = dat[str(i) + '_color'].astype(float)
+
+
+                    dat[str(i) + '_color'] = np.where(dat['orig'] == dat[i], 1, 0)
+
+
+                dat.drop(["index_color","orig_color"], axis=1, inplace=True)
+
                 dat = dat.to_dict('records')
+
                 return dat
+
             else:
                 return []
 

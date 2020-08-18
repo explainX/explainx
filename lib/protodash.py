@@ -101,12 +101,13 @@ class protodash():
         dfs.columns = self.actual_variables
         dfs["Weight(%)"] = ((np.around(W, 5) / np.sum(np.around(W, 5)))*100)
         dfs = self.decode_categorical_var(dfs)
-        return dfs
+        return dfs,self.df.iloc[row_number]
 
     def z_train_good(self, row_number):
         row= self.df.iloc[row_number]
         #remove row from the data
-        df = self.df.drop(self.df.index[row_number])
+        df = self.df
+        # df = self.df.drop(self.df.index[row_number])
         if self.classification==True:
             predict_value= row[self.y_variable]
             df= df[df[self.y_variable] == predict_value]  # choose prediction: 0/1
