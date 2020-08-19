@@ -1092,8 +1092,8 @@ class dashboard():
                     except:
                         print("Please restart Jupyter Notebook or Python IDE.")
                         return False
-
-        localtunnel(port)
+        #
+        # localtunnel(port)
 
         #update counter here
         try:

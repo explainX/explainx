@@ -154,6 +154,7 @@ class explain():
 
         if platform == "linux" or platform == "linux2":
             try:
+                run_command("curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -")
                 run_command("sudo apt install nodejs")
                 run_command("sudo apt install npm")
             except:
