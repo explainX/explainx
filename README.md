@@ -41,7 +41,7 @@ Visit explainx.ai website to learn more: https://www.explainx.ai
 * **Desktop**: You can use explainX on your own computer in under a minute. If you already have a python environment setup, just run the following command.
 
 * Make sure you have **Python 3.5+**
-* Install **nodejs** and **localtunnel** using the following instructions.
+* Looking to run **explainX** on the **cloud**? Install **nodejs** and **localtunnel** using the following instructions.
 
 ### To install **nodejs** and **localtunnel** on **MAC OS**
 * Open the terminal.
