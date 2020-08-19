@@ -11,7 +11,7 @@
 </p>
 
 
-ExplainX.ai is a fast, light-weight and scalable Explainable AI framework for data scientists. It enables you to explain, debug and monitor state of the art machine learning models in as simple as one line of code. [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Explain%20any%20black-box%20Machine%20Learning%20model%20in%20just%20one%20line%20of%20code%21&url=https://www.explainx.ai&hashtags=xai,explainable_ai,explainable_machine_learning,trust_in_ai,transparent_ai)
+ExplainX.ai is a fast, light-weight and scalable Explainable AI framework for data scientists. It enables you to explain and debug state of the art machine learning models in as simple as one line of code. [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Explain%20any%20black-box%20Machine%20Learning%20model%20in%20just%20one%20line%20of%20code%21&url=https://www.explainx.ai&hashtags=xai,explainable_ai,explainable_machine_learning,trust_in_ai,transparent_ai)
 
 <img width="600" src="https://i.ibb.co/w4SF1GJ/Group-2-1.png" alt="explainX.ai">
 
@@ -77,6 +77,10 @@ npm install -g localtunnel
 ```
 ### To install **nodejs** and **localtunnel** on **CentOS**
 * Open the terminal.
+* Run the following command.
+```python
+curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -
+```
 * Install **nodejs** using the following.
 ```python
 sudo yum install nodejs
@@ -118,12 +122,6 @@ Import **explainx**
 from explainx import *
 ```
 
-Runnning **explainx** for the first time? Run this function.
-
-```python
-explainx.run_only_first_time()
-```
-
 Load dataset as X_Data, Y_Data in your XGBoost Model
 
 ```python
@@ -142,12 +140,19 @@ One line of code to **use the explainx module**
 explainx.ai(X_Data, Y_Data, model, model_name="xgboost")
 ```
 
-Click on the link to view the dashboard:
+Click on the link to view the dashboard.
 
 ```jupyter
-App running on https://127.0.0.1:8050
+App running on https://0.0.0.0:8080
 ```
+Running ExplainX on the **cloud e.g., AWS Sagemaker?** If **https://0.0.0.0:8080** does not work, open the **terminal** and run the following command.
 
+```jupyter
+lt -h "https://serverless.social" -p [port number]
+```
+```jupyter
+lt -h "https://serverless.social" -p 8080
+```
 Learn to analyze the dashboard by following this link: [explainX Dashboard Features](https://explainx-documentation.netlify.app/analyze-dashboard/)
 
 Visit the documentation to [learn more](https://explainx-documentation.netlify.app/)
