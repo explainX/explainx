@@ -36,12 +36,26 @@ Visit explainx.ai website to learn more: https://www.explainx.ai
 * [Documentation](https://explainx-documentation.netlify.app/)
 * [Provide Feedback to Improve explainX.ai](https://forms.gle/5Q1xaHd7s6UQkRzf8)
 
-## Installation
+## Installation on your laptop
 
-* **Desktop**: You can use explainX on your own computer in under a minute. If you already have a python environment setup, just run the following command.
+* You can use **explainX** on your own computer in under a minute. 
 
 * Make sure you have **Python 3.5+**
-* Looking to run **explainX** on the **cloud**? Install **nodejs** and **localtunnel** using the following instructions.
+
+* Open the termianl and run the following to install **explainX**.
+```python
+pip install explainx
+```
+* **Jupyter Notebook**: You can also install explainx via Jupyter Notebook. Just run the following command:
+
+```python
+!pip install explainx
+```
+
+## Installation on the cloud
+
+* Make sure you have **Python 3.5+**
+* Install **nodejs** and **localtunnel** using the following instructions.
 
 ### To install **nodejs** and **localtunnel** on **MAC OS**
 * Open the terminal.
@@ -145,7 +159,7 @@ Click on the link to view the dashboard.
 ```jupyter
 App running on https://0.0.0.0:8080
 ```
-Running ExplainX on the **cloud e.g., AWS Sagemaker?** If **https://0.0.0.0:8080** does not work, open the **terminal** and run the following command.
+**Running ExplainX on the cloud e.g., AWS Sagemaker?** **https://0.0.0.0:8080** will not work. You would need to open the **terminal** and run the following command.
 
 ```jupyter
 lt -h "https://serverless.social" -p [port number]
