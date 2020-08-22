@@ -42,7 +42,7 @@ Visit explainx.ai website to learn more: https://www.explainx.ai
 
 * Make sure you have **Python 3.5+**
 
-* Open the termianl and run the following to install **explainX**.
+* Open the terminal and run the following to install **explainX**.
 ```python
 pip install explainx
 ```
