@@ -17,4 +17,4 @@ dash-editor-components==0.0.2
 shap==0.34.0
 xgboost==1.0.2
 catboost==0.21
-sklearn==0.22.1
+scikit-learn==0.22.1
