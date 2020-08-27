@@ -28,16 +28,15 @@ Visit explainx.ai website to learn more: https://www.explainx.ai
 
 ## Try it out
 
-* [Installing explainX](https://explainx-documentation.netlify.app/)
-* [Working Examples](https://explainx-documentation.netlify.app/working-example/)
-* [explainX Dashboard Features](https://explainx-documentation.netlify.app/analyze-dashboard/)
-* [Documentation](https://explainx-documentation.netlify.app/)
+* [Installing explainX](https://docs.explainx.ai/getting-started/installation)
+* [Working Examples](https://docs.explainx.ai/getting-started/starter-example)
+* [explainX Dashboard Features](https://docs.explainx.ai/tutorials/analyzing-dashboard)
+* [Documentation](https://docs.explainx.ai/)
 * [Provide Feedback to Improve explainX.ai](https://forms.gle/5Q1xaHd7s6UQkRzf8)
 
-## Installation on your laptop
+## Installation on your local computer 
 
-* You can use **explainX** on your own computer in under a minute. 
-
+* You can use **explainX** on your own computer in under a minute. Supported on MAC, Ubuntu and Windows.
 * Make sure you have **Python 3.5+**
 
 * Open the terminal and run the following to install **explainX**.
@@ -54,17 +53,17 @@ pip install explainx
 
 If you are using AWS SageMaker of Jupyter Notebook deployed on the cloud, visit our documentation for step-by-step guide installing and running explainX. [Cloud Installation Instructions](https://docs.explainx.ai/getting-started/installation)
 
-## Usage
+## Example Usage
 
 Once you have install explainX, you can simply follow the example below to use it:
 
-Import **explainx**
+Import **explainx** module.
 
 ```python
 from explainx import *
 ```
 
-Load dataset as X_Data, Y_Data in your XGBoost Model
+Load dataset as X_Data, Y_Data in your Model
 
 ```python
 #X_Data = Pandas DataFrame
@@ -87,7 +86,10 @@ Click on the link to view the dashboard.
 ```jupyter
 App running on https://0.0.0.0:8080
 ```
-**Running ExplainX on the cloud e.g., AWS Sagemaker?** **https://0.0.0.0:8080** will not work. You would need to open the **terminal** and run the following command.
+**If you are running explainX on the cloud e.g., AWS Sagemaker?** **https://0.0.0.0:8080** will not work.
+Please visit our documentation for installation instructions for the cloud: [Cloud Installation Instructions](https://docs.explainx.ai/getting-started/installation)
+
+After installation is complete, just open your **terminal** and run the following command.
 
 ```jupyter
 lt -h "https://serverless.social" -p [port number]
