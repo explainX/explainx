@@ -7,13 +7,13 @@
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.6%20|%203.7|%203.8-brightgreen.svg" alt="Python supported"></a>
   <!-- <a href="https://pypi.org/project/explainx/"><img src="https://badge.fury.io/py/explainx.svg" alt="PyPi Version"></a> -->
   <!-- <a href="https://pypi.org/project/explainx/"><img src="https://img.shields.io/pypi/dm/explainx" alt="PyPi Downloads"></a> -->
-  <a href="https://www.explainx.ai/"><img src="https://img.shields.io/website?url=https%3A%2F%2Fwww.explainx.ai%2F" alt="explainx.ai website"></a>
+  <a href="https://www.explainx.ai/"> <img src="https://img.shields.io/website?url=https%3A%2F%2Fwww.explainx.ai%2F" alt="explainx.ai website"></a>
 </p>
 
 
 ExplainX.ai is a fast, light-weight and scalable Explainable AI framework for data scientists. It enables you to explain and debug state of the art machine learning models in as simple as one line of code. [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Explain%20any%20black-box%20Machine%20Learning%20model%20in%20just%20one%20line%20of%20code%21&url=https://www.explainx.ai&hashtags=xai,explainable_ai,explainable_machine_learning,trust_in_ai,transparent_ai)
 
-<img width="600" src="https://i.ibb.co/w4SF1GJ/Group-2-1.png" alt="explainX.ai">
+<img width="800" src="started_example.png" alt="explainX.ai">
 
 #### Why we need explainability & interpretibility?
 
@@ -25,8 +25,6 @@ Essential for:
 5. High-risk applications - Healthcare, Financial Services, FinTech, Judicial, Security etc,.
 
 Visit explainx.ai website to learn more: https://www.explainx.ai     
-
-
 
 ## Try it out
 
@@ -54,77 +52,7 @@ pip install explainx
 
 ## Installation on the cloud
 
-* Make sure you have **Python 3.5+**
-* Install **nodejs** and **localtunnel** using the following instructions.
-
-### To install **nodejs** and **localtunnel** on **MAC OS**
-* Open the terminal.
-* Install Xcode Command Line Tools using the following.
-```python
-xcode-select --install
-```
-* Install **brew** using the following.
-```python
-ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" 
-```
-* Install **nodejs** using the following.
-```python
-brew install nodejs
-```
-* Install **localtunnel** using the following.
-```python
-npm install -g localtunnel
-```
-### To install **nodejs** and **localtunnel** on **Ubuntu**
-* Open the terminal.
-* Install **nodejs** using the following.
-```python
-sudo apt install nodejs
-```
-* Install **npm** using the following.
-```python
-sudo apt install npm
-```
-* Install **localtunnel** using the following.
-```python
-npm install -g localtunnel
-```
-### To install **nodejs** and **localtunnel** on **CentOS**
-* Open the terminal.
-* Run the following command.
-```python
-curl -sL https://rpm.nodesource.com/setup_10.x | sudo bash -
-```
-* Install **nodejs** using the following.
-```python
-sudo yum install nodejs
-```
-* Install **npm** using the following.
-```python
-sudo yum install npm
-```
-* Install **localtunnel** using the following.
-```python
-npm install -g localtunnel
-```
-### To install **nodejs** and **localtunnel** on **Windows**
-* Install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) found [here](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
-* Install [Nodejs](https://nodejs.org/en/download/) found [here](https://nodejs.org/en/download/).
-* Open the terminal and run the following to install **localtunnel**.
-```python
-npm install -g localtunnel
-```
-
-### Lastly, install **ExplainX** using the following.
-
-```python
-pip install explainx
-```
-* **Jupyter Notebook**: You can also install explainx via Jupyter Notebook. Just run the following command:
-
-```python
-!pip install explainx
-```
+If you are using AWS SageMaker of Jupyter Notebook deployed on the cloud, visit our documentation for step-by-step guide installing and running explainX. [Cloud Installation Instructions](https://docs.explainx.ai/getting-started/installation)
 
 ## Usage
 
@@ -167,13 +95,23 @@ lt -h "https://serverless.social" -p [port number]
 ```jupyter
 lt -h "https://serverless.social" -p 8080
 ```
+<img width="1000" src="demo-explainx-with-sound.gif" alt="explainX.ai">
+
 Learn to analyze the dashboard by following this link: [explainX Dashboard Features](https://explainx-documentation.netlify.app/analyze-dashboard/)
 
-Visit the documentation to [learn more](https://explainx-documentation.netlify.app/)
+Visit the documentation to [learn more](https://docs.explainx.ai/)
 
 ## Models Supported
-CatBoost, XGBoost, Scikit-learn Models, SVM, Neural Networks
-
+1. Catboost
+2. XGBoost
+3. Gradient Boosting Regressor
+4. RandomForest Model
+5. SVM
+6. KNeighboursClassifier
+7. Logistic Regression
+8. DecisionTreeClassifier
+9. Scikit-learn Models
+10. Neural Networks
 
 ## Video Tutorial
 
