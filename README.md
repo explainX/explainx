@@ -55,37 +55,42 @@ If you are using AWS SageMaker of Jupyter Notebook deployed on the cloud, visit 
 
 ## Example Usage
 
-Once you have install explainX, you can simply follow the example below to use it:
+After successfully installing explainX, open up your Python IDE of Jupyter Notebook and simply follow the code below to use it:
 
-Import **explainx** module.
+1. Import **explainx** module.
 
 ```python
 from explainx import *
 ```
 
-Load dataset as X_Data, Y_Data in your Model
+2. Load your datasets into your Model
 
 ```python
 #X_Data = Pandas DataFrame
 #Y_Data = Numpy Array or List
 
-X_Data, Y_Data = explainx.dataset_boston()
+X_Data, Y_Data = explainx.dataset_boston() 
+```
 
+3. Train your model.
+
+```
 #Train Model
 model = xgboost.train({"learning_rate": 0.01}, xgboost.DMatrix(X_Data, label=Y_Data), 100)
 ```
 
-One line of code to **use the explainx module**
+4. Pass your model and dataset into the explainX function:
 
 ```python
 explainx.ai(X_Data, Y_Data, model, model_name="xgboost")
 ```
 
-Click on the link to view the dashboard.
+5. Click on the dashboard link to start exploring model behavior:
 
 ```jupyter
 App running on https://0.0.0.0:8080
 ```
+
 **If you are running explainX on the cloud e.g., AWS Sagemaker?** **https://0.0.0.0:8080** will not work.
 Please visit our documentation for installation instructions for the cloud: [Cloud Installation Instructions](https://docs.explainx.ai/getting-started/installation)
 
