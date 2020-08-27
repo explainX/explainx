@@ -10,8 +10,7 @@
   <a href="https://www.explainx.ai/"> <img src="https://img.shields.io/website?url=https%3A%2F%2Fwww.explainx.ai%2F" alt="explainx.ai website"></a>
 </p>
 
-
-ExplainX.ai is a fast, light-weight and scalable Explainable AI framework for data scientists. It enables you to explain and debug black-box machine learning models in as simple as one line of code. [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Explain%20any%20black-box%20Machine%20Learning%20model%20in%20just%20one%20line%20of%20code%21&url=https://www.explainx.ai&hashtags=xai,explainable_ai,explainable_machine_learning,trust_in_ai,transparent_ai)
+ExplainX.ai is a fast, scalable and end-to-end Explainable AI framework for data scientists & machine learning engineers. With explainX, you can understand overall model behavior, get the reasoning behind individual or regional model predictions, check for biases and create convincing explanations for your business stakeholders. [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Explain%20any%20black-box%20Machine%20Learning%20model%20in%20just%20one%20line%20of%20code%21&url=https://www.explainx.ai&hashtags=xai,explainable_ai,explainable_machine_learning,trust_in_ai,transparent_ai)
 
 <img width="800" src="started_example.png" alt="explainX.ai">
 
@@ -35,20 +34,11 @@ Visit our website to learn more: https://www.explainx.ai
 * [Help Us Improve explainX.ai](https://forms.gle/5Q1xaHd7s6UQkRzf8)
 
 
-## Installation on your local computer 
+# Installation
 
-You can use **explainX** on your own computer in under a minute.
-
-Make sure you have **Python 3.5 or greater** installed.
-
-* Open the terminal and use ```pip``` to install **explainX**.
-```python
+Python 3.5+ | Linux, Mac, Windows
+```sh
 pip install explainx
-```
-
-* **Jupyter Notebook**: You can also install explainx via Jupyter Notebook. Just run the following command:
-```python
-!pip install explainx
 ```
 
 ## Installation on the cloud
