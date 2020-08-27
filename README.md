@@ -24,7 +24,7 @@ Essential for:
 4. Regulatory compliance - Does my model satisfy legal & regulatory requirements?
 5. High-risk applications - Healthcare, Financial Services, FinTech, Judicial, Security etc,.
 
-Visit explainx.ai website to learn more: https://www.explainx.ai     
+Visit our website to learn more: https://www.explainx.ai     
 
 ## Try it out
 
@@ -32,29 +32,29 @@ Visit explainx.ai website to learn more: https://www.explainx.ai
 * [Working Examples](https://docs.explainx.ai/getting-started/starter-example)
 * [explainX Dashboard Features](https://docs.explainx.ai/tutorials/analyzing-dashboard)
 * [Documentation](https://docs.explainx.ai/)
-* [Provide Feedback to Improve explainX.ai](https://forms.gle/5Q1xaHd7s6UQkRzf8)
+* [Help Us Improve explainX.ai](https://forms.gle/5Q1xaHd7s6UQkRzf8)
+
 
 ## Installation on your local computer 
 
-* You can use **explainX** on your own computer in under a minute. Supported on MAC, Ubuntu and Windows.
+* You can use **explainX** on your own computer in under a minute.
 * Make sure you have **Python 3.5+**
 
-* Open the terminal and run the following to install **explainX**.
+* Open the terminal and use ```pip``` to install **explainX**.
 ```python
 pip install explainx
 ```
-* **Jupyter Notebook**: You can also install explainx via Jupyter Notebook. Just run the following command:
 
+* **Jupyter Notebook**: You can also install explainx via Jupyter Notebook. Just run the following command:
 ```python
 !pip install explainx
 ```
 
 ## Installation on the cloud
-
 If you are using AWS SageMaker of Jupyter Notebook deployed on the cloud, visit our documentation for step-by-step guide installing and running explainX. [Cloud Installation Instructions](https://docs.explainx.ai/getting-started/installation)
 
-## Example Usage
 
+## Example Usage
 After successfully installing explainX, open up your Python IDE of Jupyter Notebook and simply follow the code below to use it:
 
 1. Import **explainx** module.
@@ -95,13 +95,13 @@ App running on https://0.0.0.0:8080
 Please visit our documentation for installation instructions for the cloud: [Cloud Installation Instructions](https://docs.explainx.ai/getting-started/installation)
 
 After installation is complete, just open your **terminal** and run the following command.
-
 ```jupyter
 lt -h "https://serverless.social" -p [port number]
 ```
 ```jupyter
 lt -h "https://serverless.social" -p 8080
 ```
+
 <img width="1000" src="demo-explainx-with-sound.gif" alt="explainX.ai">
 
 Learn to analyze the dashboard by following this link: [explainX Dashboard Features](https://explainx-documentation.netlify.app/analyze-dashboard/)
@@ -120,7 +120,7 @@ Visit the documentation to [learn more](https://docs.explainx.ai/)
 9. Scikit-learn Models
 10. Neural Networks
 
-## Video Tutorial
+## Walkthough Video Tutorial
 
 Please click on the image below to load the tutorial:
 
