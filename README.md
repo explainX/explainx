@@ -37,8 +37,9 @@ Visit our website to learn more: https://www.explainx.ai
 
 ## Installation on your local computer 
 
-* You can use **explainX** on your own computer in under a minute.
-* Make sure you have **Python 3.5+**
+You can use **explainX** on your own computer in under a minute.
+
+Make sure you have **Python 3.5 or greater** installed.
 
 * Open the terminal and use ```pip``` to install **explainX**.
 ```python
