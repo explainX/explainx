@@ -63,31 +63,31 @@ After successfully installing explainX, open up your Python IDE of Jupyter Noteb
 from explainx import *
 ```
 
-2. Load your datasets into your Model
+2. Load and split your dataset into x_data and y_data
 
 ```python
-#X_Data = Pandas DataFrame
-#Y_Data = Numpy Array or List
+#x_data = Pandas DataFrame
+#y_data = Numpy Array or List
 
-X_Data, Y_Data = explainx.dataset_boston() 
+x_data, y_data = explainx.dataset_boston() 
 ```
 
 3. Train your model.
 
-```
+```python
 #Train Model
-model = xgboost.train({"learning_rate": 0.01}, xgboost.DMatrix(X_Data, label=Y_Data), 100)
+model = xgboost.train({"learning_rate": 0.01}, xgboost.DMatrix(x_data, label=y_data), 100)
 ```
 
 4. Pass your model and dataset into the explainX function:
 
 ```python
-explainx.ai(X_Data, Y_Data, model, model_name="xgboost")
+explainx.ai(x_data, y_data, model, model_name="xgboost")
 ```
 
 5. Click on the dashboard link to start exploring model behavior:
 
-```jupyter
+```python
 App running on https://0.0.0.0:8080
 ```
 
