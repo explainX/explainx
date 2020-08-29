@@ -103,7 +103,7 @@ Visit the documentation to [learn more](https://docs.explainx.ai/)
 
 ## Models Supported
 1. Catboost
-2. XGBoost
+2. xgboost==1.0.2
 3. Gradient Boosting Regressor
 4. RandomForest Model
 5. SVM
