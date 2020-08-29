@@ -38,7 +38,8 @@ Visit our website to learn more: https://www.explainx.ai
 
 # Installation
 
-Python 3.5+ | Linux, Mac, Windows
+Python 3.5+ | Linux, Mac, Windows (Install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) first to run on Windows.)
+
 ```sh
 pip install explainx
 ```
