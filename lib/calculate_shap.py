@@ -1,7 +1,5 @@
 from imports import *
 from rescale_numeric_feature import *
-from catboost import CatBoostClassifier, Pool
-
 
 """
 This class calculates feature importance
