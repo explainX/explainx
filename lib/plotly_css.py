@@ -186,7 +186,7 @@ style26 = {'backgroundColor': '#fff',
            'textAlign': 'left',
            'height': "50px",
            'margin': 'auto',
-           'padding-left': '70px',
+        #    'padding-left': '70px',
            'padding-top': '20px',
            "font-family": "Helvetica, Arial, sans-serif",
 

@@ -74,6 +74,7 @@ class protodash():
     def remove_impact_columns(self, df):
         self.actual_variables = [col for col in df.columns if not '_impact' in col]
         self.actual_variables = [col for col in self.actual_variables if not '_rescaled' in col]
+
         df = df[self.actual_variables]
         return df
 
@@ -107,7 +108,7 @@ class protodash():
         row= self.df.iloc[row_number]
         #remove row from the data
         df = self.df
-        # df = self.df.drop(self.df.index[row_number])
+        df = self.df.drop(self.df.index[row_number])
         if self.classification==True:
             predict_value= row[self.y_variable]
             df= df[df[self.y_variable] == predict_value]  # choose prediction: 0/1

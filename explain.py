@@ -120,9 +120,14 @@ class explain():
 
         self.param["is_classification"]= is_classification
         self.param["model_name"]= model_name
+        self.param["model"]= model
+        self.param["columns"]= df.columns
+        self.param["y_variable"]= y_variable
+        self.param["y_variable_predict"]= y_variable_predict
+
 
         d= dashboard()
-        d.find(self.df_final, y_variable, y_variable_predict, mode, self.param)
+        d.find(self.df_final, mode, self.param)
 
         return True
 
