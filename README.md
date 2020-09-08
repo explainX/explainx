@@ -12,7 +12,7 @@
 
 ExplainX.ai is a fast, scalable and end-to-end Explainable AI framework for data scientists & machine learning engineers. 
 
-With explainX, you can understand overall model behavior, get the reasoning behind individual or regional model predictions, check for biases and create convincing explanations for your business stakeholders. [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Explain%20any%20black-box%20Machine%20Learning%20model%20in%20just%20one%20line%20of%20code%21&url=https://www.explainx.ai&hashtags=xai,explainable_ai,explainable_machine_learning,trust_in_ai,transparent_ai)
+With explainX, you can understand overall model behavior, get the reasoning behind model predictions, remove biases and create convincing explanations for your business stakeholders. [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Explain%20any%20black-box%20Machine%20Learning%20model%20in%20just%20one%20line%20of%20code%21&url=https://www.explainx.ai&hashtags=xai,explainable_ai,explainable_machine_learning,trust_in_ai,transparent_ai)
 
 <img width="800" src="started_example.png" alt="explainX.ai">
 
