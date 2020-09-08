@@ -117,7 +117,7 @@ class what_if():
         fg= dbc.FormGroup([
                     html.Div(feature, style = slider_feature),
                     html.Div(dcc.Input(
-                        id=feature+'-slider',
+                        id=feature+'_slider',
                         type="number",
                         value = value,
                         debounce=True,
@@ -190,4 +190,3 @@ class what_if():
         
         return fg
 
-    

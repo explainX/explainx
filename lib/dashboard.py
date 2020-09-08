@@ -139,7 +139,7 @@ class dashboard():
         self.user_id = None
         self.df=df
 
-        self.callback_input = [Input(f + '-slider', 'value') for f in self.param["columns"]]
+        self.callback_input = [Input(f + '_slider', 'value') for f in self.param["columns"]]
         self.callback_input.append(Input('submit-button-state', 'n_clicks'))
 
         # self.callback_input_prototype = [Input(f + '-slider', 'value') for f in self.param["columns"]]
@@ -147,7 +147,7 @@ class dashboard():
 
         self.prototype_array= []
         for f in self.param["columns"]:
-            self.prototype_array.append([f + '-slider', 'value'])
+            self.prototype_array.append([f + '_slider', 'value'])
         self.prototype_array.append(['btn-nclicks-1', 'n_clicks'])
         try:
             user_id = pd.read_csv("data_storage/user/user_id.csv")
@@ -251,9 +251,17 @@ class dashboard():
             elif pathname == '/apps/local_explanation':
                 return local_explanation.layout_local(original_variables,columns,df.columns)
             else:
-                return global_explanation.global_explanation(original_variables)
+                return welcome_message
 
 
+        welcome_message= html.Div(
+            [
+                html.H1("Welcome to ExplainX"),
+                html.H3("Click on one of the tabs above to start explaining.")
+            ]
+
+
+        )
         app.layout = html.Div([
             navbar,
             html.Div([
@@ -640,28 +648,29 @@ class dashboard():
 
         # Port Finder
         port = 8080
+        debug_value= False
         if mode == "inline":
             try:
-                app.run_server(mode="inline", port=port,debug=False,dev_tools_ui=False,dev_tools_props_check=False)
+                app.run_server(mode="inline", port=port,debug=debug_value,dev_tools_ui=debug_value,dev_tools_props_check=debug_value)
             except:
                 port= self.find_free_port()
-                app.run_server(mode="inline",port=port,debug=False,dev_tools_ui=False,dev_tools_props_check=False)
+                app.run_server(mode="inline",port=port,debug=debug_value,dev_tools_ui=debug_value,dev_tools_props_check=debug_value)
         else:
             try:
-                app.run_server(host='0.0.0.0', port=port,debug=False,dev_tools_ui=False,dev_tools_props_check=False)
+                app.run_server(host='0.0.0.0', port=port,debug=debug_value,dev_tools_ui=debug_value,dev_tools_props_check=debug_value)
             except:
                 # try different ip in case 0.0.0.0 does not work
                 try:
                     try:
                         port=self.find_free_port()
-                        app.run_server(host='0.0.0.0', port=port,debug=False,dev_tools_ui=False,dev_tools_props_check=False)
+                        app.run_server(host='0.0.0.0', port=port,debug=debug_value,dev_tools_ui=debug_value,dev_tools_props_check=debug_value)
                     except:
                         port = self.find_free_port()
-                        app.run_server(host='0.0.0.0', port=port,debug=False,dev_tools_ui=False,dev_tools_props_check=False)
+                        app.run_server(host='0.0.0.0', port=port,debug=debug_value,dev_tools_ui=debug_value,dev_tools_props_check=debug_value)
                 except:
                     try:
                         port = self.find_free_port()
-                        app.run_server(host='127.0.0.1', port=port,debug=False,dev_tools_ui=False,dev_tools_props_check=False)
+                        app.run_server(host='127.0.0.1', port=port,debug=debug_value,dev_tools_ui=debug_value,dev_tools_props_check=debug_value)
                     except:
                         print("Please restart Jupyter Notebook or Python IDE.")
                         return False
