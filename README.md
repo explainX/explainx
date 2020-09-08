@@ -1,5 +1,5 @@
 <h1 align="center">
-	<img width="700" src="main_banner.png" alt="explainX.ai"> 
+	<img width="700" src="main_page_banner.png" alt="explainX.ai"> 
 	<br>
 </h1>
 
