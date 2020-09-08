@@ -649,6 +649,8 @@ class dashboard():
         # Port Finder
         port = 8080
         debug_value= False
+
+
         if mode == "inline":
             try:
                 app.run_server(mode="inline", port=port,debug=debug_value,dev_tools_ui=debug_value,dev_tools_props_check=debug_value)
