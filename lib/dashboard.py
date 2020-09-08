@@ -7,7 +7,10 @@ import pandasql as psql
 import string
 import random
 import os
-
+from apps import global_explanation, local_explanation, distribution, feature_interaction
+from app import app
+from what_if import *
+from calculate_shap import *
 
 class dashboard():
     def __init__(self):
@@ -20,6 +23,7 @@ class dashboard():
         self.summary_plot = dict()
         self.feature_impact = dict()
         self.multi_level_eda = dict()
+
 
     def create_dir(self, dir_name):
         if not os.path.exists(dir_name):
@@ -122,17 +126,29 @@ class dashboard():
             self.store_data_in_csv(results, graph_type, random_str)
             return results
 
-    def find(self, df, y_variable, y_variable_predict, mode, param):
+    def find(self, df, mode, param):
         self.available_columns = available_columns = list(df.columns)
         original_variables = [col for col in df.columns if '_impact' in col]
         self.impact_variables = [col for col in original_variables if not '_rescaled' in col]
-        self.y_variable = y_variable
-        self.y_variable_predict = y_variable_predict
+        self.y_variable = param["y_variable"]
+        self.y_variable_predict = param["y_variable_predict"]
         self.param = param
         self.instance_id = self.random_string_generator()
         self.create_dir("data_storage")
         self.create_dir("data_storage/user")
         self.user_id = None
+        self.df=df
+
+        self.callback_input = [Input(f + '-slider', 'value') for f in self.param["columns"]]
+        self.callback_input.append(Input('submit-button-state', 'n_clicks'))
+
+        # self.callback_input_prototype = [Input(f + '-slider', 'value') for f in self.param["columns"]]
+        # self.callback_input_prototype.append(Input('btn-nclicks-1', 'n_clicks'))
+
+        self.prototype_array= []
+        for f in self.param["columns"]:
+            self.prototype_array.append([f + '-slider', 'value'])
+        self.prototype_array.append(['btn-nclicks-1', 'n_clicks'])
         try:
             user_id = pd.read_csv("data_storage/user/user_id.csv")
             user_id.drop_duplicates(['id'], keep='first', inplace=True)
@@ -143,25 +159,19 @@ class dashboard():
             user_id_val = self.random_string_generator()
             user_id_csv = pd.DataFrame(data={"id": [user_id_val]})
             user_id_csv.to_csv("data_storage/user/user_id.csv", index=False)
-            self.user_id= user_id_val
-
-
-            
+            self.user_id= user_id_val  
         self.insights = insights(self.param)
         d = self.dash(df, mode)
         return True
 
     def dash(self, df, mode):
-
         y_variable = self.y_variable
-
         g = plotly_graphs()
         y_variables = [col for col in df.columns if '_impact' in col]
         original_variables = [col for col in df.columns if not '_impact' in col]
         original_variables = [col for col in original_variables if not '_rescaled' in col]
         array = []
         PAGE_SIZE = 10
-
         row_number = 1
         # y_variable = "predict"
         columns = ['index', '0', '1', '2', '3', '4']
@@ -176,9 +186,24 @@ class dashboard():
                                 }
                                 ]
 
-        app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
+        # app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
 
         app.title = "explainX.ai - Main Dashboard"
+
+        PLOTLY_LOGO = "https://images.plot.ly/logo/new-branding/plotly-logomark.png"
+
+        menu = dbc.Row(
+            [
+                dbc.Col(dbc.NavItem(dbc.NavLink("Global Explanation", href="/apps/global_explanation")), style={'width':"200px",'fontSize':'12px'}),
+                dbc.Col(dbc.NavItem(dbc.NavLink("Local Explanation", href="/apps/local_explanation")), style={'width':"200px",'fontSize':'12px'}),
+                dbc.Col(dbc.NavItem(dbc.NavLink("Feature Interaction", href="/apps/feature_interaction")), style={'width':"200px",'fontSize':'12px'}),
+                dbc.Col(dbc.NavItem(dbc.NavLink("Distributions", href="/apps/distribution")), style={'width':"200px",'fontSize':'12px'}),
+                
+            ],
+            no_gutters=True,
+            className="ml-auto flex-nowrap mt-3 mt-md-0",
+            align="center"
+        )
 
         navbar = dbc.Navbar(
             [
@@ -186,31 +211,48 @@ class dashboard():
                     # Use row and col to control vertical alignment of logo / brand
                     dbc.Row(
                         [
-                            dbc.Col(dbc.NavbarBrand("explainX.ai DASHBOARD", className="ml-2"))
+                            dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px")),
+                            dbc.Col(dbc.NavbarBrand("explainX.ai", className="ml-2", style={'fontSize':'12px','color':'black'})),
                         ],
                         align="center",
                         no_gutters=True,
                     ),
-                    href="https://explainx.ai",
+                    href="https://www.explainx.ai",
                 ),
-
-                html.A(
-                    # Use row and col to control vertical alignment of logo / brand
-                    dbc.Row(
-                        [
-                            dbc.Col(dbc.NavbarBrand("Explain any machine learning model", className="ml-4"))
-                        ],
-                        align="center",
-                        no_gutters=True,
-                    ),
-                    href="https://explainx.ai",
-                ),
+                
                 dbc.NavbarToggler(id="navbar-toggler"),
-
+                dbc.Collapse(menu, id="navbar-collapse", navbar=True),
             ],
-            color="dark",
+            color="light",
             dark=True,
         )
+
+
+        # add callback for toggling the collapse on small screens
+        @app.callback(
+            Output("navbar-collapse", "is_open"),
+            [Input("navbar-toggler", "n_clicks")],
+            [State("navbar-collapse", "is_open")],
+        )
+        def toggle_navbar_collapse(n, is_open):
+            if n:
+                return not is_open
+            return is_open
+
+        @app.callback(Output('page-content', 'children'),
+              [Input('url', 'pathname')])
+        def display_page(pathname):
+            if pathname == '/apps/global_explanation':
+                return global_explanation.global_explanation(original_variables)
+            elif pathname == '/apps/feature_interaction':
+                return feature_interaction.layout_interaction(original_variables, y_variables)
+            elif pathname == '/apps/distribution' :
+                return distribution.layout_distribution(original_variables)
+            elif pathname == '/apps/local_explanation':
+                return local_explanation.layout_local(original_variables,columns,df.columns)
+            else:
+                return global_explanation.global_explanation(original_variables)
+
 
         app.layout = html.Div([
             navbar,
@@ -230,11 +272,11 @@ class dashboard():
                             html.Div(dcc.Input(
                                 id='input-on-submit',
                                 type='text',
-                                placeholder="SELECT * FROM df",
+                                # placeholder="SELECT * FROM df",
                                 value="SELECT * FROM df",
                                 style={'height': '200px', 'width': '700px', 'fontSize': '15px'})),
 
-                            html.Button('Execute Query', id='submit-val', n_clicks=0),
+                            html.Button('Execute Query', id='submit-val', n_clicks=1),
                             html.Div(id='sql-query-button',
                                      children='Enter a value and press submit',
                                      style={'display': 'none'}
@@ -311,508 +353,20 @@ class dashboard():
 
             ],
                 style=style4),
-
+            #Pages Data
+            html.Div([
+                dcc.Location(id='url', refresh=False),
+                html.Div(id='page-content')
+            ])
             # end of collapsable div
-            dcc.Tabs(id="tabs-styled-with-inline", value='tab-1', children=[
-                dcc.Tab(label='Global Explanation', value='tab-1', children=[
+           ], style=style40)
 
-                    # Global Feature Impact & Importance
-                    html.Div(id='datatable-interactivity-container', children=[
-                        html.Div([
-                            html.Div([
-                                html.H4('Global Feature Importance',
-                                        style=style5),
-                                html.P(
-                                    'Feature importance assign a score to input features based on how useful they are at predicting a target variable. ',
-                                    style=style6)
-                                ,
-                                dcc.Loading(
-                                    id="loading-1",
-                                    type="circle",
-                                    children=dbc.Row(
-                                        [
-                                            dbc.Col(html.Div(dcc.Graph(id="global_feature_importance",
-                                                                       style={'marginLeft': 50, 'marginTop': 0,
-                                                                              'height': '500px'}
-                                                                       )), width=9),
-                                            dbc.Col(
-                                                [
-                                                    html.Div([
-                                                        html.H2("How to read this graph?"),
-                                                        html.P(
-                                                            "This graph helps you identify which features in your dataset have the greatest effect on the outcomes of your machine learning model")
-                                                    ]),
-                                                    html.Div([
-                                                        html.H2("Insights"),
-                                                        html.P(id='global_message_1'),
-                                                        html.P(id='global_message_2'),
-                                                        html.P(id='global_message_3'),
-                                                        html.P(id='global_message_4'),
-                                                        html.P(id='global_message_5')
+         #Navigation
+        
+       
+        
 
-                                                    ]
-
-                                                    )]
-                                            )
-
-                                        ])
-
-                                )
-                                , ], style=style7,
-                            ),
-
-                            html.Div([
-                                html.H4('Global Feature Impact',
-                                        style=style8),
-                                html.P(
-                                    'Feature impact identifies which features (also known as columns or inputs) in a dataset have the greatest positive or negative effect on the outcomes of a machine learning model.',
-                                    style=style9),
-                                dcc.Loading(
-                                    id="loading-2",
-                                    type="circle",
-                                    children=dbc.Row(
-                                        [
-                                            dbc.Col(html.Div(dcc.Graph(id='global_feature_impact',
-                                                                       style={'marginLeft': 50, 'marginTop': 0,
-                                                                              'height': '500px'})), width=9),
-                                            dbc.Col(
-                                                [
-                                                    html.Div([
-                                                        html.H2("How to read this graph?"),
-                                                        html.P(
-                                                            "This tells you which features have positive impact and which features have negative impact on the output of the decision")
-                                                    ]),
-                                                    html.Div([
-                                                        html.H2("Insights"),
-                                                        html.P(id='message_1'),
-                                                        html.P(id='message_2'),
-                                                        html.P(id='message_3')
-                                                    ]
-
-                                                    )]
-                                            )
-
-                                        ])
-
-                                )
-
-                            ],
-                                style=style10,
-                            ),
-                        ],
-
-                            style=style11
-                        )
-                    ], style={'height': '400'})
-                ]),
-
-                dcc.Tab(label='Feature Interaction', value='tab-2', children=[
-
-                    dcc.Loading(
-                        id="feature_interaction_load",
-                        type="circle",
-                        children=html.Div([
-                            html.Div([
-                                html.H4('Partial Dependence Plot',
-                                        style=style12),
-                                html.P(
-                                    'The partial dependence plot (short PDP or PD plot) shows the marginal effect one or two features have on the predicted outcome of a machine learning model',
-                                    style=style13),
-                                html.Div([
-                                    html.P('Variable Name'),
-                                    dcc.Dropdown(
-                                        id='xaxis-column',
-                                        options=[{'label': i, 'value': i} for i in original_variables],
-                                        value=original_variables[1],
-                                        clearable=False
-                                    ),
-
-                                ],
-                                    style={'width': '20%', 'marginLeft': 70, 'float': 'left',
-                                           'display': 'inline-block'}),
-
-                                html.Div([
-                                    html.P("Variable Impact Values"),
-                                    dcc.Dropdown(
-                                        id='yaxis-column',
-                                        options=[{'label': i, 'value': i} for i in y_variables],
-                                        value=y_variables[1],
-                                        clearable=False
-                                    ),
-
-                                ], style=style14),
-
-                                html.Div([
-                                    html.P('3rd Variable'),
-                                    dcc.Dropdown(
-                                        id='third-axis',
-                                        options=[{'label': i, 'value': i} for i in original_variables],
-                                        value=original_variables[-3],
-                                        clearable=False
-                                    ),
-
-                                ], style=style15),
-
-                            ]),
-                            dcc.Loading(
-                                id="loading-5",
-                                type="circle",
-                                children=dcc.Graph(id='indicator-graphic', style={'marginLeft': 50})
-                            ),
-                        ],
-                            style=style16),
-                    ),
-
-                    dcc.Loading(
-                        id="loading-2-pdp",
-                        type='circle',
-                        children=html.Div([
-                            html.Div([
-                                html.H4('Summary Plot',
-                                        style=style17),
-                                html.P(
-                                    'In the summary plot, we see first indications of the relationship between the value of a feature and the impact on the prediction',
-                                    style=style18)
-                                ,
-                                dcc.Loading(
-                                    id="loading-3",
-                                    type="circle",
-                                    children=dcc.Graph(id='summary_plot', style={'marginLeft': 50, 'height': '600px'})
-
-                                ),
-
-                            ], style=style19),
-                        ], style=style20)
-                    )
-
-                ]),
-
-                # tab 3:Distribution
-
-                dcc.Tab(label='Distribution', value='tab-3', children=[
-
-                    html.Div([
-
-                        html.Div([
-                            html.Div([
-                                html.H4('Distributions',
-                                        style=style21),
-                                html.Div([
-                                    html.P('Variable Name'),
-                                    dcc.Dropdown(
-                                        id='xaxis-column-name',
-                                        options=[{'label': i, 'value': i} for i in original_variables],
-                                        value=original_variables[0]
-                                    ),
-                                ],
-                                    style=style22),
-                                html.Div([
-                                    html.P('Plot Type'),
-                                    dcc.Dropdown(
-                                        id='plot_type',
-                                        options=[{'label': 'Violin Plot', 'value': 'Violin Plot'},
-                                                 {'label': 'Histogram', 'value': 'Histogram'}, ],
-                                        value='Histogram'
-                                    ),
-                                ],
-                                    style=style23),
-
-                            ]),
-
-                            dcc.Graph(id='indicator-graphic2',
-                                      style={'marginLeft': 50, 'marginTop': 100, 'height': '500px'}),
-                        ],
-                            style=style24),
-
-                        html.Div([
-
-                            html.Div([
-                                html.H4('Multi-Level EDA', style=style21),
-                                html.Div([
-                                    html.P('X-Axis Variable'),
-                                    dcc.Dropdown(
-                                        id='x_axis',
-                                        options=[{'label': i, 'value': i} for i in original_variables],
-                                        value=original_variables[0]
-                                    ),
-                                ], style=style22),
-                                html.Div([
-                                    html.P('Y-Axis Variable'),
-                                    dcc.Dropdown(
-                                        id='y_axis',
-                                        options=[{'label': i, 'value': i} for i in original_variables],
-                                        value=original_variables[1]
-                                    ),
-                                ], style=style22),
-                                html.Div([
-                                    html.P('Size'),
-                                    dcc.Dropdown(
-                                        id='size',
-                                        options=[{'label': i, 'value': i} for i in original_variables],
-                                        # value=original_variables[0]
-                                        placeholder="Choose a variable"
-                                    ),
-                                ], style=style22),
-                                html.Div([
-                                    html.P('Color'),
-                                    dcc.Dropdown(
-                                        id='color',
-                                        options=[{'label': i, 'value': i} for i in original_variables],
-                                        placeholder="Choose a variable"
-                                    ),
-                                ], style=style22),
-                                html.Div([
-                                    html.P('Drill-down by Column'),
-                                    dcc.Dropdown(
-                                        id='facet_col',
-                                        options=[{'label': i, 'value': i} for i in original_variables],
-                                        placeholder="Select a categorical variable"
-                                        # value=original_variables[0]
-                                    ),
-                                ], style=style22),
-                                html.Div([
-                                    html.P('Drill-down by Row'),
-                                    dcc.Dropdown(
-                                        id='facet_row',
-                                        options=[{'label': i, 'value': i} for i in original_variables],
-                                        placeholder="Select a categorical variable"
-                                    ),
-                                ], style=style22)
-                            ]),
-                            dcc.Graph(id='multi_level_eda',
-                                      style={'marginLeft': 50, 'marginTop': 200, 'height': '700px'})
-
-                        ], style=style24)
-
-                    ], style=style25)
-
-                ]),
-                # tab 4:Local Explanation
-
-                dcc.Tab(label='Local Explanation', value='tab-4', children=[
-
-                    html.Div([
-
-                        # Input and Data
-                        html.Div([
-
-                            html.Div([
-                                html.H4('Data',
-                                        style=style26),
-                                html.I("Index of Row That You Want To Explain.", style={'padding-left': '70px'}),
-
-                                dcc.Input(id="row_number", type="number", value=1,
-                                          placeholder="Enter a Row Number e.g. 1, 4, 5",
-                                          style={'text-align': 'center'}),
-
-                                html.Div(id='local_data_table', style={'marginTop': "20px", 'marginBottom': "5px"}),
-
-                            ]),
-
-                        ]),  # End of Input & Data Div
-
-                        dcc.Tabs([
-                            dcc.Tab(label='Local Feature Explanation', children=[
-
-                                html.Div(id='datatable-interactivity-container2', children=[
-                                    html.Div([
-
-                                        html.Div([
-                                            html.H4('Local Feature Impact',
-                                                    style=style29),
-                                            html.P(
-                                                'Local Feature impact identifies which features have the greatest positive or negative effect on the outcome of a machine learning model for a specific row.',
-                                                style=style30),
-                                            dcc.Loading(
-                                                id="local_feature_impact_1",
-                                                type="circle",
-                                                children=dbc.Row(
-                                                    [
-                                                        dbc.Col(html.Div(dcc.Graph(id='local_feature_impact',
-                                                                                   style={'marginLeft': 50,
-                                                                                          'marginTop': 0,
-                                                                                          'height': '500px'})),
-                                                                width=8),
-                                                        dbc.Col(
-                                                            [
-                                                                html.Div([
-                                                                    html.H2("How to read this graph?"),
-                                                                    html.P(
-                                                                        "According to the model, the features are most important in explaining the target variable. Most importance is on the top.")
-                                                                ]),
-                                                                html.Div([
-                                                                    html.H2("Insights"),
-                                                                    html.P(id='local_message_1'),
-                                                                    html.P(id='local_message_2'),
-                                                                    html.P(id='local_message_3')
-                                                                ]),
-                                                                html.Div([
-                                                                    html.H2("Next Steps"),
-                                                                    html.P(
-                                                                        "Click on the similar profile tabs and explore profiles that had similar attributes"),
-                                                                ])
-                                                            ]
-                                                            , width=4),
-
-                                                    ]))
-
-                                        ],
-                                            style=style31,
-                                        ),
-                                    ],
-
-                                        style=style32)], style={'height': '400'})
-
-                            ]),
-
-                            dcc.Tab(id="similar_tabs", label='Similar Profiles', children=[
-
-                                html.Div([
-                                    html.H4('Similar Profiles',
-                                            style=style33),
-
-                                    html.Button('Display Similar Profiles', id='btn-nclicks-1', n_clicks=0,
-                                                style=style34),
-
-                                    html.P(
-                                        'Display similar  profiles and the extent to which they are similar to the chosen applicant as indicated by the last row in the table below labelled as "Weight"',
-                                        style=style35),
-                                    html.Div([
-                                        dcc.Loading(
-                                            id="table",
-                                            type="circle",
-                                            children=dash_table.DataTable(
-                                                id='prototype_data',
-                                                columns=[{"name": i, "id": i} for i in columns],
-                                                data=[],
-                                                editable=False,
-                                                # filter_action="native",
-                                                sort_mode="multi",
-                                                row_deletable=False,
-                                                page_action="native",
-                                                page_current=0,
-                                                page_size=len(original_variables) + 1,
-                                                style_table=style36,
-                                                style_header=style37,
-                                                style_cell={
-                                                    "font-family": "Helvetica, Arial, sans-serif",
-                                                    "fontSize": "15px",
-                                                    'width': '{}%'.format(len(df.columns)),
-                                                    'textOverflow': 'ellipsis',
-                                                    'overflow': 'hidden',
-                                                    'textAlign': 'left',
-                                                    'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-                                                    "marginBottom": "100px"
-                                                },
-                                                style_data_conditional=[
-                                                    {
-                                                        'if': {
-
-                                                            'filter_query': '{index} = "Weight(%)"'
-
-                                                        },
-                                                        "backgroundColor": "green",
-                                                        'color': 'white'
-
-                                                    },
-
-                                                    {
-
-                                                        'if': {
-
-                                                            'filter_query': '{0_color} =1',
-
-                                                            'column_id': '0'
-
-                                                        },
-
-                                                        'backgroundColor': 'tomato',
-
-                                                        'color': 'white'
-
-                                                    },
-
-                                                    {
-
-                                                        'if': {
-
-                                                            'filter_query': '{1_color} =1',
-
-                                                            'column_id': '1'
-
-                                                        },
-
-                                                        'backgroundColor': 'tomato',
-
-                                                        'color': 'white'
-
-                                                    },
-
-                                                    {
-
-                                                        'if': {
-
-                                                            'filter_query': '{2_color} =1',
-
-                                                            'column_id': '2'
-
-                                                        },
-
-                                                        'backgroundColor': 'tomato',
-
-                                                        'color': 'white'
-
-                                                    },
-
-                                                    {
-
-                                                        'if': {
-
-                                                            'filter_query': '{3_color} =1',
-
-                                                            'column_id': '3'
-
-                                                        },
-
-                                                        'backgroundColor': 'tomato',
-
-                                                        'color': 'white'
-
-                                                    },
-
-                                                    {
-
-                                                        'if': {
-
-                                                            'filter_query': '{4_color} =1',
-
-                                                            'column_id': '4'
-
-                                                        },
-
-                                                        'backgroundColor': 'tomato',
-
-                                                        'color': 'white'
-
-                                                    }
-
-                                                ],
-                                                #
-                                            )
-                                        )
-
-                                    ])
-
-                                ], style=style39),
-
-                            ])
-
-                        ], style={'marginTop': 50}), ])
-
-                ])
-
-            ]), ], style=style40)
-
+       #Data Interactivity
         @app.callback(
             Output('datatable-interactivity', 'data'),
             [Input('datatable-interactivity', "page_current"),
@@ -821,7 +375,7 @@ class dashboard():
             return df.iloc[
                    page_current * page_size:(page_current + 1) * page_size
                    ].to_dict('records')
-
+        #Collapse-Toggle
         @app.callback(
             Output("collapse", "is_open"),
             [Input("collapse-button", "n_clicks")],
@@ -832,6 +386,7 @@ class dashboard():
                 return not is_open
             return is_open
 
+        #Collapse-Toggle 2
         @app.callback(
             Output("collapse-2", "is_open"),
             [Input("collapse-button-2", "n_clicks")],
@@ -842,62 +397,28 @@ class dashboard():
                 return not is_open
             return is_open
 
+        #SQL - Data Input Callback
         @app.callback(
             dash.dependencies.Output('sql-query-button', 'children'),
             [dash.dependencies.Input('submit-val', 'n_clicks')],
             [dash.dependencies.State('input-on-submit', 'value')])
         def update_output(n_clicks, value):
-            # sql_query = f'SELECT * FROM df {value}'
             sql_query = f'{value}'
-
             return sql_query
-
-        # Global Feature Importance
+            # value1 = 'SELECT * FROM df'
+            # if n_clicks:
+               
+            # else:
+            #     return value1
+        
+        #What-If Form CallBack
         @app.callback(
-            [Output('global_feature_importance', "figure"),
-             Output('global_message_1', "children"),
-             Output('global_message_2', "children"),
-             Output('global_message_3', "children"),
-             Output('global_message_4', "children"),
-             Output('global_message_5', "children")],
-            [Input('sql-query-button', 'children'),
-             Input('tabs-styled-with-inline', 'value')])
-        def update_graphs(sql_query, tab):
-            if tab == "tab-1":
-                g = plotly_graphs()
-                graph_type = "feature_importance"
-                dff = self.caching_data_manager(df, sql_query, graph_type, g.feature_importance)
-                figure = g.feature_importance_graph(dff)
-                message = self.insights.insight_1_feature_imp(dff)
-                if len(message) == 4:
-                    return figure, message[0], message[1], message[2], message[3], ""
-                return figure, message[0], message[1], message[2], message[3], message[4]
-            else:
-                return {}, '', '', '', '', ''
-
-        # Global Feature Impact
-        @app.callback(
-            [Output('global_feature_impact', "figure"),
-             Output('message_1', "children"),
-             Output('message_2', "children"),
-             Output('message_3', "children")],
-            [Input('sql-query-button', 'children'),
-             Input('tabs-styled-with-inline', 'value')])
-        def update_graphs(sql_query, tab):
-            if tab == 'tab-1':
-                g = plotly_graphs()
-                graph_type = "feature_impact"
-                dff = self.caching_data_manager(df, sql_query, graph_type, g.feature_impact)
-                figure = g.feature_impact_graph(dff)
-                message = self.insights.insight_2_global_feature_impact(dff)
-                return figure, message[0], message[1], message[2]
-            else:
-                return {}, '', '', ''
-
-        @app.callback(
-            Output(component_id='local_data_table', component_property='children'),
-            [Input(component_id='row_number', component_property='value')])
-        def update_local_table(row_number):
+        Output('place_form_here', 'children'),
+        [
+            # Input('submit-button-state', 'n_clicks'),
+        Input('row_number','value')])
+        def create_what_if_form(row_number):
+            x = what_if()
             i = 0
             if type(row_number) == type(1):
                 i = row_number
@@ -906,116 +427,168 @@ class dashboard():
             impact_variables = [col for col in array if '_impact' in col]
             for col in impact_variables:
                 array1.drop([col], axis=1, inplace=True)
-            figure = dbc.Table.from_dataframe(array1, striped=True, bordered=True, hover=True, responsive=True,
-                                              size='lg', style={'font-size': '12px'})
-            return figure
+            # features = [col for col in array if not '_impact' in col]
+            features= list(self.param["columns"])
+            features.append("y_prediction")
+            features.append("y_actual")
 
+            form = x.what_if_form(array1, features)
+            return form    
+
+        """
+        change this. Take input from what-if form.
+        """
         # Local Feature Impact Graph
         @app.callback(
             [Output('local_feature_impact', "figure"),
-             Output('local_message_1', "children"),
-             Output('local_message_2', "children"),
-             Output('local_message_3', "children")],
-            [Input(component_id='row_number', component_property='value'),
-             Input('tabs-styled-with-inline', 'value')])
-        def update_impact_graph(row_number, tab):
-            if tab == 'tab-4':
-                i = 0
-                if type(row_number) == type(1):
-                    i = row_number
-                array = df[i:i + 1]
-                figure, dat = g.feature_impact_old(array)
-                message = self.insights.insight_2_local_feature_impact(dat)
-                return figure, message[0], message[1], message[2]
-            else:
-                return {}, '', '', ''
+                Output('local_message_1', "children"),
+                Output('local_message_2', "children"),
+                Output('local_message_3', "children")],
+            self.callback_input)
+        def update_impact_graph(*values):
+            changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+            # if 'submit-button-state' in changed_id:
 
+
+            # use values to construct a dataframe
+            # find prediction and shap values.
+
+            df= pd.DataFrame([values[:-1]])
+            df.columns= self.param["columns"]
+            # print(df)
+
+            #find prediction and impact values first here please.
+            array = self.calculate_prediction_shap(df)
+
+
+            figure, dat = g.feature_impact_old(array)
+            # print(dat)
+            message = self.insights.insight_2_local_feature_impact(dat)
+            return figure, message[0], message[1], message[2]
+            # else:
+            #     df2 = self.df[0:1]
+
+
+            #     figure, dat = g.feature_impact_old(df2)
+            #     # print(dat)
+            #     message = self.insights.insight_2_local_feature_impact(dat)
+            #     return figure, message[0], message[1], message[2]
+
+        # Prototypical Analysis
+        """
+        Change this. Take input from what-if from
+        """
+        @app.callback(
+            Output(component_id='prototype_data', component_property='data'),
+            [Input(f[0], f[1])for f in self.prototype_array])
+        def update_table(*values):
+            changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+            if 'btn-nclicks-1' in changed_id:
+                #get x variables and prediction column from the data
+
+                df_row = pd.DataFrame([values[:-1]])
+                df_row.columns = self.param["columns"]
+
+
+                # find prediction and impact values first here please.
+                df_row = self.calculate_prediction(df_row)
+                df_selected= df[list(self.param["columns"])+ [self.param["y_variable_predict"]]]
+
+                row_number = len(df_selected)
+                df_selected.loc[row_number] = df_row.values[0]
+
+                p = protodash()
+                p.preprocess_data(df_selected, self.param["y_variable_predict"])
+
+
+
+
+                dfs, sample_row = p.find_prototypes(row_number)
+                dat = dfs.T.reset_index()
+                print("sample row columns")
+                sample_row = sample_row.to_frame()
+                sample_row.rename(columns={sample_row.columns[0]: "orig"}, inplace=True)
+                sample_row.reset_index(inplace=True)
+                print(sample_row.columns)
+                dat = pd.merge(dat, sample_row, on=['index'], how='left')
+                dat['orig'] = dat['orig'].astype(float)
+                for i in list(dat.columns):
+                    dat[str(i) + '_color'] = np.nan
+                    if i != 'index':
+                        dat[i] = dat[i].astype(float)
+                        dat[str(i) + '_color'] = dat[str(i) + '_color'].astype(float)
+                    dat[str(i) + '_color'] = np.where(dat['orig'] == dat[i], 1, 0)
+                dat.drop(["index_color","orig_color"], axis=1, inplace=True)
+                dat = dat.to_dict('records')
+                return dat
+            else:
+                return []
+        
+        # Global Feature Importance
+        @app.callback(
+            [Output('global_feature_importance', "figure"),
+                Output('global_message_1', "children"),
+                Output('global_message_2', "children"),
+                Output('global_message_3', "children"),
+                Output('global_message_4', "children"),
+                Output('global_message_5', "children")],
+            [Input('sql-query-button', 'children'),
+            Input('xaxis-column-test-2', 'value')])
+        def update_graphs(sql_query, value ):
+            g = plotly_graphs()
+            graph_type = "feature_importance"
+            dff = self.caching_data_manager(df, sql_query, graph_type, g.feature_importance)
+            message = self.insights.insight_1_feature_imp(dff)
+            figure = g.feature_importance_graph(dff)
+           
+            if len(message) == 4:
+                return figure, message[0], message[1], message[2], message[3], ""
+            return figure, message[0], message[1], message[2], message[3], message[4]
+
+        # Global Feature Impact
+        @app.callback(
+            [Output('global_feature_impact', "figure"),
+                Output('message_1', "children"),
+                Output('message_2', "children"),
+                Output('message_3', "children")],
+            [Input('sql-query-button', 'children'),
+            Input('xaxis-column-test-2', 'value')])
+        def update_graphs(sql_query,value):
+            g = plotly_graphs()
+            graph_type = "feature_impact"
+            df3 = self.caching_data_manager(df, sql_query, graph_type, g.feature_impact)
+            figure = g.feature_impact_graph(df3)
+            message = self.insights.insight_2_global_feature_impact(df3)
+            return figure, message[0], message[1], message[2]
+      
         # Partial Dependence Plot Graph
         @app.callback(
             Output('indicator-graphic', 'figure'),
             [Input('xaxis-column', 'value'),
-             Input('yaxis-column', 'value'),
-             Input('third-axis', 'value'),
-             Input('sql-query-button', 'children'),
-             Input('tabs-styled-with-inline', 'value')])
-        def update_graph(xaxis_column_name, yaxis_column_name, third_axis_name, sql_query, tab):
-            if tab == 'tab-2':
-                g = plotly_graphs()
-                graph_type = 'pdp'
-                df3 = self.caching_data_manager(df, sql_query, graph_type, g.partial_dependence_plot)
-                fig = g.pdp_plot(df3, df3[xaxis_column_name], df3[yaxis_column_name],
-                                 df3[third_axis_name])
-                return fig
-            else:
-                return {}
-
-        # Prototypical Analysis
-        @app.callback(
-            Output(component_id='prototype_data', component_property='data'),
-            [Input(component_id='row_number', component_property='value'),
-             Input('btn-nclicks-1', 'n_clicks')])
-        def update_table(row_number, btn1):
-            changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-            if 'btn-nclicks-1' in changed_id:
-
-                p = protodash()
-                p.preprocess_data(df, y_variable)
-
-                dfs, sample_row = p.find_prototypes(row_number)
-
-                dat = dfs.T.reset_index()
-
-                print("sample row columns")
-
-                sample_row = sample_row.to_frame()
-
-                sample_row.rename(columns={sample_row.columns[0]: "orig"}, inplace=True)
-
-                sample_row.reset_index(inplace=True)
-
-                print(sample_row.columns)
-
-                dat = pd.merge(dat, sample_row, on=['index'], how='left')
-
-                dat['orig'] = dat['orig'].astype(float)
-
-                for i in list(dat.columns):
-
-                    dat[str(i) + '_color'] = np.nan
-
-                    if i != 'index':
-
-                        dat[i] = dat[i].astype(float)
-
-                        dat[str(i) + '_color'] = dat[str(i) + '_color'].astype(float)
-
-
-                    dat[str(i) + '_color'] = np.where(dat['orig'] == dat[i], 1, 0)
-
-
-                dat.drop(["index_color","orig_color"], axis=1, inplace=True)
-
-                dat = dat.to_dict('records')
-
-                return dat
-
-            else:
-                return []
+                Input('yaxis-column', 'value'),
+                Input('third-axis', 'value'),
+                Input('sql-query-button', 'children')])
+        def update_graph(xaxis_column_name, yaxis_column_name, third_axis_name, sql_query):
+            g = plotly_graphs()
+            graph_type = 'pdp'
+            df3 = self.caching_data_manager(df, sql_query, graph_type, g.partial_dependence_plot)
+            fig = g.pdp_plot(df3, df3[xaxis_column_name], df3[yaxis_column_name],
+                                df3[third_axis_name])
+            return fig
+           
 
         # Summary Plot
         @app.callback(
             Output('summary_plot', 'figure'),
             [Input('sql-query-button', 'children'),
-             Input('tabs-styled-with-inline', 'value')])
-        def update_graph2(sql_query, tab):
-            if tab == 'tab-2':
-                graph_type = 'summary_plot'
-                g = plotly_graphs()
-                dff = self.caching_data_manager(df, sql_query, graph_type, g.summary_plot)
-                fig = g.summary_plot_graph(dff)
-                return fig
-            else:
-                return {}
+            Input('xaxis-column-test', 'value')])
+        def update_graph2(sql_query, value):
+            g = plotly_graphs()
+            graph_type = 'summary_plot'
+            df3 = self.caching_data_manager(df, sql_query, graph_type, g.summary_plot)
+            print(df3)
+            fig = g.summary_plot_graph(df3)
+            return fig
 
         # Distributions
         @app.callback(
@@ -1026,7 +599,6 @@ class dashboard():
 
              ])
         def update_graph2(xaxis_column_name, plot_type, sql_query):
-
             graph_type = 'filtered_df'
             df3 = self.caching_data_manager(df, sql_query, graph_type)
             cat_variables = []
@@ -1064,45 +636,41 @@ class dashboard():
             return px.scatter(df3, x=x_axis, y=y_axis, size=size, color=color, facet_col=facet_col, facet_row=facet_row,
                               facet_col_wrap=4)
 
+           
+
         # Port Finder
-        port =8080
+        port = 8080
         if mode == "inline":
             try:
-                app.run_server(mode="inline", port=port)
+                app.run_server(mode="inline", port=port,debug=False,dev_tools_ui=False,dev_tools_props_check=False)
             except:
                 port= self.find_free_port()
-                app.run_server(mode="inline",port=port)
+                app.run_server(mode="inline",port=port,debug=False,dev_tools_ui=False,dev_tools_props_check=False)
         else:
             try:
-                app.run_server(host='0.0.0.0', port=port)
-
+                app.run_server(host='0.0.0.0', port=port,debug=False,dev_tools_ui=False,dev_tools_props_check=False)
             except:
                 # try different ip in case 0.0.0.0 does not work
                 try:
                     try:
                         port=self.find_free_port()
-                        app.run_server(host='0.0.0.0', port=port)
+                        app.run_server(host='0.0.0.0', port=port,debug=False,dev_tools_ui=False,dev_tools_props_check=False)
                     except:
                         port = self.find_free_port()
-                        app.run_server(host='0.0.0.0', port=port)
+                        app.run_server(host='0.0.0.0', port=port,debug=False,dev_tools_ui=False,dev_tools_props_check=False)
                 except:
                     try:
                         port = self.find_free_port()
-                        app.run_server(host='127.0.0.1', port=port)
+                        app.run_server(host='127.0.0.1', port=port,debug=False,dev_tools_ui=False,dev_tools_props_check=False)
                     except:
                         print("Please restart Jupyter Notebook or Python IDE.")
                         return False
-        #
-        # localtunnel(port)
-
-        #update counter here
         try:
             self.increate_counter()
         except:
             pass
-
-
         return True
+
 
     def find_free_port(self):
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
@@ -1110,6 +678,7 @@ class dashboard():
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             return s.getsockname()[1]
 
+    #COUNTER FUNCTION (NEEDS TO BE IMPLEMENTED)
     def increate_counter(self):
         # call api call here
 
@@ -1127,6 +696,60 @@ class dashboard():
             return True
         else:
             return False
+
+
+
+    def calculate_prediction_shap(self, df):
+        if self.param["model_name"] == "xgboost":
+            import xgboost
+            if xgboost.__version__ in ['1.1.0', '1.1.1', '1.1.0rc2', '1.1.0rc1']:
+                print(
+                    "Current Xgboost version is not supported. Please install Xgboost using 'pip install xgboost==1.0.2'")
+                return False
+            prediction_col = self.param["model"].predict(xgboost.DMatrix(df))
+
+        elif self.param["model_name"]  == "catboost":
+            prediction_col = self.param["model"].predict(df.to_numpy())
+
+        else:
+            prediction_col = self.param["model"].predict(df.to_numpy())
+
+        # is classification?
+        is_classification = self.param["is_classification"]
+
+        # shap
+        c = calculate_shap()
+        df_final, explainer = c.find(self.param["model"], df, prediction_col, is_classification, model_name=self.param["model_name"])
+
+        # prediction col
+        df_final[self.param["y_variable_predict"]] = prediction_col
+
+        return df_final
+
+    def calculate_prediction(self, df):
+        if self.param["model_name"] == "xgboost":
+            import xgboost
+            if xgboost.__version__ in ['1.1.0', '1.1.1', '1.1.0rc2', '1.1.0rc1']:
+                print(
+                    "Current Xgboost version is not supported. Please install Xgboost using 'pip install xgboost==1.0.2'")
+                return False
+            prediction_col = self.param["model"].predict(xgboost.DMatrix(df))
+
+        elif self.param["model_name"]  == "catboost":
+            prediction_col = self.param["model"].predict(df.to_numpy())
+
+        else:
+            prediction_col = self.param["model"].predict(df.to_numpy())
+
+        # is classification?
+        is_classification = self.param["is_classification"]
+
+
+        # prediction col
+        df[self.param["y_variable_predict"]] = prediction_col
+
+        return df
+
 
 
 def localtunnel(port):

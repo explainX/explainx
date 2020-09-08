@@ -11,7 +11,6 @@ class data_for_shap_graphs():
 
         # save all important variables here.
 
-
     def feature_importance(self,  df):
         fimp = feature_importance()
         df3 = fimp.find(df)
