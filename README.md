@@ -51,35 +51,46 @@ If you are using AWS SageMaker of Jupyter Notebook deployed on the cloud, visit 
 ## Example Usage
 After successfully installing explainX, open up your Python IDE of Jupyter Notebook and simply follow the code below to use it:
 
-1. Import **explainx** module.
+1. Import required module.
 
 ```python
-from explainx import *
+from explainx import * 
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
 ```
 
 2. Load and split your dataset into x_data and y_data
 
 ```python
-#x_data = Pandas DataFrame
-#y_data = Numpy Array or List
+#Load Dataset: X_Data, Y_Data 
+#X_Data = Pandas DataFrame
+#Y_Data = Numpy Array or List
 
-x_data, y_data = explainx.dataset_boston() 
+X_data,Y_data = explainx.dataset_heloc()
 ```
 
-3. Train your model.
+3. Split dataset into training & testing. 
+
+``` python
+X_train, X_test, Y_train, Y_test = train_test_split(X_data,Y_data, test_size=0.3, random_state=0)
+```
+
+4. Train your model.
 
 ```python
-#Train Model
-model = xgboost.train({"learning_rate": 0.01}, xgboost.DMatrix(x_data, label=y_data), 100)
+# Train a RandomForest Model
+model = RandomForestClassifier()
+model.fit(X_train, Y_train)
 ```
 
-4. Pass your model and dataset into the explainX function:
+5. Pass your model and dataset into the explainX function:
 
 ```python
-explainx.ai(x_data, y_data, model, model_name="xgboost")
+explainx.ai(X_test, Y_test, model, model_name="randomforest")
 ```
 
-5. Click on the dashboard link to start exploring model behavior:
+6. Click on the dashboard link to start exploring model behavior:
 
 ```python
 App running on https://0.0.0.0:8080
