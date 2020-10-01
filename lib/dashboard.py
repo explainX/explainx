@@ -680,7 +680,7 @@ class dashboard():
             self.increate_counter()
         except:
             pass
-        return True
+        return port
 
 
     def find_free_port(self):
@@ -777,4 +777,6 @@ def get_random_string(length):
     letters = string.ascii_lowercase+ string.ascii_uppercase
     result_str = ''.join(random.choice(letters) for i in range(length))
     return result_str
+
+
 

@@ -13,7 +13,7 @@ X,y = explainx.dataset_heloc()
 #xgboost
 model = xgboost.train({"learning_rate": 0.01}, xgboost.DMatrix(X, label=y), 100)
 
-explainx.ai(X, y, model, model_name="xgboost")
+explainx.ai_test(X, y, model, model_name="xgboost")
 
 from sklearn.ensemble import GradientBoostingRegressor
 
@@ -28,8 +28,10 @@ X_train, X_test, y_train, y_test = train_test_split(X,y, test_size=0.2, random_s
 model = GradientBoostingRegressor()
 model.fit(X_train, y_train)
 
-explainx.ai(X_test,  y_test, model, model_name="gradientboostingregressor")
+# start and stop explainx
+explainx.ai_test(X_test,  y_test, model, model_name="gradientboostingregressor")
 
+#test other functions that find all the graphs.
 
 
 # Load Heloc dataset
@@ -48,4 +50,4 @@ model = CatBoostRegressor(iterations=150,
 # Fit model
 model.fit(X_train.to_numpy(), y_train)
 
-explainx.ai(X_test,  y_test, model, model_name="catboost")
+explainx.ai_test(X_test,  y_test, model, model_name="catboost")
