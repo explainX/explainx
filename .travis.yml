@@ -1,4 +1,11 @@
 language: python            # this works for Linux but is an error on macOS or Windows
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"      # current default Python on Travis CI
+  - "3.7"
+  - "3.8"
 jobs:
   include:
     - name: "Python 3.8.0 on Xenial Linux"

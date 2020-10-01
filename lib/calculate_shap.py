@@ -183,6 +183,7 @@ class calculate_shap():
         """
         SHAP VALUES CALCULATED
         """
+        from catboost import Pool
         shap_values = model.get_feature_importance(Pool(x_array, cat_features=cat_index), type='ShapValues')
         shap_values = shap_values[:, :-1]
         total_columns = x_variable
