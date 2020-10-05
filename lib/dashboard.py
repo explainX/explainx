@@ -11,6 +11,8 @@ from apps import global_explanation, local_explanation, distribution, feature_in
 from app import app
 from what_if import *
 from calculate_shap import *
+from analytics import Analytics
+
 
 class dashboard():
     def __init__(self):
@@ -23,7 +25,6 @@ class dashboard():
         self.summary_plot = dict()
         self.feature_impact = dict()
         self.multi_level_eda = dict()
-
 
     def create_dir(self, dir_name):
         if not os.path.exists(dir_name):
@@ -72,7 +73,7 @@ class dashboard():
             if not random_id.empty:
                 result = random_id['random_id'].iloc[0]
                 dff = pd.read_csv("./data_storage/{}/{}.csv".format(graph_type, result))
-                #print("{}  {}  {}".format(graph_type, "file exists", result))
+                # print("{}  {}  {}".format(graph_type, "file exists", result))
                 return True, True, dff
             return False, True, None
 
@@ -104,11 +105,11 @@ class dashboard():
     def caching_data_manager(self, df, sql_query, graph_type, calculated_funct=None, details_dict=None):
         status_file, file_exist, dff = self.caching_exists_in_file(sql_query, graph_type)
         if status_file:
-            #print("{}/{}".format(graph_type, "exist in file"))
+            # print("{}/{}".format(graph_type, "exist in file"))
 
             return dff
         else:
-            #print("{}/{}".format(graph_type, "don't exists"))
+            # print("{}/{}".format(graph_type, "don't exists"))
             random_str = self.random_string_generator()
             dict_bkp = self.creating_filtered_backup_file(sql_query, random_str, graph_type)
             dff = psql.sqldf(sql_query, locals())
@@ -137,7 +138,20 @@ class dashboard():
         self.create_dir("data_storage")
         self.create_dir("data_storage/user")
         self.user_id = None
-        self.df=df
+        self.df = df
+
+        self.analytics = Analytics()
+        self.analytics['ip'] = self.analytics.finding_ip()
+        self.analytics['mac'] = self.analytics.finding_address()
+        self.analytics['instance_id'] = self.instance_id
+        self.analytics['time'] = str(datetime.datetime.now())
+        self.analytics['total_columns'] = len(self.available_columns)
+        self.analytics['total_rows'] = len(self.df)
+        self.analytics['os'] = self.analytics.finding_system()
+        self.analytics['model_name'] = self.param["model_name"]
+        self.analytics["function"] = 'explainx.ai'
+        self.analytics["query"] = "all"
+        self.analytics['finish_time'] = ''
 
         self.callback_input = [Input(f + '_slider', 'value') for f in self.param["columns"]]
         self.callback_input.append(Input('submit-button-state', 'n_clicks'))
@@ -145,7 +159,7 @@ class dashboard():
         # self.callback_input_prototype = [Input(f + '-slider', 'value') for f in self.param["columns"]]
         # self.callback_input_prototype.append(Input('btn-nclicks-1', 'n_clicks'))
 
-        self.prototype_array= []
+        self.prototype_array = []
         for f in self.param["columns"]:
             self.prototype_array.append([f + '_slider', 'value'])
         self.prototype_array.append(['btn-nclicks-1', 'n_clicks'])
@@ -155,11 +169,14 @@ class dashboard():
             user_id = user_id['id'].iloc[0]
             self.user_id = user_id
         except Exception as e:
-            #print("inside user track" )
+            # print("inside user track" )
             user_id_val = self.random_string_generator()
             user_id_csv = pd.DataFrame(data={"id": [user_id_val]})
             user_id_csv.to_csv("data_storage/user/user_id.csv", index=False)
-            self.user_id= user_id_val  
+            self.user_id = user_id_val
+
+        self.analytics['user_id'] = self.user_id
+        self.analytics.insert_data()
         self.insights = insights(self.param)
         d = self.dash(df, mode)
         return True
@@ -194,11 +211,15 @@ class dashboard():
 
         menu = dbc.Row(
             [
-                dbc.Col(dbc.NavItem(dbc.NavLink("Global Explanation", href="/apps/global_explanation")), style={'width':"200px",'fontSize':'12px'}),
-                dbc.Col(dbc.NavItem(dbc.NavLink("Local Explanation", href="/apps/local_explanation")), style={'width':"200px",'fontSize':'12px'}),
-                dbc.Col(dbc.NavItem(dbc.NavLink("Feature Interaction", href="/apps/feature_interaction")), style={'width':"200px",'fontSize':'12px'}),
-                dbc.Col(dbc.NavItem(dbc.NavLink("Distributions", href="/apps/distribution")), style={'width':"200px",'fontSize':'12px'}),
-                
+                dbc.Col(dbc.NavItem(dbc.NavLink("Global Explanation", href="/apps/global_explanation")),
+                        style={'width': "200px", 'fontSize': '12px'}),
+                dbc.Col(dbc.NavItem(dbc.NavLink("Local Explanation", href="/apps/local_explanation")),
+                        style={'width': "200px", 'fontSize': '12px'}),
+                dbc.Col(dbc.NavItem(dbc.NavLink("Feature Interaction", href="/apps/feature_interaction")),
+                        style={'width': "200px", 'fontSize': '12px'}),
+                dbc.Col(dbc.NavItem(dbc.NavLink("Distributions", href="/apps/distribution")),
+                        style={'width': "200px", 'fontSize': '12px'}),
+
             ],
             no_gutters=True,
             className="ml-auto flex-nowrap mt-3 mt-md-0",
@@ -212,21 +233,21 @@ class dashboard():
                     dbc.Row(
                         [
                             dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px")),
-                            dbc.Col(dbc.NavbarBrand("explainX.ai", className="ml-2", style={'fontSize':'12px','color':'black'})),
+                            dbc.Col(dbc.NavbarBrand("explainX.ai", className="ml-2",
+                                                    style={'fontSize': '12px', 'color': 'black'})),
                         ],
                         align="center",
                         no_gutters=True,
                     ),
                     href="https://www.explainx.ai",
                 ),
-                
+
                 dbc.NavbarToggler(id="navbar-toggler"),
                 dbc.Collapse(menu, id="navbar-collapse", navbar=True),
             ],
             color="light",
             dark=True,
         )
-
 
         # add callback for toggling the collapse on small screens
         @app.callback(
@@ -240,26 +261,24 @@ class dashboard():
             return is_open
 
         @app.callback(Output('page-content', 'children'),
-              [Input('url', 'pathname')])
+                      [Input('url', 'pathname')])
         def display_page(pathname):
             if pathname == '/apps/global_explanation':
                 return global_explanation.global_explanation(original_variables)
             elif pathname == '/apps/feature_interaction':
                 return feature_interaction.layout_interaction(original_variables, y_variables)
-            elif pathname == '/apps/distribution' :
+            elif pathname == '/apps/distribution':
                 return distribution.layout_distribution(original_variables)
             elif pathname == '/apps/local_explanation':
-                return local_explanation.layout_local(original_variables,columns,df.columns)
+                return local_explanation.layout_local(original_variables, columns, df.columns)
             else:
                 return welcome_message
 
-
-        welcome_message= html.Div(
+        welcome_message = html.Div(
             [
                 html.H1("Welcome to ExplainX"),
                 html.H3("Click on one of the tabs above to start explaining.")
             ]
-
 
         )
         app.layout = html.Div([
@@ -361,20 +380,17 @@ class dashboard():
 
             ],
                 style=style4),
-            #Pages Data
+            # Pages Data
             html.Div([
                 dcc.Location(id='url', refresh=False),
                 html.Div(id='page-content')
             ])
             # end of collapsable div
-           ], style=style40)
+        ], style=style40)
 
-         #Navigation
-        
-       
-        
+        # Navigation
 
-       #Data Interactivity
+        # Data Interactivity
         @app.callback(
             Output('datatable-interactivity', 'data'),
             [Input('datatable-interactivity', "page_current"),
@@ -383,7 +399,8 @@ class dashboard():
             return df.iloc[
                    page_current * page_size:(page_current + 1) * page_size
                    ].to_dict('records')
-        #Collapse-Toggle
+
+        # Collapse-Toggle
         @app.callback(
             Output("collapse", "is_open"),
             [Input("collapse-button", "n_clicks")],
@@ -394,7 +411,7 @@ class dashboard():
                 return not is_open
             return is_open
 
-        #Collapse-Toggle 2
+        # Collapse-Toggle 2
         @app.callback(
             Output("collapse-2", "is_open"),
             [Input("collapse-button-2", "n_clicks")],
@@ -405,7 +422,7 @@ class dashboard():
                 return not is_open
             return is_open
 
-        #SQL - Data Input Callback
+        # SQL - Data Input Callback
         @app.callback(
             dash.dependencies.Output('sql-query-button', 'children'),
             [dash.dependencies.Input('submit-val', 'n_clicks')],
@@ -415,17 +432,23 @@ class dashboard():
             return sql_query
             # value1 = 'SELECT * FROM df'
             # if n_clicks:
-               
+
             # else:
             #     return value1
-        
-        #What-If Form CallBack
+
+        # What-If Form CallBack
         @app.callback(
-        Output('place_form_here', 'children'),
-        [
-            # Input('submit-button-state', 'n_clicks'),
-        Input('row_number','value')])
+            Output('place_form_here', 'children'),
+            [
+                # Input('submit-button-state', 'n_clicks'),
+                Input('row_number', 'value')])
         def create_what_if_form(row_number):
+            self.analytics.update_data()
+            self.analytics['function'] = "what_if"
+            self.analytics['time'] = str(datetime.datetime.now())
+            self.analytics['query'] = row_number
+            self.analytics.insert_data()
+            self.analytics['finish_time'] = ''
             x = what_if()
             i = 0
             if type(row_number) == type(1):
@@ -436,38 +459,37 @@ class dashboard():
             for col in impact_variables:
                 array1.drop([col], axis=1, inplace=True)
             # features = [col for col in array if not '_impact' in col]
-            features= list(self.param["columns"])
+            features = list(self.param["columns"])
             features.append("y_prediction")
             features.append("y_actual")
 
             form = x.what_if_form(array1, features)
-            return form    
+            return form
 
         """
         change this. Take input from what-if form.
         """
+
         # Local Feature Impact Graph
         @app.callback(
             [Output('local_feature_impact', "figure"),
-                Output('local_message_1', "children"),
-                Output('local_message_2', "children"),
-                Output('local_message_3', "children")],
+             Output('local_message_1', "children"),
+             Output('local_message_2', "children"),
+             Output('local_message_3', "children")],
             self.callback_input)
         def update_impact_graph(*values):
             changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
             # if 'submit-button-state' in changed_id:
 
-
             # use values to construct a dataframe
             # find prediction and shap values.
 
-            df= pd.DataFrame([values[:-1]])
-            df.columns= self.param["columns"]
+            df = pd.DataFrame([values[:-1]])
+            df.columns = self.param["columns"]
             # print(df)
 
-            #find prediction and impact values first here please.
+            # find prediction and impact values first here please.
             array = self.calculate_prediction_shap(df)
-
 
             figure, dat = g.feature_impact_old(array)
             # print(dat)
@@ -475,7 +497,6 @@ class dashboard():
             return figure, message[0], message[1], message[2]
             # else:
             #     df2 = self.df[0:1]
-
 
             #     figure, dat = g.feature_impact_old(df2)
             #     # print(dat)
@@ -486,30 +507,27 @@ class dashboard():
         """
         Change this. Take input from what-if from
         """
+
         @app.callback(
             Output(component_id='prototype_data', component_property='data'),
-            [Input(f[0], f[1])for f in self.prototype_array])
+            [Input(f[0], f[1]) for f in self.prototype_array])
         def update_table(*values):
             changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
             if 'btn-nclicks-1' in changed_id:
-                #get x variables and prediction column from the data
+                # get x variables and prediction column from the data
 
                 df_row = pd.DataFrame([values[:-1]])
                 df_row.columns = self.param["columns"]
 
-
                 # find prediction and impact values first here please.
                 df_row = self.calculate_prediction(df_row)
-                df_selected= df[list(self.param["columns"])+ [self.param["y_variable_predict"]]]
+                df_selected = df[list(self.param["columns"]) + [self.param["y_variable_predict"]]]
 
                 row_number = len(df_selected)
                 df_selected.loc[row_number] = df_row.values[0]
 
                 p = protodash()
                 p.preprocess_data(df_selected, self.param["y_variable_predict"])
-
-
-
 
                 dfs, sample_row = p.find_prototypes(row_number)
                 dat = dfs.T.reset_index()
@@ -526,29 +544,36 @@ class dashboard():
                         dat[i] = dat[i].astype(float)
                         dat[str(i) + '_color'] = dat[str(i) + '_color'].astype(float)
                     dat[str(i) + '_color'] = np.where(dat['orig'] == dat[i], 1, 0)
-                dat.drop(["index_color","orig_color"], axis=1, inplace=True)
+                dat.drop(["index_color", "orig_color"], axis=1, inplace=True)
                 dat = dat.to_dict('records')
                 return dat
             else:
                 return []
-        
+
         # Global Feature Importance
         @app.callback(
             [Output('global_feature_importance', "figure"),
-                Output('global_message_1', "children"),
-                Output('global_message_2', "children"),
-                Output('global_message_3', "children"),
-                Output('global_message_4', "children"),
-                Output('global_message_5', "children")],
+             Output('global_message_1', "children"),
+             Output('global_message_2', "children"),
+             Output('global_message_3', "children"),
+             Output('global_message_4', "children"),
+             Output('global_message_5', "children")],
             [Input('sql-query-button', 'children'),
-            Input('xaxis-column-test-2', 'value')])
-        def update_graphs(sql_query, value ):
+             Input('xaxis-column-test-2', 'value')])
+        def update_graphs(sql_query, value):
+            self.analytics.update_data()
+            self.analytics['function'] = "feature_importance"
+            self.analytics['time'] = str(datetime.datetime.now())
+            self.analytics['query'] = sql_query
+            self.analytics['finish_time'] = ''
+            self.analytics.insert_data()
+
             g = plotly_graphs()
             graph_type = "feature_importance"
             dff = self.caching_data_manager(df, sql_query, graph_type, g.feature_importance)
             message = self.insights.insight_1_feature_imp(dff)
             figure = g.feature_importance_graph(dff)
-           
+
             if len(message) == 4:
                 return figure, message[0], message[1], message[2], message[3], ""
             return figure, message[0], message[1], message[2], message[3], message[4]
@@ -556,41 +581,60 @@ class dashboard():
         # Global Feature Impact
         @app.callback(
             [Output('global_feature_impact', "figure"),
-                Output('message_1', "children"),
-                Output('message_2', "children"),
-                Output('message_3', "children")],
+             Output('message_1', "children"),
+             Output('message_2', "children"),
+             Output('message_3', "children")],
             [Input('sql-query-button', 'children'),
-            Input('xaxis-column-test-2', 'value')])
-        def update_graphs(sql_query,value):
+             Input('xaxis-column-test-2', 'value')])
+        def update_graphs(sql_query, value):
+            self.analytics.update_data()
+            self.analytics['function'] = "feature_impact"
+            self.analytics['time'] = str(datetime.datetime.now())
+            self.analytics['query'] = sql_query
+            self.analytics['finish_time'] = ''
+            self.analytics.insert_data()
+
             g = plotly_graphs()
             graph_type = "feature_impact"
             df3 = self.caching_data_manager(df, sql_query, graph_type, g.feature_impact)
             figure = g.feature_impact_graph(df3)
             message = self.insights.insight_2_global_feature_impact(df3)
             return figure, message[0], message[1], message[2]
-      
+
         # Partial Dependence Plot Graph
         @app.callback(
             Output('indicator-graphic', 'figure'),
             [Input('xaxis-column', 'value'),
-                Input('yaxis-column', 'value'),
-                Input('third-axis', 'value'),
-                Input('sql-query-button', 'children')])
+             Input('yaxis-column', 'value'),
+             Input('third-axis', 'value'),
+             Input('sql-query-button', 'children')])
         def update_graph(xaxis_column_name, yaxis_column_name, third_axis_name, sql_query):
+            self.analytics.update_data()
+            self.analytics['function'] = "pdp"
+            self.analytics['time'] = str(datetime.datetime.now())
+            self.analytics['query'] = sql_query
+            self.analytics.insert_data()
+
             g = plotly_graphs()
             graph_type = 'pdp'
             df3 = self.caching_data_manager(df, sql_query, graph_type, g.partial_dependence_plot)
             fig = g.pdp_plot(df3, df3[xaxis_column_name], df3[yaxis_column_name],
-                                df3[third_axis_name])
+                             df3[third_axis_name])
             return fig
-           
 
         # Summary Plot
         @app.callback(
             Output('summary_plot', 'figure'),
             [Input('sql-query-button', 'children'),
-            Input('xaxis-column-test', 'value')])
+             Input('xaxis-column-test', 'value')])
         def update_graph2(sql_query, value):
+            self.analytics.update_data()
+            self.analytics['function'] = "summary_plot"
+            self.analytics['time'] = str(datetime.datetime.now())
+            self.analytics['query'] = sql_query
+            self.analytics['finish_time'] = ''
+            self.analytics.insert_data()
+
             g = plotly_graphs()
             graph_type = 'summary_plot'
             df3 = self.caching_data_manager(df, sql_query, graph_type, g.summary_plot)
@@ -639,12 +683,17 @@ class dashboard():
              ]
         )
         def multi_level(x_axis, y_axis, size, color, facet_col, facet_row, sql_query):
+            self.analytics.update_data()
+            self.analytics['function'] = "multi_level"
+            self.analytics['time'] = str(datetime.datetime.now())
+            self.analytics['query'] = sql_query
+            self.analytics['finish_time'] = ''
+            self.analytics.insert_data()
+
             graph_type = 'filtered_df'
             df3 = self.caching_data_manager(df, sql_query, graph_type)
             return px.scatter(df3, x=x_axis, y=y_axis, size=size, color=color, facet_col=facet_col, facet_row=facet_row,
                               facet_col_wrap=4)
-
-           
 
         # Port Finder
         port = 8080
@@ -653,26 +702,32 @@ class dashboard():
 
         if mode == "inline":
             try:
-                app.run_server(mode="inline", port=port,debug=debug_value,dev_tools_ui=debug_value,dev_tools_props_check=debug_value)
+                app.run_server(mode="inline", port=port, debug=debug_value, dev_tools_ui=debug_value,
+                               dev_tools_props_check=debug_value)
             except:
-                port= self.find_free_port()
-                app.run_server(mode="inline",port=port,debug=debug_value,dev_tools_ui=debug_value,dev_tools_props_check=debug_value)
+                port = self.find_free_port()
+                app.run_server(mode="inline", port=port, debug=debug_value, dev_tools_ui=debug_value,
+                               dev_tools_props_check=debug_value)
         else:
             try:
-                app.run_server(host='0.0.0.0', port=port,debug=debug_value,dev_tools_ui=debug_value,dev_tools_props_check=debug_value)
+                app.run_server(host='0.0.0.0', port=port, debug=debug_value, dev_tools_ui=debug_value,
+                               dev_tools_props_check=debug_value)
             except:
                 # try different ip in case 0.0.0.0 does not work
                 try:
                     try:
-                        port=self.find_free_port()
-                        app.run_server(host='0.0.0.0', port=port,debug=debug_value,dev_tools_ui=debug_value,dev_tools_props_check=debug_value)
+                        port = self.find_free_port()
+                        app.run_server(host='0.0.0.0', port=port, debug=debug_value, dev_tools_ui=debug_value,
+                                       dev_tools_props_check=debug_value)
                     except:
                         port = self.find_free_port()
-                        app.run_server(host='0.0.0.0', port=port,debug=debug_value,dev_tools_ui=debug_value,dev_tools_props_check=debug_value)
+                        app.run_server(host='0.0.0.0', port=port, debug=debug_value, dev_tools_ui=debug_value,
+                                       dev_tools_props_check=debug_value)
                 except:
                     try:
                         port = self.find_free_port()
-                        app.run_server(host='127.0.0.1', port=port,debug=debug_value,dev_tools_ui=debug_value,dev_tools_props_check=debug_value)
+                        app.run_server(host='127.0.0.1', port=port, debug=debug_value, dev_tools_ui=debug_value,
+                                       dev_tools_props_check=debug_value)
                     except:
                         print("Please restart Jupyter Notebook or Python IDE.")
                         return False
@@ -682,14 +737,13 @@ class dashboard():
             pass
         return port
 
-
     def find_free_port(self):
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
             s.bind(('', 0))
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             return s.getsockname()[1]
 
-    #COUNTER FUNCTION (NEEDS TO BE IMPLEMENTED)
+    # COUNTER FUNCTION (NEEDS TO BE IMPLEMENTED)
     def increate_counter(self):
         # call api call here
 
@@ -703,12 +757,10 @@ class dashboard():
 
         }
         r = requests.post(url, params=params, json=data)
-        if r.json()["message"]=="200":
+        if r.json()["message"] == "200":
             return True
         else:
             return False
-
-
 
     def calculate_prediction_shap(self, df):
         if self.param["model_name"] == "xgboost":
@@ -719,7 +771,7 @@ class dashboard():
                 return False
             prediction_col = self.param["model"].predict(xgboost.DMatrix(df))
 
-        elif self.param["model_name"]  == "catboost":
+        elif self.param["model_name"] == "catboost":
             prediction_col = self.param["model"].predict(df.to_numpy())
 
         else:
@@ -730,7 +782,8 @@ class dashboard():
 
         # shap
         c = calculate_shap()
-        df_final, explainer = c.find(self.param["model"], df, prediction_col, is_classification, model_name=self.param["model_name"])
+        df_final, explainer = c.find(self.param["model"], df, prediction_col, is_classification,
+                                     model_name=self.param["model_name"])
 
         # prediction col
         df_final[self.param["y_variable_predict"]] = prediction_col
@@ -746,7 +799,7 @@ class dashboard():
                 return False
             prediction_col = self.param["model"].predict(xgboost.DMatrix(df))
 
-        elif self.param["model_name"]  == "catboost":
+        elif self.param["model_name"] == "catboost":
             prediction_col = self.param["model"].predict(df.to_numpy())
 
         else:
@@ -755,12 +808,10 @@ class dashboard():
         # is classification?
         is_classification = self.param["is_classification"]
 
-
         # prediction col
         df[self.param["y_variable_predict"]] = prediction_col
 
         return df
-
 
 
 def localtunnel(port):
@@ -768,15 +819,12 @@ def localtunnel(port):
     task = subprocess.Popen(['lt', '-h', '"https://serverless.social"', '-p', str(port)],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=os.setsid)
 
-    outpt= task.stdout.readline()
-    outpt_string= outpt.decode("utf-8").split("is:")
-    print('Explainx.ai is running @ '+outpt_string[1])
+    outpt = task.stdout.readline()
+    outpt_string = outpt.decode("utf-8").split("is:")
+    print('Explainx.ai is running @ ' + outpt_string[1])
 
 
 def get_random_string(length):
-    letters = string.ascii_lowercase+ string.ascii_uppercase
+    letters = string.ascii_lowercase + string.ascii_uppercase
     result_str = ''.join(random.choice(letters) for i in range(length))
     return result_str
-
-
-

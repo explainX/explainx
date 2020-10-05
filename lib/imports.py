@@ -1,6 +1,3 @@
-
-
-
 from jupyter_dash import JupyterDash
 import dash_bootstrap_components as dbc
 import dash
@@ -25,6 +22,14 @@ import subprocess
 import os
 import sys
 import shap
-
 import random
 import string
+from uuid import getnode as get_mac
+import platform
+import datetime
+import pyrebase
+from config_det import data_det
+from collections import deque
+
+firebase_app = pyrebase.initialize_app(data_det)
+ref = firebase_app.database()
