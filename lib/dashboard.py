@@ -61,6 +61,8 @@ class dashboard():
             return False, None
 
     def caching_exists_in_file(self, sql_query, graph_type):
+        print("graph_type")
+        print(graph_type)
         self.create_dir("data_storage")
         self.create_dir("data_storage/{}".format(graph_type))
 
@@ -104,7 +106,9 @@ class dashboard():
 
     def caching_data_manager(self, df, sql_query, graph_type, calculated_funct=None, details_dict=None):
         status_file, file_exist, dff = self.caching_exists_in_file(sql_query, graph_type)
+        print(status_file)
         if status_file:
+            print("status file")
             # print("{}/{}".format(graph_type, "exist in file"))
 
             return dff
@@ -587,17 +591,18 @@ class dashboard():
             [Input('sql-query-button', 'children'),
              Input('xaxis-column-test-2', 'value')])
         def update_graphs(sql_query, value):
-            self.analytics.update_data()
-            self.analytics['function'] = "feature_impact"
-            self.analytics['time'] = str(datetime.datetime.now())
-            self.analytics['query'] = sql_query
-            self.analytics['finish_time'] = ''
-            self.analytics.insert_data()
-
+            # self.analytics.update_data()
+            # self.analytics['function'] = "feature_impact"
+            # self.analytics['time'] = str(datetime.datetime.now())
+            # self.analytics['query'] = sql_query
+            # self.analytics['finish_time'] = ''
+            # self.analytics.insert_data()
             g = plotly_graphs()
             graph_type = "feature_impact"
             df3 = self.caching_data_manager(df, sql_query, graph_type, g.feature_impact)
+
             figure = g.feature_impact_graph(df3)
+
             message = self.insights.insight_2_global_feature_impact(df3)
             return figure, message[0], message[1], message[2]
 
@@ -628,12 +633,12 @@ class dashboard():
             [Input('sql-query-button', 'children'),
              Input('xaxis-column-test', 'value')])
         def update_graph2(sql_query, value):
-            self.analytics.update_data()
-            self.analytics['function'] = "summary_plot"
-            self.analytics['time'] = str(datetime.datetime.now())
-            self.analytics['query'] = sql_query
-            self.analytics['finish_time'] = ''
-            self.analytics.insert_data()
+            # self.analytics.update_data()
+            # self.analytics['function'] = "summary_plot"
+            # self.analytics['time'] = str(datetime.datetime.now())
+            # self.analytics['query'] = sql_query
+            # self.analytics['finish_time'] = ''
+            # self.analytics.insert_data()
 
             g = plotly_graphs()
             graph_type = 'summary_plot'
