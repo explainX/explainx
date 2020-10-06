@@ -22,8 +22,8 @@ class insight_regression():
         df_numpy = df.to_numpy()
 
         for i in range(3):
-            top_important_variables.append(df_numpy[-1 * i][0])
-            average_shap_values.append(df_numpy[-1 * i][1])
+            top_important_variables.append(df_numpy[-1 * (i+1)][0])
+            average_shap_values.append(df_numpy[-1 * (i+1)][1])
 
         sentences = []
         sentences.append(
@@ -52,9 +52,10 @@ class insight_regression():
 
         df_numpy = df.to_numpy()
 
+
         for i in range(3):
-            top_positive_variables.append(df_numpy[-1 * i][0])
-            average_shap_values_positive.append(df_numpy[-1 * i][1])
+            top_positive_variables.append(df_numpy[-1 * (i+1)][0])
+            average_shap_values_positive.append(df_numpy[-1 * (i+1)][1])
 
             top_negative_variables.append(df_numpy[i][0])
             average_shap_values_negative.append(df_numpy[i][1])
@@ -87,6 +88,43 @@ class insight_regression():
 
         return sentences
 
+    def insight_2_local_feature_impact(self, df, y_and_prob):
+
+        top_positive_variables = []
+        average_shap_values_positive = []
+
+        top_negative_variables = []
+        average_shap_values_negative = []
+
+        df_numpy = df.to_numpy()
+        print("insights")
+        print(df_numpy)
+
+        for i in range(3):
+            top_positive_variables.append(df_numpy[-1 * (i+1)][0])
+            average_shap_values_positive.append(df_numpy[-1 * (i+1)][1])
+
+            top_negative_variables.append(df_numpy[i][0])
+            average_shap_values_negative.append(df_numpy[i][1])
+
+        sentences = []
+
+        sentences.append("Model Prediction : " + str(y_and_prob[0]))
+
+        sentences.append("Top 3 Positive Impact Variables : " +
+                         top_positive_variables[0] + ", " +
+                         top_positive_variables[1] + ", " +
+                         top_positive_variables[2] + " " )
+
+        sentences.append("Top 3 Negative Impact Variables : " +
+                         top_negative_variables[0] + ", " +
+                         top_negative_variables[1] + ", " +
+                         top_negative_variables[2] + " " )
+
+        sentences.append("")
+
+        return sentences
+
     def insight_3(self, df):
 
         top_positive_variables = []
@@ -95,8 +133,8 @@ class insight_regression():
         df_numpy = df.to_numpy()
 
         for i in range(3):
-            top_positive_variables.append(df_numpy[-1 * i][0])
-            average_shap_values_positive.append(df_numpy[-1 * i][1])
+            top_positive_variables.append(df_numpy[-1 * (i+1)][0])
+            average_shap_values_positive.append(df_numpy[-1 * (i+1)][1])
 
         sentences = []
 

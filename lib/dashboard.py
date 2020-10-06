@@ -61,8 +61,6 @@ class dashboard():
             return False, None
 
     def caching_exists_in_file(self, sql_query, graph_type):
-        print("graph_type")
-        print(graph_type)
         self.create_dir("data_storage")
         self.create_dir("data_storage/{}".format(graph_type))
 
@@ -106,9 +104,7 @@ class dashboard():
 
     def caching_data_manager(self, df, sql_query, graph_type, calculated_funct=None, details_dict=None):
         status_file, file_exist, dff = self.caching_exists_in_file(sql_query, graph_type)
-        print(status_file)
         if status_file:
-            print("status file")
             # print("{}/{}".format(graph_type, "exist in file"))
 
             return dff
@@ -127,7 +123,7 @@ class dashboard():
 
             results = dff
             if graph_type != 'filtered_df':
-                results = calculated_funct(dff)
+                results = calculated_funct(dff, self.param["is_classification"])
             self.store_data_in_csv(results, graph_type, random_str)
             return results
 
@@ -211,20 +207,22 @@ class dashboard():
 
         app.title = "explainX.ai - Main Dashboard"
 
-        PLOTLY_LOGO = "https://images.plot.ly/logo/new-branding/plotly-logomark.png"
+        PLOTLY_LOGO = "https://i.ibb.co/ZTWtVDV/explainx-logo.png"
 
         menu = dbc.Row(
             [
                 dbc.Col(dbc.NavItem(dbc.NavLink("Global Explanation", href="/apps/global_explanation")),
-                        style={'width': "200px", 'fontSize': '12px'}),
+                        style={'width': "200px", 'fontSize': '15px'}),
                 dbc.Col(dbc.NavItem(dbc.NavLink("Local Explanation", href="/apps/local_explanation")),
-                        style={'width': "200px", 'fontSize': '12px'}),
+                        style={'width': "200px", 'fontSize': '15px'}),
                 dbc.Col(dbc.NavItem(dbc.NavLink("Feature Interaction", href="/apps/feature_interaction")),
-                        style={'width': "200px", 'fontSize': '12px'}),
+                        style={'width': "200px", 'fontSize': '15px'}),
                 dbc.Col(dbc.NavItem(dbc.NavLink("Distributions", href="/apps/distribution")),
-                        style={'width': "200px", 'fontSize': '12px'}),
+                        style={'width': "200px", 'fontSize': '15px'}),
 
             ],
+
+          
             no_gutters=True,
             className="ml-auto flex-nowrap mt-3 mt-md-0",
             align="center"
@@ -238,7 +236,7 @@ class dashboard():
                         [
                             dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px")),
                             dbc.Col(dbc.NavbarBrand("explainX.ai", className="ml-2",
-                                                    style={'fontSize': '12px', 'color': 'black'})),
+                                                    style={'fontSize': '15px', 'color': 'black'})),
                         ],
                         align="center",
                         no_gutters=True,
@@ -483,29 +481,28 @@ class dashboard():
             self.callback_input)
         def update_impact_graph(*values):
             changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-            # if 'submit-button-state' in changed_id:
-
-            # use values to construct a dataframe
-            # find prediction and shap values.
-
             df = pd.DataFrame([values[:-1]])
             df.columns = self.param["columns"]
-            # print(df)
-
-            # find prediction and impact values first here please.
             array = self.calculate_prediction_shap(df)
 
-            figure, dat = g.feature_impact_old(array)
-            # print(dat)
-            message = self.insights.insight_2_local_feature_impact(dat)
-            return figure, message[0], message[1], message[2]
-            # else:
-            #     df2 = self.df[0:1]
+            #Y_Pred
+            #Probability_
+            if self.param["is_classification"]:
+                y_and_prob=[]
+                y_and_prob.append(int(array["y_prediction"]))
+                y_and_prob.append(round(float(array["Probability_"+str(int(array["y_prediction"])) ]),2))
+            else:
+                y_and_prob = []
+                y_and_prob.append(round(float(array["y_prediction"]),2))
 
-            #     figure, dat = g.feature_impact_old(df2)
-            #     # print(dat)
-            #     message = self.insights.insight_2_local_feature_impact(dat)
-            #     return figure, message[0], message[1], message[2]
+            # figure, dat = g.feature_impact_old(array)
+            figure, dat = g.local_feature_impact_graph(array)
+            message = self.insights.insight_2_local_feature_impact(dat, y_and_prob)
+
+
+
+            return figure, message[0], message[1], message[2]
+
 
         # Prototypical Analysis
         """
@@ -535,11 +532,9 @@ class dashboard():
 
                 dfs, sample_row = p.find_prototypes(row_number)
                 dat = dfs.T.reset_index()
-                print("sample row columns")
                 sample_row = sample_row.to_frame()
                 sample_row.rename(columns={sample_row.columns[0]: "orig"}, inplace=True)
                 sample_row.reset_index(inplace=True)
-                print(sample_row.columns)
                 dat = pd.merge(dat, sample_row, on=['index'], how='left')
                 dat['orig'] = dat['orig'].astype(float)
                 for i in list(dat.columns):
@@ -558,10 +553,12 @@ class dashboard():
         @app.callback(
             [Output('global_feature_importance', "figure"),
              Output('global_message_1', "children"),
-             Output('global_message_2', "children"),
-             Output('global_message_3', "children"),
-             Output('global_message_4', "children"),
-             Output('global_message_5', "children")],
+            #  Output('global_message_2', "children"),
+            #  Output('global_message_3', "children"),
+            #  Output('global_message_4', "children"),
+            #  Output('global_message_5', "children")
+             ],
+            
             [Input('sql-query-button', 'children'),
              Input('xaxis-column-test-2', 'value')])
         def update_graphs(sql_query, value):
@@ -576,11 +573,13 @@ class dashboard():
             graph_type = "feature_importance"
             dff = self.caching_data_manager(df, sql_query, graph_type, g.feature_importance)
             message = self.insights.insight_1_feature_imp(dff)
-            figure = g.feature_importance_graph(dff)
+            #figure = g.feature_importance_graph(dff)
+            figure =  g.global_feature_importance_graph(dff, self.param["is_classification"])
 
-            if len(message) == 4:
-                return figure, message[0], message[1], message[2], message[3], ""
-            return figure, message[0], message[1], message[2], message[3], message[4]
+            # return figure
+            # if len(message) == 4:
+                # return figure, message[0], message[1], message[2], message[3], ""
+            return figure, message[0]
 
         # Global Feature Impact
         @app.callback(
@@ -591,29 +590,25 @@ class dashboard():
             [Input('sql-query-button', 'children'),
              Input('xaxis-column-test-2', 'value')])
         def update_graphs(sql_query, value):
-            # self.analytics.update_data()
-            # self.analytics['function'] = "feature_impact"
-            # self.analytics['time'] = str(datetime.datetime.now())
-            # self.analytics['query'] = sql_query
-            # self.analytics['finish_time'] = ''
-            # self.analytics.insert_data()
             g = plotly_graphs()
             graph_type = "feature_impact"
             df3 = self.caching_data_manager(df, sql_query, graph_type, g.feature_impact)
 
-            figure = g.feature_impact_graph(df3)
+            # figure = g.feature_impact_graph(df3)
+            figure = g.global_feature_impact_graph(df3, self.param["is_classification"])
 
             message = self.insights.insight_2_global_feature_impact(df3)
+            #return figure
             return figure, message[0], message[1], message[2]
 
         # Partial Dependence Plot Graph
         @app.callback(
             Output('indicator-graphic', 'figure'),
             [Input('xaxis-column', 'value'),
-             Input('yaxis-column', 'value'),
+            #  Input('yaxis-column', 'value'),
              Input('third-axis', 'value'),
              Input('sql-query-button', 'children')])
-        def update_graph(xaxis_column_name, yaxis_column_name, third_axis_name, sql_query):
+        def update_graph(xaxis_column_name, third_axis_name, sql_query):
             self.analytics.update_data()
             self.analytics['function'] = "pdp"
             self.analytics['time'] = str(datetime.datetime.now())
@@ -623,8 +618,7 @@ class dashboard():
             g = plotly_graphs()
             graph_type = 'pdp'
             df3 = self.caching_data_manager(df, sql_query, graph_type, g.partial_dependence_plot)
-            fig = g.pdp_plot(df3, df3[xaxis_column_name], df3[yaxis_column_name],
-                             df3[third_axis_name])
+            fig = g.pdp_plot(df3, df3[xaxis_column_name], df3[xaxis_column_name+"_impact"], df3[third_axis_name])
             return fig
 
         # Summary Plot
@@ -643,7 +637,6 @@ class dashboard():
             g = plotly_graphs()
             graph_type = 'summary_plot'
             df3 = self.caching_data_manager(df, sql_query, graph_type, g.summary_plot)
-            print(df3)
             fig = g.summary_plot_graph(df3)
             return fig
 
@@ -668,37 +661,37 @@ class dashboard():
 
             if plot_type == "Histogram":
                 # group_labels = ['xxaxis_column_name']
-                return px.histogram(df3, x=xaxis_column_name, marginal="box")
+                return px.histogram(df3, x=xaxis_column_name, marginal="box", template="plotly_white")
             else:
                 for i in cat_variables:
-                    return px.violin(df3, x=xaxis_column_name, box=True, points='all')
+                    return px.violin(df3, x=xaxis_column_name, box=True, points='all', template="plotly_white")
                 else:
-                    return px.violin(df3, y=xaxis_column_name, box=True, points='all', )
+                    return px.violin(df3, y=xaxis_column_name, box=True, points='all', template="plotly_white")
 
-        # Multi Level EDA
-        @app.callback(
-            Output('multi_level_eda', 'figure'),
-            [Input('x_axis', 'value'),
-             Input('y_axis', 'value'),
-             Input('size', 'value'),
-             Input('color', 'value'),
-             Input('facet_col', 'value'),
-             Input('facet_row', 'value'),
-             Input('sql-query-button', 'children'),
-             ]
-        )
-        def multi_level(x_axis, y_axis, size, color, facet_col, facet_row, sql_query):
-            self.analytics.update_data()
-            self.analytics['function'] = "multi_level"
-            self.analytics['time'] = str(datetime.datetime.now())
-            self.analytics['query'] = sql_query
-            self.analytics['finish_time'] = ''
-            self.analytics.insert_data()
+        # # Multi Level EDA
+        # @app.callback(
+        #     Output('multi_level_eda', 'figure'),
+        #     [Input('x_axis', 'value'),
+        #      Input('y_axis', 'value'),
+        #      Input('size', 'value'),
+        #      Input('color', 'value'),
+        #      Input('facet_col', 'value'),
+        #      Input('facet_row', 'value'),
+        #      Input('sql-query-button', 'children'),
+        #      ]
+        # )
+        # def multi_level(x_axis, y_axis, size, color, facet_col, facet_row, sql_query):
+        #     self.analytics.update_data()
+        #     self.analytics['function'] = "multi_level"
+        #     self.analytics['time'] = str(datetime.datetime.now())
+        #     self.analytics['query'] = sql_query
+        #     self.analytics['finish_time'] = ''
+        #     self.analytics.insert_data()
 
-            graph_type = 'filtered_df'
-            df3 = self.caching_data_manager(df, sql_query, graph_type)
-            return px.scatter(df3, x=x_axis, y=y_axis, size=size, color=color, facet_col=facet_col, facet_row=facet_row,
-                              facet_col_wrap=4)
+        #     graph_type = 'filtered_df'
+        #     df3 = self.caching_data_manager(df, sql_query, graph_type)
+        #     return px.scatter(df3, x=x_axis, y=y_axis, size=size, color=color, facet_col=facet_col, facet_row=facet_row,
+        #                       facet_col_wrap=4)
 
         # Port Finder
         port = 8080
@@ -791,7 +784,17 @@ class dashboard():
                                      model_name=self.param["model_name"])
 
         # prediction col
-        df_final[self.param["y_variable_predict"]] = prediction_col
+        df_final["y_prediction"] = prediction_col
+
+        if is_classification==True:
+
+            # find and add probabilities in the dataset.
+            prediction_col_prob = self.param["model"].predict_proba(df.to_numpy())
+            pd_prediction_col_prob = pd.DataFrame(prediction_col_prob)
+
+            for c in pd_prediction_col_prob.columns:
+                df_final["Probability_" + str(c)] = list(pd_prediction_col_prob[c])
+
 
         return df_final
 

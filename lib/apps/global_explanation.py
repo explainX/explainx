@@ -32,21 +32,21 @@ def global_explanation(original_variables):
                                                 dbc.Col(html.Div(dcc.Graph(id="global_feature_importance",
                                                                         style={'marginLeft': 50, 'marginTop': 0,
                                                                                 'height': '500px'}
-                                                                        )), width=9),
+                                                                        )), width=8),
                                                 dbc.Col(
                                                     [
+                                                        # html.Div([
+                                                        #     html.H2("How to read this graph?"),
+                                                        #     html.P(
+                                                        #         "This graph helps you identify which features in your dataset have the greatest effect on the outcomes of your machine learning model")
+                                                        # ]),
                                                         html.Div([
-                                                            html.H2("How to read this graph?"),
-                                                            html.P(
-                                                                "This graph helps you identify which features in your dataset have the greatest effect on the outcomes of your machine learning model")
-                                                        ]),
-                                                        html.Div([
-                                                            html.H2("Insights"),
+                                                            html.H4("Insights"),
                                                             html.P(id='global_message_1'),
-                                                            html.P(id='global_message_2'),
-                                                            html.P(id='global_message_3'),
-                                                            html.P(id='global_message_4'),
-                                                            html.P(id='global_message_5')
+                                                            # html.P(id='global_message_2'),
+                                                            # html.P(id='global_message_3'),
+                                                            # html.P(id='global_message_4'),
+                                                            # html.P(id='global_message_5')
 
                                                         ]
 
@@ -72,16 +72,12 @@ def global_explanation(original_variables):
                                             [
                                                 dbc.Col(html.Div(dcc.Graph(id='global_feature_impact',
                                                                         style={'marginLeft': 50, 'marginTop': 0,
-                                                                                'height': '500px'})), width=9),
+                                                                                'height': '500px'})), width=8),
                                                 dbc.Col(
                                                     [
+                                                      
                                                         html.Div([
-                                                            html.H2("How to read this graph?"),
-                                                            html.P(
-                                                                "This tells you which features have positive impact and which features have negative impact on the output of the decision")
-                                                        ]),
-                                                        html.Div([
-                                                            html.H2("Insights"),
+                                                            html.H4("Insights"),
                                                             html.P(id='message_1'),
                                                             html.P(id='message_2'),
                                                             html.P(id='message_3')

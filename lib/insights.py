@@ -31,12 +31,11 @@ class insights():
         else:
             return self.regression.insight_2_global_feature_impact(df, self.param["expected_values"][0])
     
-    def insight_2_local_feature_impact(self, df, outcome=0):
+    def insight_2_local_feature_impact(self, df, y_and_prob):
         if self.param["is_classification"] == True:
-            return self.classification.insight_2_local_feature_impact(df, outcome, self.param["expected_values"],
-                                                                       self.param["classes"])
+            return self.classification.insight_2_local_feature_impact(df, y_and_prob)
         else:
-            return self.regression.insight_2_global_feature_impact(df, self.param["expected_values"][0])
+            return self.regression.insight_2_local_feature_impact(df, y_and_prob)
 
     def insight_3(self, df):
         if self.param["is_classification"] == True:

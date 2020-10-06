@@ -24,23 +24,24 @@ def layout_interaction(original_variables, y_variables):
                                         clearable=False
                                     ),
 
-                                ],
-                                    style={'width': '20%', 'marginLeft': 70, 'float': 'left',
-                                            'display': 'inline-block'}),
+                                ],style=style22
+                                    # style={'width': '20%', 'marginLeft': 70, 'float': 'left',
+                                    #         'display': 'inline-block'}
+                                            ),
+
+                                # html.Div([
+                                #     html.P("Variable Impact Values"),
+                                #     dcc.Dropdown(
+                                #         id='yaxis-column',
+                                #         options=[{'label': i, 'value': i} for i in y_variables],
+                                #         value=y_variables[1],
+                                #         clearable=False
+                                #     ),
+
+                                # ], style=style14),
 
                                 html.Div([
-                                    html.P("Variable Impact Values"),
-                                    dcc.Dropdown(
-                                        id='yaxis-column',
-                                        options=[{'label': i, 'value': i} for i in y_variables],
-                                        value=y_variables[1],
-                                        clearable=False
-                                    ),
-
-                                ], style=style14),
-
-                                html.Div([
-                                    html.P('3rd Variable'),
+                                    html.P('Color Axis'),
                                     dcc.Dropdown(
                                         id='third-axis',
                                         options=[{'label': i, 'value': i} for i in original_variables],
@@ -48,13 +49,13 @@ def layout_interaction(original_variables, y_variables):
                                         clearable=False
                                     ),
 
-                                ], style=style15),
+                                ], style=style23),
 
                             ]),
                             dcc.Loading(
                                 id="loading-5",
                                 type="circle",
-                                children=dcc.Graph(id='indicator-graphic', style={'marginLeft': 50})
+                                children=dcc.Graph(id='indicator-graphic', style={'marginLeft': 50, 'marginTop':80})
                             ),
                         ],
                             style=style16),

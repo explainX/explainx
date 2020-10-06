@@ -182,7 +182,7 @@ class explain():
             pd_prediction_col_prob = pd.DataFrame(prediction_col_prob)
 
             for c in pd_prediction_col_prob.columns:
-                self.df_final["probability_of_predicting_class_" + str(c)] = list(pd_prediction_col_prob[c])
+                self.df_final["Probability_" + str(c)] = list(pd_prediction_col_prob[c])
 
             classes = []
             for c in pd_prediction_col_prob.columns:

@@ -37,18 +37,22 @@ def layout_local(original_variables,columns,df_column):
                     html.Br(),
                     html.Div([
                         
-                        dbc.Table(html.Thead(html.Tr([html.Th("Feature", style={"width":"50%"}), html.Th("Value")])), 
+                        dbc.Table(html.Thead(
+                            html.Tr(
+                                [
+                                    html.Th("Feature", style={"width":"50%", 'marginLeft':'10px'}), 
+                                    html.Th("Value")])), 
                         bordered=True, 
                         dark=True,
                         hover=True,
                         responsive=True,
                         striped=True,
-                        style={'width':'88%'}),
+                        style={'width':'90%'}),
 
                     html.Div(id="place_form_here", 
                         style={ 
-                            "maxHeight": "650px", 
-                            "maxWidth":"500px",
+                            "maxHeight": "740px", 
+                             "maxWidth":"550px",
                             "overflow": "scroll",
                             # "border-right":"1px solid grey",
                             # "border-bottom":"1px solid grey",
@@ -63,7 +67,7 @@ def layout_local(original_variables,columns,df_column):
                       
                       ])
 
-                ], style={'width':'35%'}),
+                ], style={'width':'30%'}),
 
                 #Tabs Div
                 html.Div([
@@ -86,28 +90,25 @@ def layout_local(original_variables,columns,df_column):
                                     children=dbc.Row(
                                         [
                                             dbc.Col(html.Div(dcc.Graph(id='local_feature_impact',
-                                                                        style={'marginLeft': 75,
-                                                                                'marginTop': 0,
-                                                                                'height': '500px'})),
+                                                                        style={
+                                                                            # 'marginLeft': 0,
+                                                                            #     'marginTop': 0,
+                                                                                'height': '600px'})),
                                                     width=8),
                                             dbc.Col(
                                                 [
+                                                    # html.Div([
+                                                    #     html.H4("How to read this graph?"),
+                                                    #     html.P(
+                                                    #         "According to the model, the features are most important in explaining the target variable. Most importance is on the top.")
+                                                    # ]),
                                                     html.Div([
-                                                        html.H2("How to read this graph?"),
-                                                        html.P(
-                                                            "According to the model, the features are most important in explaining the target variable. Most importance is on the top.")
-                                                    ]),
-                                                    html.Div([
-                                                        html.H2("Insights"),
+                                                        html.H4("Insights"),
                                                         html.P(id='local_message_1'),
                                                         html.P(id='local_message_2'),
                                                         html.P(id='local_message_3')
                                                     ]),
-                                                    html.Div([
-                                                        html.H2("Next Steps"),
-                                                        html.P(
-                                                            "Click on the similar profile tabs and explore profiles that had similar attributes"),
-                                                    ])
+                                                   
                                                 ]
                                                 , width=4),
 
@@ -267,7 +268,7 @@ def layout_local(original_variables,columns,df_column):
 
                     ])
 
-                ], style={"width":'65%'})
+                ], style={"width":'70%'})
 
             ], style={'display':'flex'}),
         
