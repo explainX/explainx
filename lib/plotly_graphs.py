@@ -142,6 +142,7 @@ class plotly_graphs():
     def global_feature_impact_graph(self, df,classification=False):
 
         if classification==True:
+            df['class_name'] = df['class_name'].apply(str)
 
             fig = px.bar(df, x="VariableName", y="Impact_Value",
                          color='class_name', barmode='group',
@@ -173,6 +174,7 @@ class plotly_graphs():
     def global_feature_importance_graph(self, df, classification=False):
 
         if classification==True:
+            df['class_name'] = df['class_name'].apply(str)
 
             fig = px.bar(df, x="VariableName", y="Impact_Value",
                          color='class_name', barmode='group',
