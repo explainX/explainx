@@ -134,7 +134,7 @@ class dashboard():
         self.y_variable = param["y_variable"]
         self.y_variable_predict = param["y_variable_predict"]
         self.param = param
-        self.instance_id = self.random_string_generator()
+        self.instance_id =param['instance_id']
         self.create_dir("data_storage")
         self.create_dir("data_storage/user")
         self.user_id = None

@@ -3,22 +3,22 @@ import sys
 
 import re
 
-
 from pathlib import Path
 from sys import platform
 import subprocess
 import time
 
-path= Path(__file__).parent.absolute()
-path_dataset= os.path.join(path, "datasets")
-path= os.path.join(path, "lib")
+path = Path(__file__).parent.absolute()
+path_dataset = os.path.join(path, "datasets")
+path = os.path.join(path, "lib")
 
 sys.path.append(path)
-
 
 from imports import *
 from dashboard import *
 from calculate_shap import *
+from analytics import Analytics
+
 """
 This class calculates feature importance
 
@@ -31,7 +31,7 @@ Input:
 class explain():
     def __init__(self):
         super(explain, self).__init__()
-        self.param= {}
+        self.param = {}
 
     # is classification function?
 
@@ -47,24 +47,40 @@ class explain():
                 is_classification = True
         return is_classification
 
+    def random_string_generator(self):
+        random_str = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
+        return random_str
 
-    def ai(self,  df,  y, model, model_name="xgboost", mode=None):
-        y_variable= "y_actual"
-        y_variable_predict= "y_prediction"
-
-
+    def ai(self, df, y, model, model_name="xgboost", mode=None):
+        y_variable = "y_actual"
+        y_variable_predict = "y_prediction"
+        instance_id = self.random_string_generator()
+        analytics = Analytics()
+        analytics['ip'] = analytics.finding_ip()
+        analytics['mac'] = analytics.finding_address()
+        analytics['instance_id'] = instance_id
+        analytics['time'] = str(datetime.datetime.now())
+        analytics['total_columns'] = len(df.columns)
+        analytics['total_rows'] = len(df)
+        analytics['os'] = analytics.finding_system()
+        analytics['model_name'] = model_name
+        analytics["function"] = 'before_dashboard'
+        analytics["query"] = "before_dashboard"
+        analytics['finish_time'] = ''
+        analytics.insert_data()
 
         # If yes, then different shap functuions are required.
         # get the shap value based on predcton and make a new dataframe.
 
         # find predictions first as shap values need that.
 
-        prediction_col=[]
+        prediction_col = []
 
         if model_name == "xgboost":
             import xgboost
             if xgboost.__version__ in ['1.1.0', '1.1.1', '1.1.0rc2', '1.1.0rc1']:
-                print("Current Xgboost version is not supported. Please install Xgboost using 'pip install xgboost==1.0.2'")
+                print(
+                    "Current Xgboost version is not supported. Please install Xgboost using 'pip install xgboost==1.0.2'")
                 return False
             prediction_col = model.predict(xgboost.DMatrix(df))
 
@@ -77,22 +93,17 @@ class explain():
         # is classification?
         is_classification = self.is_classification_given_y_array(prediction_col)
 
-
-
-        #shap
+        # shap
         c = calculate_shap()
         self.df_final, self.explainer = c.find(model, df, prediction_col, is_classification, model_name=model_name)
 
-        #prediction col
+        # prediction col
         self.df_final[y_variable_predict] = prediction_col
-
-
 
         self.df_final[y_variable] = y
 
-
-        #additional inputs.
-        if is_classification==True:
+        # additional inputs.
+        if is_classification == True:
             # find and add probabilities in the dataset.
             prediction_col_prob = model.predict_proba(df.to_numpy())
             pd_prediction_col_prob = pd.DataFrame(prediction_col_prob)
@@ -103,52 +114,48 @@ class explain():
             classes = []
             for c in pd_prediction_col_prob.columns:
                 classes.append(str(c))
-            self.param["classes"]=classes
+            self.param["classes"] = classes
 
             try:
                 expected_values_by_class = self.explainer.expected_value
             except:
-                expected_values_by_class=[]
+                expected_values_by_class = []
                 for c in range(len(classes)):
-                    expected_values_by_class.append(1/len(classes))
+                    expected_values_by_class.append(1 / len(classes))
 
-
-            self.param["expected_values"]= expected_values_by_class
+            self.param["expected_values"] = expected_values_by_class
         else:
             try:
                 expected_values = self.explainer.expected_value
                 self.param["expected_values"] = [expected_values]
             except:
-                expected_value = [round(np.array(y).mean(),2)]
+                expected_value = [round(np.array(y).mean(), 2)]
                 self.param["expected_values"] = expected_value
 
+        self.param["is_classification"] = is_classification
+        self.param["model_name"] = model_name
+        self.param["model"] = model
+        self.param["columns"] = df.columns
+        self.param["y_variable"] = y_variable
+        self.param["y_variable_predict"] = y_variable_predict
+        self.param['instance_id'] = instance_id
 
-        self.param["is_classification"]= is_classification
-        self.param["model_name"]= model_name
-        self.param["model"]= model
-        self.param["columns"]= df.columns
-        self.param["y_variable"]= y_variable
-        self.param["y_variable_predict"]= y_variable_predict
-
-
-        d= dashboard()
+        d = dashboard()
         d.find(self.df_final, mode, self.param)
 
         return True
 
+    def ai_test(self, df, y, model, model_name="xgboost", mode=None):
+        y_variable = "y_actual"
+        y_variable_predict = "y_prediction"
 
-    def ai_test(self,  df,  y, model, model_name="xgboost", mode=None):
-        y_variable= "y_actual"
-        y_variable_predict= "y_prediction"
-
-
-
-        prediction_col=[]
+        prediction_col = []
 
         if model_name == "xgboost":
             import xgboost
             if xgboost.__version__ in ['1.1.0', '1.1.1', '1.1.0rc2', '1.1.0rc1']:
-                print("Current Xgboost version is not supported. Please install Xgboost using 'pip install xgboost==1.0.2'")
+                print(
+                    "Current Xgboost version is not supported. Please install Xgboost using 'pip install xgboost==1.0.2'")
                 return False
             prediction_col = model.predict(xgboost.DMatrix(df))
 
@@ -161,22 +168,17 @@ class explain():
         # is classification?
         is_classification = self.is_classification_given_y_array(prediction_col)
 
-
-
-        #shap
+        # shap
         c = calculate_shap()
         self.df_final, self.explainer = c.find(model, df, prediction_col, is_classification, model_name=model_name)
 
-        #prediction col
+        # prediction col
         self.df_final[y_variable_predict] = prediction_col
-
-
 
         self.df_final[y_variable] = y
 
-
-        #additional inputs.
-        if is_classification==True:
+        # additional inputs.
+        if is_classification == True:
             # find and add probabilities in the dataset.
             prediction_col_prob = model.predict_proba(df.to_numpy())
             pd_prediction_col_prob = pd.DataFrame(prediction_col_prob)
@@ -187,34 +189,30 @@ class explain():
             classes = []
             for c in pd_prediction_col_prob.columns:
                 classes.append(str(c))
-            self.param["classes"]=classes
+            self.param["classes"] = classes
 
             try:
                 expected_values_by_class = self.explainer.expected_value
             except:
-                expected_values_by_class=[]
+                expected_values_by_class = []
                 for c in range(len(classes)):
-                    expected_values_by_class.append(1/len(classes))
+                    expected_values_by_class.append(1 / len(classes))
 
-
-            self.param["expected_values"]= expected_values_by_class
+            self.param["expected_values"] = expected_values_by_class
         else:
             try:
                 expected_values = self.explainer.expected_value
                 self.param["expected_values"] = [expected_values]
             except:
-                expected_value = [round(np.array(y).mean(),2)]
+                expected_value = [round(np.array(y).mean(), 2)]
                 self.param["expected_values"] = expected_value
 
-
-        self.param["is_classification"]= is_classification
-        self.param["model_name"]= model_name
-        self.param["model"]= model
-        self.param["columns"]= df.columns
-        self.param["y_variable"]= y_variable
-        self.param["y_variable_predict"]= y_variable_predict
-
-
+        self.param["is_classification"] = is_classification
+        self.param["model_name"] = model_name
+        self.param["model"] = model
+        self.param["columns"] = df.columns
+        self.param["y_variable"] = y_variable
+        self.param["y_variable_predict"] = y_variable_predict
 
         # manually test all the graphs to see if all work
 
@@ -224,32 +222,28 @@ class explain():
         fim, df2 = g.feature_impact(self.df_final)
         sp = g.summary_plot(self.df_final)
 
-
         return True
 
     def dataset_boston(self):
         # load JS visualization code to notebook
         shap.initjs()
         X, y = shap.datasets.boston()
-        return X,y
-
+        return X, y
 
     def dataset_iris(self):
         # load JS visualization code to notebook
         shap.initjs()
         X, y = shap.datasets.iris()
-        return X,y
-
+        return X, y
 
     def dataset_heloc(self):
-        dataset= pd.read_csv(path_dataset+"/heloc_dataset.csv")
+        dataset = pd.read_csv(path_dataset + "/heloc_dataset.csv")
 
-        map_riskperformance= {"RiskPerformance": {"Good":1, "Bad":0}}
+        map_riskperformance = {"RiskPerformance": {"Good": 1, "Bad": 0}}
         dataset.replace(map_riskperformance, inplace=True)
-        y= list(dataset["RiskPerformance"])
-        X= dataset.drop("RiskPerformance", axis=1)
-        return X,y
-
+        y = list(dataset["RiskPerformance"])
+        X = dataset.drop("RiskPerformance", axis=1)
+        return X, y
 
     def run_only_first_time(self):
 
@@ -276,7 +270,7 @@ class explain():
             run_command("npm install -g localtunnel")
 
 
-explainx=explain()
+explainx = explain()
 
 
 def run_command(command):
@@ -288,9 +282,3 @@ def run_command(command):
 
     for line in iter(task.stdout.readline, b''):
         print('{0}'.format(line.decode('utf-8')), end='')
-
-
-
-
-
-
