@@ -50,7 +50,7 @@ class protodash():
     def preprocess_data(self,  df, y_variable):
 
         #store y_var
-        self.y_variable=y_variable
+        self.y_variable= y_variable
 
         # encode categorical var
         df= self.encode_categorical_var(df)
@@ -94,15 +94,18 @@ class protodash():
         #get prototypes
         explainer = ProtodashExplainer()
         try:
-            (W, S, setValues) = explainer.explain(Z, data, m=5, kernelType='other', sigma=5)
+            (W, S, setValues) = explainer.explain(Z, data, m=10, kernelType='other', sigma=5)
         except:
-            (W, S, setValues) = explainer.explain(Z, data, m=5, kernelType='other', sigma=5) #Guassian gives an error. 
+            (W, S, setValues) = explainer.explain(Z, data, m=10, kernelType='other', sigma=5) #Guassian gives an error. 
+
         #make a dataframe
+
         dfs = pd.DataFrame.from_records(data[S, 0:].astype('double'))
         dfs.columns = self.actual_variables
-        dfs["Weight(%)"] = ((np.around(W, 5) / np.sum(np.around(W, 5)))*100)
+        dfs["Weight(%)"] = ((np.around(W, 10) / np.sum(np.around(W, 10)))*100)
         dfs = self.decode_categorical_var(dfs)
-        return dfs,self.df.iloc[row_number]
+       
+        return dfs
 
     def z_train_good(self, row_number):
         row= self.df.iloc[row_number]

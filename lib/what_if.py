@@ -6,15 +6,6 @@ from summary_plot import *
 import dash_daq as daq
 from data_for_shap_graphs import *
 
-slider_feature = {"fontSize":"10px",
-                    'white-space': 'normal',
-                        "overflow-wrap": "break-word",
-                        "width":"200px",
-                        "padding":"1px", 
-                        "border-bottom": "1px solid #2d3436",
-                        'justify-content':'center',
-                        'padding-top':'20px'}
-
 class what_if():
     def __init__(self):
         super(what_if, self).__init__()
@@ -54,14 +45,7 @@ class what_if():
         """
         find all categories in categorical features.
         """
-        
-        
         all_categories=list(set(df[feature_name]))
-        
-    #     if len(all_categories)<=3:
-    #         col_type= 'radio'
-    #     else:
-    #         col_type= 'dropdown'
         
         return all_categories, 'dropdown'
 
@@ -96,11 +80,15 @@ class what_if():
             """
             if col_type_dict[f]=='slider':
                 #form_group_array.append(self.form_group_slider(f, col_value_dict[f]))
-                 form_group_array.append(self.form_group_input(f, col_value_dict[f]))
+                
+
+                form_group_array.append(self.form_group_input(f, col_value_dict[f]))
                 
             elif col_type_dict[f]=='radio':
+                
                 form_group_array.append(self.form_group_radio(f, col_value_dict[f]))
             else:
+                
                 form_group_array.append(self.form_group_dropdown(f, col_value_dict[f]))
                                     
                                     
@@ -115,21 +103,15 @@ class what_if():
             value=values[3]
         
         fg= dbc.FormGroup([
-                    html.Div(feature, style = slider_feature),
+                    html.Div(feature, className="form_feature"),
                     html.Div(dcc.Input(
+                        className = "form_group_input",
                         id=feature+'_slider',
                         type="number",
                         value = value,
                         debounce=True,
-                        placeholder="Enter the value"), 
-                            style={"font-size":"10px", 
-                                    'width': "200px", 
-                                    'display': 'inline-block', 
-                                    "padding":"1px",
-                                    'margin-left':"30px",
-                                    "height":'40px'})
-
-                        ], style={"display":"flex", "width":"450px","height":"40px"})
+                        placeholder="Enter the value"))], 
+                        className="what_if_form_group")
         
         return fg
         
@@ -143,24 +125,13 @@ class what_if():
             value=values[3]
         
         fg= dbc.FormGroup([
-                    html.Div(feature, style = slider_feature),
+                    html.Div(feature, className="form_feature"),
                     html.Div(daq.Slider(
+                                className = "form_group_slider",
                                 id=feature+'-slider',
                                 min=values[0],
                                 max=values[-1],
-                            handleLabel={"showCurrentValue": True,"label": 'Value'},
-                            ),style={'width': "100px", 
-                                    'display': 'inline-block', 
-                                    "padding":"1px",
-                                    'margin-left':"20px",
-                                    'margin-top':'25px',
-                                    "height":'40px'})
-
-                        ], style={"display":"flex", 
-                                    "width":"400px",
-                                    "height":"40px",
-                                    'margin-bottom':'5px',
-                                    'margin-top':'5px'})
+                            handleLabel={"showCurrentValue": True,"label": 'Value'}))], className="what_if_form_group")
         
         return fg
 
@@ -174,19 +145,12 @@ class what_if():
             value=values[0]
         
         fg = dbc.FormGroup([
-                    html.Div(feature,style = slider_feature),
+                    html.Div(feature, className="form_feature"),
                     html.Div(dcc.Dropdown(
+                                className = "form_group_dropdown",
                                 id= feature+'-slider',
                                 options=options,
-                                value=value
-                    ), 
-                                style={"font-size":"9px", 
-                                        'width': "200px", 
-                                    'display': 'inline-block', 
-                                    "padding":"1px",
-                                    'margin-left':"30px",
-                                    "height":'40px'})
-        ],style={"display":"flex",  "width":"450px", "height":'40px'})
+                                value=value))],className="what_if_form_group")
         
         return fg
 
