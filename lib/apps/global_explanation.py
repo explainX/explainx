@@ -4,6 +4,7 @@ from plotly_css import *
 from app import app
 
 def global_explanation(original_variables):
+    
     layout =  html.Div(children=[
         
 
@@ -16,9 +17,9 @@ def global_explanation(original_variables):
                                             value=original_variables[1],
                                             clearable=False
                                         )
-                                ], style={'display':'none'})]),
+                                    ], style={'display':'none'})]),
                                 html.Div([
-                                    html.H4('Global Feature Importance',
+                                    html.H4('Aggregate Feature Importance',
                                             style=style5),
                                     html.P(
                                         'Feature importance assign a score to input features based on how useful they are at predicting a target variable. ',
@@ -27,33 +28,25 @@ def global_explanation(original_variables):
                                     dcc.Loading(
                                         id="loading-1",
                                         type="circle",
-                                        children=dbc.Row(
-                                            [
-                                                dbc.Col(html.Div(dcc.Graph(id="global_feature_importance",
-                                                                        style={'marginLeft': 50, 'marginTop': 0,
-                                                                                'height': '500px'}
-                                                                        )), width=8),
-                                                dbc.Col(
-                                                    [
-                                                        # html.Div([
-                                                        #     html.H2("How to read this graph?"),
-                                                        #     html.P(
-                                                        #         "This graph helps you identify which features in your dataset have the greatest effect on the outcomes of your machine learning model")
-                                                        # ]),
-                                                        html.Div([
-                                                            html.H4("Insights"),
-                                                            html.P(id='global_message_1'),
-                                                            # html.P(id='global_message_2'),
-                                                            # html.P(id='global_message_3'),
-                                                            # html.P(id='global_message_4'),
-                                                            # html.P(id='global_message_5')
-
-                                                        ]
-
-                                                        )]
-                                                )
-
+                                        children = [
+                                            html.Div([
+                                                html.Div([
+                                                    html.H5(id="global_message_1")
+                                                ], className="insights_div_1"),
+                                                html.Div(dcc.Graph(id="global_feature_importance"), className="aggregate_imp"),
+                                           
                                             ])
+                                        ],
+                                
+                                        # children=dbc.Row([
+                                        #         dbc.Col(html.Div(dcc.Graph(id="global_feature_importance")), width=8),
+                                        #         dbc.Col([
+                                        #                 html.Div([
+                                        #                 html.H4("Insights"),
+                                        #                 html.P(id='global_message_1')
+                                        #                 ])
+                                        #             ])
+                                        #         ])
 
                                     )
                                     , ], style=style7,
@@ -77,7 +70,7 @@ def global_explanation(original_variables):
                                                     [
                                                       
                                                         html.Div([
-                                                            html.H4("Insights"),
+                                                            html.H4("How the overall model behavior was determined"),
                                                             html.P(id='message_1'),
                                                             html.P(id='message_2'),
                                                             html.P(id='message_3')

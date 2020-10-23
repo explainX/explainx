@@ -41,6 +41,7 @@ class get_cols():
         c = df.columns
 
         sample_df = pd.DataFrame(["a", "b", "c"])
+        sample_df[1] = sample_df[0].astype('category')
         sample_df = sample_df.convert_dtypes()
         sample_df_dic= dict(sample_df.dtypes)
 
@@ -49,6 +50,10 @@ class get_cols():
             try:
                 if di[i] == sample_df_dic[0]:
                     cate.append(i)
+                elif di[i] == 'category':
+                    cate.append(i)
+                else:
+                    pass
             except:
                 pass
 

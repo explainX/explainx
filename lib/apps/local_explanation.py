@@ -8,105 +8,71 @@ import pandas as pd
 def layout_local(original_variables,columns,df_column):
     layout = html.Div([
             # Input and Data
-            html.Div([
                 html.Div([
-                    html.H4('What-If Analysis',
-                            style=style26),
-                    html.I("Datapoint Index."),
-
-                    dcc.Input(id="row_number", type="number", value=1,
+                        html.H3('What-If Analysis'),
+                        html.Div([
+                            html.P("Datapoint Index: "),
+                            dcc.Input(
+                                id="row_number", 
+                                type="number", 
+                                value=1,
                                 placeholder="Enter a Row Number e.g. 1, 4, 5",
                                 style={'text-align': 'center'}),
-                    html.Button(id='submit-button-state', n_clicks=0, children='Predict', style={'margin-left':'50px'}),
-                    
+                            html.Button(
+                                id='submit-button-state', 
+                                n_clicks=0, 
+                                children='Predict', 
+                                style={'margin-left':'10px'}),
+                                ], style={"display":"flex"})
+                        ],style={'margin-bottom':"10px"}),
 
-                    # html.Div(id='local_data_table', style={'marginTop': "20px", 'marginBottom': "5px"}),
-
-
-                ]),
-
-            ]),  # End of Input & Data Div
-
+            # End of Input & Data Div
             html.Div([
-
                 #What-If Div
                 html.Div([
-
-                    
-
-                    html.Br(),
                     html.Div([
-                        
-                        dbc.Table(html.Thead(
-                            html.Tr(
-                                [
-                                    html.Th("Feature", style={"width":"50%", 'marginLeft':'10px'}), 
-                                    html.Th("Value")])), 
-                        bordered=True, 
-                        dark=True,
-                        hover=True,
-                        responsive=True,
-                        striped=True,
-                        style={'width':'90%'}),
+                            dbc.Table(html.Thead(html.Tr([html.Th("Feature"), html.Th("Value")])), 
+                            bordered=True, 
+                            dark=True,
+                            hover=True,
+                            responsive=True,
+                            striped=True,
+                            style={'width':'100%'}),
 
-                    html.Div(id="place_form_here", 
-                        style={ 
-                            "maxHeight": "740px", 
-                             "maxWidth":"550px",
-                            "overflow": "scroll",
-                            # "border-right":"1px solid grey",
-                            # "border-bottom":"1px solid grey",
-                            # "border-top":"1px solid grey",
-                            "border-radius":'0 0 10px 10px',
-                            'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
-                            "display":"flex",
-                            "justify-content":"center",
-                            "padding-top":"10px",
-                            "padding-bottom":"10px"}),
-                   
-                      
-                      ])
-
-                ], style={'width':'30%'}),
+                            html.Div(id="place_form_here", className="place_form")
+                            ])
+                ], style={'width':'29%'}),
+            
+                html.Div([], style={'width':"1%"}),
 
                 #Tabs Div
-                html.Div([
-
-                     dcc.Tabs([
-                dcc.Tab(label='Local Feature Explanation', children=[
-
+                html.Div([dcc.Tabs([
+                    dcc.Tab(label='Local Feature Explanation', children=[
                     html.Div(id='datatable-interactivity-container2', children=[
                         html.Div([
-
                             html.Div([
-                                html.H4('Local Feature Impact',
-                                        style=style29),
+                                html.Div([
+                                html.H4('Features Influencing This Predictions', className="local_impact_heading"),
                                 html.P(
-                                    'Local Feature impact identifies which features have the greatest positive or negative effect on the outcome of a machine learning model for a specific row.',
-                                    style=style30),
+                                    'This graph identifies which features (also known as columns or inputs) in your dataset had a positive or negative influence on the final outcome of your machine learning model.', className="local_impact_details"),
+                            ]),
+
+                            
                                 dcc.Loading(
                                     id="local_feature_impact_1",
                                     type="circle",
                                     children=dbc.Row(
                                         [
                                             dbc.Col(html.Div(dcc.Graph(id='local_feature_impact',
-                                                                        style={
-                                                                            # 'marginLeft': 0,
-                                                                            #     'marginTop': 0,
-                                                                                'height': '600px'})),
-                                                    width=8),
+                                                                        style={'marginLeft': 10, 'height': '590px'})), width=8),
                                             dbc.Col(
                                                 [
-                                                    # html.Div([
-                                                    #     html.H4("How to read this graph?"),
-                                                    #     html.P(
-                                                    #         "According to the model, the features are most important in explaining the target variable. Most importance is on the top.")
-                                                    # ]),
                                                     html.Div([
-                                                        html.H4("Insights"),
-                                                        html.P(id='local_message_1'),
-                                                        html.P(id='local_message_2'),
-                                                        html.P(id='local_message_3')
+                                                        html.H4(id='local_message_1'),
+                                                        html.H4(id='local_message_2'),
+                                                        html.H5("How this prediction was determined?"),
+                                                        html.H5(id='local_message_3'),
+                                                        html.H5(id='local_message_4')
                                                     ]),
                                                    
                                                 ]
@@ -144,7 +110,6 @@ def layout_local(original_variables,columns,df_column):
                                     columns=[{"name": i, "id": i} for i in columns],
                                     data=[],
                                     editable=False,
-                                    # filter_action="native",
                                     sort_mode="multi",
                                     row_deletable=False,
                                     page_action="native",
@@ -155,7 +120,6 @@ def layout_local(original_variables,columns,df_column):
                                     style_cell={
                                         "font-family": "Helvetica, Arial, sans-serif",
                                         "fontSize": "15px",
-                                        # 'width': '{}%'.format(len(df.columns)),
                                         'width': '{}%'.format(len(df_column)),
                                         'textOverflow': 'ellipsis',
                                         'overflow': 'hidden',
@@ -268,7 +232,7 @@ def layout_local(original_variables,columns,df_column):
 
                     ])
 
-                ], style={"width":'70%'})
+                ], style={"width":'69%'})
 
             ], style={'display':'flex'}),
         

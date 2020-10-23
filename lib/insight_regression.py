@@ -18,6 +18,7 @@ class insight_regression():
         #
         top_important_variables = []
         average_shap_values = []
+        
 
         df_numpy = df.to_numpy()
 
@@ -26,6 +27,7 @@ class insight_regression():
             average_shap_values.append(df_numpy[-1 * (i+1)][1])
 
         sentences = []
+        
         sentences.append(
             "This graph helps you identify which features in your dataset have the greatest effect on the outcomes of your machine learning model.")
         sentences.append("In this graph, you can see: " + str(top_important_variables[0]) + " " +

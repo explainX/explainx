@@ -29,8 +29,17 @@ class encode_decode_cat_col():
     def encode_new(self, df, column_name):
         self.one_hot_encoder[column_name] = OneHotEncoder(handle_unknown='ignore')
 
-        # fill missing values with the a new category missing
-        df[column_name] = df[column_name].fillna("missing")
+
+        if df[column_name].dtype.name == 'category':
+                df[column_name] = df[column_name].cat.add_categories('Unknown')
+                df[column_name].fillna('Unknown', inplace =True) 
+            
+
+        else:
+            # fill missing values with the a new category missing
+            df[column_name] = df[column_name].fillna("missing")
+
+        
 
         en = self.one_hot_encoder[column_name].fit_transform(df[[column_name]]).toarray()
         df_en = pd.DataFrame(en)

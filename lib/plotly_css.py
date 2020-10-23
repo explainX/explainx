@@ -39,9 +39,7 @@ style6 = {'backgroundColor': '#fff',
           'height': "50px",
           'margin': 'auto',
           'padding-left': '70px',
-          'padding-top': '20px',
-          "font-family": "Helvetica, Arial, sans-serif",
-
+         
           }
 
 style7 = {'backgroundColor': "#fff", "minHeight": "400px",
@@ -211,9 +209,8 @@ style29 = {'backgroundColor': '#fff',
            'border-radius': '15px 15px 15px 15px ',
            'textAlign': 'left',
            'height': "50px",
-           'margin': 'auto',
-           'padding-left': '70px',
-           'padding-top': '20px'
+           'margin-left': '50px',
+           'padding-top': '10px'
 
            }
 
@@ -222,11 +219,9 @@ style30 = {'backgroundColor': '#fff',
            'border-radius': '15px 15px 0px 0px ',
            'textAlign': 'left',
            'height': "50px",
-           'margin': 'auto',
-           'padding-left': '70px',
-           'padding-top': '20px',
-           "font-family": "Helvetica, Arial, sans-serif",
-
+           'margin-left': '50px',
+          
+           
            }
 
 style31 = {'backgroundColor': "#fff", "minHeight": "400px",
