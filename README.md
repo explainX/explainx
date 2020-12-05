@@ -13,7 +13,6 @@ Use explainX to understand overall model behavior, explain the "why" behind mode
 
 <img width="1000" src="rf_starter_example.png" alt="explainX.ai">
 
-ExplainX.ai is a model explainability/interpretability framework for data scientists and business users.
 
 #### Why we need model explainability & interpretibility?
 
