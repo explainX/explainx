@@ -9,7 +9,6 @@ Input:
 
 """
 
-
 class calculate_shap():
     def __init__(self):
         super(calculate_shap, self).__init__()

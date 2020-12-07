@@ -1,14 +1,5 @@
 from imports import *
 
-"""
-This class calculates feature impact
-
-Input: 
-
-
-"""
-
-
 class feature_impact():
     def __init__(self):
         super(feature_impact, self).__init__()
@@ -16,7 +7,8 @@ class feature_impact():
 
 
     def find(self,  df):
-
+        df  = pd.DataFrame(df)
+        print(df)
         variables = [col for col in df.columns if '_impact' in col]
         y = []
         for i in range(len(variables)):

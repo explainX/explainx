@@ -1,8 +1,6 @@
 import os
 import sys
-
 import re
-
 from pathlib import Path
 from sys import platform
 import subprocess
@@ -19,15 +17,6 @@ from dashboard import *
 from calculate_shap import *
 from analytics import Analytics
 
-"""
-This class calculates feature importance
-
-Input: 
-
-
-"""
-
-
 class explain():
     def __init__(self):
         super(explain, self).__init__()
@@ -35,17 +24,18 @@ class explain():
 
     # is classification function?
 
-    def is_classification_given_y_array(self, y_test):
-        is_classification = False
-        total = len(y_test)
-        total_unique = len(set(y_test))
-        if total < 30:
-            if total_unique < 10:
-                is_classification = True
-        else:
-            if total_unique < 20:
-                is_classification = True
-        return is_classification
+    # def is_classification_given_y_array(self, y_test):
+    #     is_classification = False
+    #     total = len(y_test)
+    #     total_unique = len(set(y_test))
+    #     if total < 30:
+    #         if total_unique < 10:
+    #             is_classification = True
+    #     else:
+    #         if total_unique < 20:
+    #             is_classification = True
+    #     return is_classification
+    
 
     def random_string_generator(self):
         random_str = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
@@ -54,6 +44,8 @@ class explain():
     def ai(self, df, y, model, model_name="xgboost", mode=None):
         y_variable = "y_actual"
         y_variable_predict = "y_prediction"
+        
+        #Code for Analytics
         instance_id = self.random_string_generator()
         analytics = Analytics()
         analytics['ip'] = analytics.finding_ip()
@@ -69,11 +61,6 @@ class explain():
         analytics['finish_time'] = ''
         analytics.insert_data()
 
-        # If yes, then different shap functuions are required.
-        # get the shap value based on predcton and make a new dataframe.
-
-        # find predictions first as shap values need that.
-
         prediction_col = []
 
         if model_name == "xgboost":
@@ -88,40 +75,48 @@ class explain():
             prediction_col = model.predict(df.to_numpy())
 
         else:
-            prediction_col = model.predict(df.to_numpy())
+            prediction_col = model.predict(df)
 
         # is classification?
-        is_classification = self.is_classification_given_y_array(prediction_col)
+        #is_classification = self.is_classification_given_y_array(prediction_col)
+        ModelType = lambda model: True if is_classifier(model) else False
+        is_classification = ModelType(model)
 
         # shap
         c = calculate_shap()
         self.df_final, self.explainer = c.find(model, df, prediction_col, is_classification, model_name=model_name)
 
-        # prediction col
+        #Append Model Decision & True Labels Columns into the dataset.
         self.df_final[y_variable_predict] = prediction_col
-
         self.df_final[y_variable] = y
 
         # additional inputs.
         if is_classification == True:
             # find and add probabilities in the dataset.
-            prediction_col_prob = model.predict_proba(df.to_numpy())
-            pd_prediction_col_prob = pd.DataFrame(prediction_col_prob)
+            #prediction_col_prob = model.predict_proba(df)
+            #pd_prediction_col_prob = pd.DataFrame(prediction_col_prob)
 
-            for c in pd_prediction_col_prob.columns:
-                self.df_final["probability_of_predicting_class_" + str(c)] = list(pd_prediction_col_prob[c])
+            probabilities = model.predict_proba(df)
 
-            classes = []
-            for c in pd_prediction_col_prob.columns:
-                classes.append(str(c))
-            self.param["classes"] = classes
+            for i in range(len(np.unique(prediction_col))):
+                self.df_final['Probability: {}'.format(np.unique(prediction_col)[i])] = probabilities[:,i]
+            
+            self.param['classes'] = np.unique(prediction_col)
+
+            #for c in pd_prediction_col_prob.columns:
+             #   self.df_final["probability_of_predicting_class_" + str(c)] = list(pd_prediction_col_prob[c])
+
+            #classes = []
+            #for c in pd_prediction_col_prob.columns:
+             #   classes.append(str(c))
+            #self.param["classes"] = classes
 
             try:
                 expected_values_by_class = self.explainer.expected_value
             except:
                 expected_values_by_class = []
-                for c in range(len(classes)):
-                    expected_values_by_class.append(1 / len(classes))
+                for c in range(len(np.unique(prediction_col))):
+                    expected_values_by_class.append(1 / len(np.unique(prediction_col)))
 
             self.param["expected_values"] = expected_values_by_class
         else:

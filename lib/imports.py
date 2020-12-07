@@ -31,6 +31,8 @@ import pyrebase
 from config_det import data_det
 from collections import deque
 from sklearn import metrics
+from sklearn.base import is_classifier, is_regressor
+import pytest
 
 firebase_app = pyrebase.initialize_app(data_det)
 ref = firebase_app.database()

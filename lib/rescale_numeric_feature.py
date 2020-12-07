@@ -1,13 +1,5 @@
 from imports import *
 
-"""
-This class calculates feature importance
-
-Input: 
-
-
-"""
-
 
 class get_cols():
     def __init__(self):
