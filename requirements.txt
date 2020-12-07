@@ -14,8 +14,9 @@ scipy==1.4.1
 pandasql==0.7.3
 tqdm==4.47.0
 dash-editor-components==0.0.2
-shap==0.34.0
+shap==0.37.0
 xgboost==1.0.2
 catboost==0.21
 scikit-learn==0.22.1
 pyrebase
+pytest
