@@ -224,11 +224,10 @@ class dashboard():
                 dbc.Col(dbc.NavItem(dbc.NavLink("Distributions", href="/apps/distribution")),
                         style={'width': "150px", 'fontSize': '10px'}),
                 dbc.Col(dbc.NavItem(dbc.NavLink("Cohort Analysis", href="/apps/cohort")),
-                style={'width': "150px", 'fontSize': '10px'})
+                        style={'width': "150px", 'fontSize': '10px'})
 
             ],
 
-          
             no_gutters=True,
             className="ml-auto flex-nowrap mt-3 mt-md-0",
             align="center"
@@ -284,43 +283,49 @@ class dashboard():
             else:
                 return welcome_message
 
-        
         welcome_message = html.Div(
             [
                 html.Div([
                     html.H3("Welcome to ExplainX.ai Explainable AI Dashboard"),
                     html.H4("Start explaining your model by exploring one of the following options.")
-                ], style={'margin-left':"20px"}),
+                ], style={'margin-left': "20px"}),
                 html.Div([
                     html.Div([
-                        html.Img(src='https://lh3.googleusercontent.com/uNkpoLQRIza6SSDk9fQed6bu6c1Q9zDkDjZqkRtF3cU97Smf2rS0soKo2ZQm32gJe8FyLYvNRUYJ-hqM7zs4esIAFchdPmgC4sHgbpxTKkGjm4dRK-NagI56K8vnXg8FH4s_Jct2RaQ', className = "global_explanation_image"),
+                        html.Img(
+                            src='https://lh3.googleusercontent.com/uNkpoLQRIza6SSDk9fQed6bu6c1Q9zDkDjZqkRtF3cU97Smf2rS0soKo2ZQm32gJe8FyLYvNRUYJ-hqM7zs4esIAFchdPmgC4sHgbpxTKkGjm4dRK-NagI56K8vnXg8FH4s_Jct2RaQ',
+                            className="global_explanation_image"),
 
                         dcc.Link("Global Explanation", href="/apps/global_explanation", className="link")
-                    ], className ="welcome_box", id="global_explanation_deets"),
-                    
+                    ], className="welcome_box", id="global_explanation_deets"),
 
                     html.Div([
-                        html.Img(src='https://lh3.googleusercontent.com/LpM-N2QavBVxlMW6vKm5fmT5Qe3mYtI2q2OQc5kgZfW4kKOFlyidgrwT5C9zB3XHZncHvlGcFl82Si7bMDQN_PtLf4PThqdEUs1UwoUPeNHs0VYY6ICKlHi44ppZLZIMQvaWI4bMqm0', className = "global_explanation_image"),
+                        html.Img(
+                            src='https://lh3.googleusercontent.com/LpM-N2QavBVxlMW6vKm5fmT5Qe3mYtI2q2OQc5kgZfW4kKOFlyidgrwT5C9zB3XHZncHvlGcFl82Si7bMDQN_PtLf4PThqdEUs1UwoUPeNHs0VYY6ICKlHi44ppZLZIMQvaWI4bMqm0',
+                            className="global_explanation_image"),
 
                         dcc.Link("Local Level Explanation", href="/apps/local_explanation", className="link")
 
                     ], className="welcome_box", id="local_explanation_deets"),
 
                     html.Div([
-                        html.Img(src='https://lh6.googleusercontent.com/GXnNtGlqQcsRXugwwlZ31SwrJda4Z1WVyIi5i13vZImrUY6YgIZvM81d7zrBOh8n2jK_Lqj3BB5IqS4dU5l680-rZuu40bMXa-EAd8ag3WDIU2SNYieg0DH3e_FwUq5f2-y-X_POE-k', className = "global_explanation_image"),
+                        html.Img(
+                            src='https://lh6.googleusercontent.com/GXnNtGlqQcsRXugwwlZ31SwrJda4Z1WVyIi5i13vZImrUY6YgIZvM81d7zrBOh8n2jK_Lqj3BB5IqS4dU5l680-rZuu40bMXa-EAd8ag3WDIU2SNYieg0DH3e_FwUq5f2-y-X_POE-k',
+                            className="global_explanation_image"),
 
-                        dcc.Link("Feature Interactions", href="/apps/feature_interaction", className="link" )
+                        dcc.Link("Feature Interactions", href="/apps/feature_interaction", className="link")
 
                     ], className="welcome_box", id="feature_interaction_deets"),
 
                     html.Div([
-                        html.Img(src='https://uploads-ssl.webflow.com/5edc18e72f7ba21e1ed2efae/5f519fd99580494301e67b7b_pipeline.png', className = "global_explanation_image"),
+                        html.Img(
+                            src='https://uploads-ssl.webflow.com/5edc18e72f7ba21e1ed2efae/5f519fd99580494301e67b7b_pipeline.png',
+                            className="global_explanation_image"),
 
                         dcc.Link("Cohort Analysis", href="/apps/cohort", className="link")
 
                     ], className="welcome_box", id="cohort_analysis_deets")
                 ], className="main_welcome_div"),
-                
+
             ]
 
         )
@@ -335,8 +340,8 @@ class dashboard():
                                     "Analyze using SQL",
                                     id="collapse-button-2",
                                     color="link",
-                                    style={'fontSize': '10px', 'margin-top':'0px'}), style={"margin-top":"0px"}), 
-                                    style={"height":"50px"}),
+                                    style={'fontSize': '10px', 'margin-top': '0px'}), style={"margin-top": "0px"}),
+                            style={"height": "50px"}),
                         dbc.Collapse(html.Div([
                             html.Div(dcc.Input(
                                 id='input-on-submit',
@@ -366,8 +371,8 @@ class dashboard():
                                     "View Your Data",
                                     id="collapse-button",
                                     color="link",
-                                    style={'fontSize': '10px'}), style={"margin-top":"0px"}), 
-                                    style={"height":"50px"}),
+                                    style={'fontSize': '10px'}), style={"margin-top": "0px"}),
+                            style={"height": "50px"}),
                         dbc.Collapse(html.Div([
                             html.H4('',
                                     style=style1),
@@ -463,41 +468,38 @@ class dashboard():
                 return not is_open
             return is_open
 
-        #Cohort Analysis - Callbacks
+        # Cohort Analysis - Callbacks
         @app.callback(
-        Output("modal", "is_open"),
-        [Input("open", "n_clicks"), Input("close", "n_clicks")],
-        [State("modal", "is_open")],
-        prevent_initial_call=True)
+            Output("modal", "is_open"),
+            [Input("open", "n_clicks"), Input("close", "n_clicks")],
+            [State("modal", "is_open")],
+            prevent_initial_call=True)
         def toggle_modal(n1, n2, is_open):
             if n1 or n2:
                 return not is_open
             return is_open
 
         @app.callback(
-        [Output("cohort-metrics-div", "children"),
-        Output("cohort-details", "children"),
-        Output("cohort-graph", "children")],
-        [Input("add-cohort","n_clicks"),
-        Input("remove-cohort","n_clicks"),
-        Input("x-axis","value")],
-        [State("demo-dropdown","value"),
-        State("demo-operators", "value"),
-        State("demo-values", "value")])
+            [Output("cohort-metrics-div", "children"),
+             Output("cohort-details", "children"),
+             Output("cohort-graph", "children")],
+            [Input("add-cohort", "n_clicks"),
+             Input("remove-cohort", "n_clicks"),
+             Input("x-axis", "value")],
+            [State("demo-dropdown", "value"),
+             State("demo-operators", "value"),
+             State("demo-values", "value")])
         def cohort_metrics_details(add_cohort, remove_cohort, x_axis, var_name, operator, value):
             changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
             if 'remove-cohort' in changed_id:
                 ca.remove_cohort()
                 fig = ca.cohort_graph(x_axis)
-                return ca.cohort_metrics_details(), ca.cohort_details(), dcc.Graph(figure=fig), 
+                return ca.cohort_metrics_details(), ca.cohort_details(), dcc.Graph(figure=fig),
             else:
-                ca.add_cohort_metrics(df, var_name, operator,value, self.param["is_classification"])
+                ca.add_cohort_metrics(df, var_name, operator, value, self.param["is_classification"])
                 cohort = ca.add_cohort(df, x_axis, var_name, operator, value)
                 fig = ca.cohort_graph(x_axis)
                 return ca.cohort_metrics_details(), ca.cohort_details(), dcc.Graph(figure=fig)
-
-
-        
 
         # SQL - Data Input Callback
         @app.callback(
@@ -507,7 +509,6 @@ class dashboard():
         def update_output(n_clicks, value):
             sql_query = f'{value}'
             return sql_query
-            
 
         # What-If Form CallBack
         @app.callback(
@@ -555,24 +556,21 @@ class dashboard():
             df.columns = self.param["columns"]
             array = self.calculate_prediction_shap(df)
 
-            #Y_Pred
-            #Probability_
+            # Y_Pred
+            # Probability_
             if self.param["is_classification"]:
-                y_and_prob=[]
+                y_and_prob = []
                 y_and_prob.append(int(array["y_prediction"]))
-                y_and_prob.append(round(float(array["Probability_"+str(int(array["y_prediction"])) ]),2))
+                y_and_prob.append(round(float(array["Probability_" + str(int(array["y_prediction"]))]), 2))
             else:
                 y_and_prob = []
-                y_and_prob.append(round(float(array["y_prediction"]),2))
+                y_and_prob.append(round(float(array["y_prediction"]), 2))
 
             # figure, dat = g.feature_impact_old(array)
             figure, dat = g.local_feature_impact_graph(array)
             message = self.insights.insight_2_local_feature_impact(dat, y_and_prob)
 
-
-
             return figure, message[0], message[1], message[2], message[3]
-
 
         # Prototypical Analysis
         """
@@ -606,7 +604,7 @@ class dashboard():
                 sample_row = sample_row.to_frame()
                 sample_row.rename(columns={sample_row.columns[0]: "orig"}, inplace=True)
                 sample_row.reset_index(inplace=True)
-                #print(sample_row.columns)
+                # print(sample_row.columns)
                 dat = pd.merge(dat, sample_row, on=['index'], how='left')
                 dat['orig'] = dat['orig'].astype(float)
                 for i in list(dat.columns):
@@ -638,7 +636,7 @@ class dashboard():
             graph_type = "feature_importance"
             dff = self.caching_data_manager(df, sql_query, graph_type, g.feature_importance)
             message = self.insights.insight_1_feature_imp(dff)
-            figure =  g.global_feature_importance_graph(dff, self.param["is_classification"])
+            figure = g.global_feature_importance_graph(dff, self.param["is_classification"])
             return figure, message[0]
 
         # Global Feature Impact
@@ -661,7 +659,7 @@ class dashboard():
         @app.callback(
             Output('indicator-graphic', 'figure'),
             [Input('xaxis-column', 'value'),
-            #  Input('yaxis-column', 'value'),
+             #  Input('yaxis-column', 'value'),
              Input('third-axis', 'value'),
              Input('sql-query-button', 'children')])
         def update_graph(xaxis_column_name, third_axis_name, sql_query):
@@ -675,7 +673,7 @@ class dashboard():
             graph_type = 'pdp'
             df3 = self.caching_data_manager(df, sql_query, graph_type, g.partial_dependence_plot)
             print(df3)
-            fig = g.pdp_plot(df3, df3[xaxis_column_name], df3[xaxis_column_name+"_impact"], df3[third_axis_name])
+            fig = g.pdp_plot(df3, df3[xaxis_column_name], df3[xaxis_column_name + "_impact"], df3[third_axis_name])
             return fig
 
         # Summary Plot
@@ -684,7 +682,6 @@ class dashboard():
             [Input('sql-query-button', 'children'),
              Input('xaxis-column-test', 'value')])
         def update_graph2(sql_query, value):
-        
 
             g = plotly_graphs()
             graph_type = 'summary_plot'
@@ -710,7 +707,7 @@ class dashboard():
                     num_variables.append(i)
 
             if plot_type == "Histogram":
-                
+
                 return px.histogram(df3, x=xaxis_column_name, marginal="box", template="plotly_white")
             else:
                 for i in cat_variables:
@@ -718,40 +715,44 @@ class dashboard():
                 else:
                     return px.violin(df3, y=xaxis_column_name, box=True, points='all', template="plotly_white")
 
-        
         # Port Finder
         port = 8080
-        debug_value= False
-
+        debug_value = False
 
         if mode == "inline":
             try:
                 app.run_server(mode="inline", port=port, debug=debug_value, dev_tools_ui=debug_value,
-                               dev_tools_props_check=debug_value, dev_tools_silence_routes_logging = True, dev_tools_hot_reload=True)
+                               dev_tools_props_check=debug_value, dev_tools_silence_routes_logging=True,
+                               dev_tools_hot_reload=True)
             except:
                 port = self.find_free_port()
                 app.run_server(mode="inline", port=port, debug=debug_value, dev_tools_ui=debug_value,
-                               dev_tools_props_check=debug_value, dev_tools_silence_routes_logging = True, dev_tools_hot_reload=True)
+                               dev_tools_props_check=debug_value, dev_tools_silence_routes_logging=True,
+                               dev_tools_hot_reload=True)
         else:
             try:
                 app.run_server(host='0.0.0.0', port=port, debug=debug_value, dev_tools_ui=debug_value,
-                               dev_tools_props_check=debug_value, dev_tools_silence_routes_logging = True, dev_tools_hot_reload=True)
+                               dev_tools_props_check=debug_value, dev_tools_silence_routes_logging=True,
+                               dev_tools_hot_reload=True)
             except:
                 # try different ip in case 0.0.0.0 does not work
                 try:
                     try:
                         port = self.find_free_port()
                         app.run_server(host='0.0.0.0', port=port, debug=debug_value, dev_tools_ui=debug_value,
-                                       dev_tools_props_check=debug_value, dev_tools_silence_routes_logging = True, dev_tools_hot_reload=True)
+                                       dev_tools_props_check=debug_value, dev_tools_silence_routes_logging=True,
+                                       dev_tools_hot_reload=True)
                     except:
                         port = self.find_free_port()
                         app.run_server(host='0.0.0.0', port=port, debug=debug_value, dev_tools_ui=debug_value,
-                                       dev_tools_props_check=debug_value, dev_tools_silence_routes_logging = True, dev_tools_hot_reload=True)
+                                       dev_tools_props_check=debug_value, dev_tools_silence_routes_logging=True,
+                                       dev_tools_hot_reload=True)
                 except:
                     try:
                         port = self.find_free_port()
                         app.run_server(host='127.0.0.1', port=port, debug=debug_value, dev_tools_ui=debug_value,
-                                       dev_tools_props_check=debug_value, dev_tools_silence_routes_logging = True, dev_tools_hot_reload=True)
+                                       dev_tools_props_check=debug_value, dev_tools_silence_routes_logging=True,
+                                       dev_tools_hot_reload=True)
                     except:
                         print("Please restart Jupyter Notebook or Python IDE.")
                         return False
@@ -812,7 +813,7 @@ class dashboard():
         # prediction col
         df_final["y_prediction"] = prediction_col
 
-        if is_classification==True:
+        if is_classification == True:
 
             # find and add probabilities in the dataset.
             prediction_col_prob = self.param["model"].predict_proba(df.to_numpy())
@@ -820,7 +821,6 @@ class dashboard():
 
             for c in pd_prediction_col_prob.columns:
                 df_final["Probability_" + str(c)] = list(pd_prediction_col_prob[c])
-
 
         return df_final
 
