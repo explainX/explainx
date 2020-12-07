@@ -1,13 +1,5 @@
 from imports import *
 
-"""
-This class calculates feature importance
-
-Input: 
-
-
-"""
-
 
 class shap_pdp():
     def __init__(self):

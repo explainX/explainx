@@ -1,12 +1,5 @@
 from imports import *
 from rescale_numeric_feature import *
-"""
-This class helps to plot summary plot
-
-Input: 
-
-
-"""
 
 
 class summary_plot():
@@ -17,15 +10,11 @@ class summary_plot():
 
 
     def find(self,  df):
-
         column = get_cols()
         self.original_columns = column.get_all_cols(df)
-
         re= rescale_numeric_features()
         df_with_rescaled_features= re.rescale(df)
-
-        final_dataframe= self.rearrange_dataframe(df_with_rescaled_features )
-
+        final_dataframe= self.rearrange_dataframe( df_with_rescaled_features )
         return final_dataframe
 
     def rearrange_dataframe(self, df_re ):

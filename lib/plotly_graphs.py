@@ -56,7 +56,7 @@ class plotly_graphs():
         return df2
 
 
-    def summary_plot_graph(self, df,classification=False):
+    def summary_plot_graph(self, df):
         summary_plot = px.scatter(df, x="Feature Impact on Outcome", y="Feature Name", color="Rescaled Feature Value",
                                   hover_data=["Original Feature Value"], color_continuous_scale="Bluered_r", template="plotly_white")
         return summary_plot
@@ -70,7 +70,7 @@ class plotly_graphs():
 
     def pdp_plot(self, df, v1, v2, v3):
         g = px.scatter(df, x=v1, y=v2, color=v3, color_continuous_scale="Bluered_r",
-                       color_discrete_sequence=px.colors.sequential.Plasma_r, template="plotly_white")
+                       color_discrete_sequence= px.colors.sequential.Plasma_r, template="plotly_white")
         return g
 
 

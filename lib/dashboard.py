@@ -464,7 +464,6 @@ class dashboard():
             return is_open
 
         #Cohort Analysis - Callbacks
-
         @app.callback(
         Output("modal", "is_open"),
         [Input("open", "n_clicks"), Input("close", "n_clicks")],
@@ -675,6 +674,7 @@ class dashboard():
             g = plotly_graphs()
             graph_type = 'pdp'
             df3 = self.caching_data_manager(df, sql_query, graph_type, g.partial_dependence_plot)
+            print(df3)
             fig = g.pdp_plot(df3, df3[xaxis_column_name], df3[xaxis_column_name+"_impact"], df3[third_axis_name])
             return fig
 

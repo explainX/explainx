@@ -1,13 +1,7 @@
 from imports import *
 from sklearn.preprocessing import OneHotEncoder
 import numpy as np
-"""
-This class calculates feature importance
 
-Input: 
-
-
-"""
 
 
 class encode_decode_cat_col():

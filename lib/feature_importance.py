@@ -1,14 +1,5 @@
 from imports import *
 
-"""
-This class calculates feature importance
-
-Input: 
-
-
-"""
-
-
 class feature_importance():
     def __init__(self):
         super(feature_importance, self).__init__()

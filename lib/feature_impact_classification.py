@@ -1,14 +1,5 @@
 from imports import *
 
-"""
-This class calculates feature impact
-
-Input: 
-
-
-"""
-
-
 class feature_impact_classification():
     def __init__(self):
         super(feature_impact_classification, self).__init__()

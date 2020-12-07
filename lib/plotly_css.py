@@ -114,7 +114,7 @@ style16 = {'backgroundColor': "#fff", "minHeight": "600px",
            'border-radius': '15px 15px 15px 15px',
            'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
            'border-right': '1px solid #2c3e50', 'border-bottom': '1px solid #2c3e50',
-           'marginTop': 50, 'width': '95%'}
+           'marginTop': 50, 'width': '100%'}
 
 style17 = {'backgroundColor': '#fff',
            'color': 'black',
@@ -147,8 +147,8 @@ style19 = {'backgroundColor': "#fff", "minHeight": "600px",
 
 style20 = {'marginBottom': 50,
            'marginTop': 50,
-           'marginLeft': "1%",
-           'width': '95%', }
+           #'marginLeft': "1%",
+           'width': '100%', }
 
 style21 = {'backgroundColor': '#fff',
            'color': 'black',
