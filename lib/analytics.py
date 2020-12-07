@@ -9,17 +9,26 @@ class Analytics(object):
 
     @staticmethod
     def finding_address():
-        val = get_mac()
-        return val
+        try:
+            val = get_mac()
+            return val
+        except Exception as e:
+            return ''
 
     @staticmethod
     def finding_ip():
-        val = socket.gethostbyname(socket.gethostname())
-        return val
+        try:
+            val = socket.gethostbyname(socket.gethostname())
+            return val
+        except Exception as e:
+            return ''
 
     @staticmethod
     def finding_system():
-        return platform.system()
+        try:
+            return platform.system()
+        except Exception as e:
+            return ''
 
     def __setitem__(self, key, val):
         self.dict[key] = val
