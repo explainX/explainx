@@ -593,6 +593,8 @@ class dashboard():
                 df_selected = df[list(self.param["columns"]) + [self.param["y_variable_predict"]]]
 
                 row_number = len(df_selected)
+                if not isinstance(df_row, pd.DataFrame):
+                    df_row = df_row.as_data_frame()
                 df_selected.loc[row_number] = df_row.values[0]
 
                 p = protodash()
@@ -717,7 +719,7 @@ class dashboard():
 
         # Port Finder
         port = 8080
-        debug_value = False
+        debug_value = True
 
         if mode == "inline":
             try:
@@ -799,6 +801,10 @@ class dashboard():
         elif self.param["model_name"] == "catboost":
             prediction_col = self.param["model"].predict(df.to_numpy())
 
+        elif self.param['model_name'] == 'h2o':
+            df = h2o.H2OFrame(df)
+            prediction_col = self.param["model"].predict(df)
+
         else:
             prediction_col = self.param["model"].predict(df.to_numpy())
 
@@ -811,18 +817,57 @@ class dashboard():
                                      model_name=self.param["model_name"])
 
         # prediction col
-        df_final["y_prediction"] = prediction_col
+        # df_final["y_prediction"] = prediction_col
 
-        if is_classification == True:
+        if is_classification is True:
 
-            # find and add probabilities in the dataset.
-            prediction_col_prob = self.param["model"].predict_proba(df.to_numpy())
+            try:
+                df_final = self.formatting_y_pred_for_h2o_classification(df_final, prediction_col)
+                # find and add probabilities in the dataset.
+                prediction_col_prob = self.param["model"].predict_proba(df.to_numpy())
+            except:
+                prediction_col_prob = self.param["model"].predict(df)
+                prediction_col_prob = prediction_col_prob.as_data_frame()
             pd_prediction_col_prob = pd.DataFrame(prediction_col_prob)
 
             for c in pd_prediction_col_prob.columns:
                 df_final["Probability_" + str(c)] = list(pd_prediction_col_prob[c])
 
+            # for c in pd_prediction_col_prob.columns:
+            #     df_final["Probability_" + str(c)] = list(pd_prediction_col_prob[c])
+            #     if c != 'predict':
+            #         if "p" in c:
+            #             res = c.split("p")[-1]
+            #             df_final["Probability_" + str(res)] = list(pd_prediction_col_prob[c])
+            #         else:
+            #             df_final["Probability_" + str(c)] = list(pd_prediction_col_prob[c])
+            #     else:
+            #         df_final["Probability_" + str(c)] = list(pd_prediction_col_prob[c])
+            df_final = self.formatting_h2o_prediction_prob(df_final, pd_prediction_col_prob)
         return df_final
+
+    def formatting_y_pred_for_h2o_classification(self, final_df, pred_col):
+        try:
+            final_df["y_prediction"] = pred_col
+        except:
+            # df_final = df_final.as_data_frame()
+            print("prediction col checking")
+            prediction_col = pred_col.as_data_frame()
+            final_df["y_prediction"] = prediction_col['predict'].iloc[0]
+        return final_df
+
+    def formatting_h2o_prediction_prob(self, final_df, h2o_pred):
+        for c in h2o_pred.columns:
+            final_df["Probability_" + str(c)] = list(h2o_pred[c])
+            if c != 'predict':
+                if "p" in c:
+                    res = c.split("p")[-1]
+                    final_df["Probability_" + str(res)] = list(h2o_pred[c])
+                else:
+                    final_df["Probability_" + str(c)] = list(h2o_pred[c])
+            else:
+                final_df["Probability_" + str(c)] = list(h2o_pred[c])
+        return final_df
 
     def calculate_prediction(self, df):
         if self.param["model_name"] == "xgboost":
@@ -835,6 +880,10 @@ class dashboard():
 
         elif self.param["model_name"] == "catboost":
             prediction_col = self.param["model"].predict(df.to_numpy())
+
+        elif self.param['model_name'] == 'h2o':
+            df = h2o.H2OFrame(df)
+            prediction_col = self.param["model"].predict(df)
 
         else:
             prediction_col = self.param["model"].predict(df.to_numpy())
