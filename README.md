@@ -121,7 +121,7 @@ In this latest release, we have also given the option to use explainability tech
 
 ```python
 
-explainx_modules.ai(X_test, Y_test, model)
+explainx_modules.ai(model, X_test, Y_test)
 
 ```
 As an upgrade, we have eliminated the need to pass in the model name as explainX is smart enough to identify the model type and problem type i.e. classification or regression, by itself. 
