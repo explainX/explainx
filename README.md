@@ -30,7 +30,6 @@ Essential for:
 3. How can I understand and trust the model's decisions?
 4. Does my model satisfy legal & regulatory requirements?
 
-Visit our website to learn more: https://www.explainx.ai     
 
 # Get Started
 
@@ -55,59 +54,148 @@ After successfully installing explainX, open up your Python IDE of Jupyter Noteb
 1. Import required module.
 
 ```python
+
 from explainx import * 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
+
 ```
 
 2. Load and split your dataset into x_data and y_data
 
 ```python
+
 #Load Dataset: X_Data, Y_Data 
 #X_Data = Pandas DataFrame
 #Y_Data = Numpy Array or List
 
 X_data,Y_data = explainx.dataset_heloc()
+
 ```
 
 3. Split dataset into training & testing. 
 
 ``` python
+
 X_train, X_test, Y_train, Y_test = train_test_split(X_data,Y_data, test_size=0.3, random_state=0)
+
 ```
 
 4. Train your model.
 
 ```python
+
 # Train a RandomForest Model
 model = RandomForestClassifier()
 model.fit(X_train, Y_train)
+
 ```
 
-5. Pass your model and dataset into the explainX function:
+After you're done training the model, you can either access the complete explainability dashboard or access individual techniques.
+
+
+## Complete Explainability Dashboard
+
+To access the entire dashboard with all the explainability techniques under one roof, follow the code down below. It is great for sharing your work with your peers and managers in an interactive and easy to understand way. 
+
+5.1. Pass your model and dataset into the explainX function:
 
 ```python
 explainx.ai(X_test, Y_test, model, model_name="randomforest")
 ```
 
-6. Click on the dashboard link to start exploring model behavior:
+5.2. Click on the dashboard link to start exploring model behavior:
 
 ```python
+
 App running on https://0.0.0.0:8080
+
 ```
+
+
+## Explainability Modules
+
+In this latest release, we have also given the option to use explainability techniques individually. This will allow the user to choose technique that fits their personal AI use case. 
+
+6.1. Pass your model, X_Data and Y_Data into the explainx_modules function. 
+
+```python
+
+explainx_modules.ai(X_test, Y_test, model")
+
+```
+As an upgrade, we have eliminated the need to pass in the model name as explainX is smart enough to identify the model type and problem type i.e. classification or regression, by itself. 
+
+You can access multiple modules:
+
+Module 1: Dataframe with Predictions
+```python
+
+explainx_modules.dataframe_graphing()
+
+```
+
+Module 2: Model Metrics
+```python
+
+explainx_modules.metrics()
+
+```
+
+Module 3: Global Level SHAP Values
+```python
+
+explainx_modules.shap_df()
+
+```
+
+Module 4: What-If Scenario Analysis (Local Level Explanations)
+```python
+
+explainx_modules.what_if_analysis()
+
+```
+
+Module 5: Partial Dependence Plot & Summary Plot
+```python
+
+explainx_modules.feature_interactions()
+
+```
+
+Module 6: Model Performance Comparison (Cohort Analysis)
+```python
+
+explainx_modules.cohort_analysis()
+
+```
+
+To access the modules within your jupyter notebook as IFrames, just pass the <b>mode='inline'</b> argument. 
+
+
+<b>For detailed description into each module, check out our documentation at https://www.docs.explainx.ai</b>
+
+
+## Cloud Installation
 
 **If you are running explainX on the cloud e.g., AWS Sagemaker?** **https://0.0.0.0:8080** will not work.
 Please visit our documentation for installation instructions for the cloud: [Cloud Installation Instructions](https://docs.explainx.ai/getting-started/installation)
 
 After installation is complete, just open your **terminal** and run the following command.
 ```jupyter
+
 lt -h "https://serverless.social" -p [port number]
+
 ```
 ```jupyter
+
 lt -h "https://serverless.social" -p 8080
+
 ```
 
 <img width="1000" src="demo-explainx-with-sound.gif" alt="explainX.ai">
+
+
 
 ## Walkthough Video Tutorial
 
@@ -116,6 +204,8 @@ Please click on the image below to load the tutorial:
 [![here](https://github.com/explainX/explainx/blob/master/explain_video_img.png)](https://youtu.be/CDMpOismME8)  
 
 (Note: Please manually set it to 720p or greater to have the text appear clearly)
+
+
 
 ## Supported Techniques
 
@@ -129,6 +219,8 @@ Please click on the image below to load the tutorial:
 |Surrogate Decision Tree | Coming Soon |
 |Anchors | Coming Soon |
 |Integrated Gradients (IG)| Coming Soon |
+
+
 
 ## Main Models Supported
 
@@ -147,6 +239,7 @@ Please click on the image below to load the tutorial:
 |11.| H2O.ai AutoML | Next in Line |
 |12.| TensorFlow Models | Coming Soon |
 |13.| PyTorch Models | Coming Soon |
+
 
 
 ## Contributing
