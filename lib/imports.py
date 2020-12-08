@@ -24,6 +24,7 @@ import sys
 import shap
 import random
 import string
+import h2o
 from uuid import getnode as get_mac
 import platform
 import datetime
