@@ -30,6 +30,9 @@ Essential for:
 3. How can I understand and trust the model's decisions?
 4. Does my model satisfy legal & regulatory requirements?
 
+#### We have deployed the app on our server so you can play around with the dashboard. Check it out:
+
+Dashboard Demo: http://3.128.188.55:8080/
 
 # Getting Started
 
