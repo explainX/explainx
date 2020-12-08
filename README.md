@@ -31,7 +31,7 @@ Essential for:
 4. Does my model satisfy legal & regulatory requirements?
 
 
-# Get Started
+# Getting Started
 
 ## Installation
 
