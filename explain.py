@@ -41,6 +41,100 @@ class explain():
         random_str = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
         return random_str
 
+    def ai_h2o_automl(self, df, y_column_name, model, model_name="h2o", mode=None):
+        y_variable = "y_actual"
+        y_variable_predict = "y_prediction"
+        y_variable = "y_actual"
+        y_variable_predict = "y_prediction"
+        instance_id = self.random_string_generator()
+        analytics = Analytics()
+        analytics['ip'] = analytics.finding_ip()
+        analytics['mac'] = analytics.finding_address()
+        analytics['instance_id'] = instance_id
+        analytics['time'] = str(datetime.datetime.now())
+        analytics['total_columns'] = len(df.columns)
+        analytics['total_rows'] = len(df)
+        analytics['os'] = analytics.finding_system()
+        analytics['model_name'] = model_name
+        analytics["function"] = 'before_dashboard'
+        analytics["query"] = "before_dashboard"
+        analytics['finish_time'] = ''
+        analytics.insert_data()
+
+        # If yes, then different shap functuions are required.
+        # get the shap value based on predcton and make a new dataframe.
+
+        # find predictions first as shap values need that.
+
+        prediction_col = []
+
+        if model_name == 'h2o':
+            if isinstance(df, pd.DataFrame):
+                df = h2o.H2OFrame(df)
+            prediction_col = model.predict(df[y_column_name])
+        # is classification?
+
+        is_classification = self.is_classification_given_y_array(prediction_col.as_data_frame()[y_column_name].tolist())
+
+        # shap
+        c = calculate_shap()
+        self.df_final, self.explainer = c.find(model, df, prediction_col, is_classification,
+                                               model_name=model_name)
+
+        # prediction col
+        self.df_final[y_variable_predict] = prediction_col.as_data_frame()[y_column_name].tolist()
+
+        self.df_final[y_variable] = df.as_data_frame()[y_column_name].tolist()
+
+        # additional inputs.
+        if is_classification is True:
+            # find and add probabilities in the dataset.
+            try:
+                prediction_col_prob = model.predict_proba(df)
+            except:
+                prediction_col_prob = model.predict(df)
+            prediction_col_prob = prediction_col_prob.as_data_frame()
+
+            pd_prediction_col_prob = pd.DataFrame(prediction_col_prob)
+
+            for c in pd_prediction_col_prob.columns:
+                self.df_final["probability_of_predicting_class_" + str(c)] = list(pd_prediction_col_prob[c])
+
+            classes = []
+            for c in pd_prediction_col_prob.columns:
+                classes.append(str(c))
+            self.param["classes"] = classes
+
+            try:
+                expected_values_by_class = self.explainer.expected_value
+            except:
+                expected_values_by_class = []
+                for c in range(len(classes)):
+                    expected_values_by_class.append(1 / len(classes))
+
+            self.param["expected_values"] = expected_values_by_class
+        else:
+            try:
+                expected_values = self.explainer.expected_value
+                self.param["expected_values"] = [expected_values]
+            except:
+                expected_value = [round(np.array(y).mean(), 2)]
+                self.param["expected_values"] = expected_value
+
+        self.param["is_classification"] = is_classification
+        self.param["model_name"] = model_name
+        self.param["model"] = model
+        self.param["columns"] = df.columns
+        self.param["y_variable"] = y_variable
+        self.param["y_variable_predict"] = y_variable_predict
+        self.param['instance_id'] = instance_id
+
+        d = dashboard()
+        d.find(self.df_final, mode, self.param)
+
+        return True
+
+
     def ai(self, df, y, model, model_name="xgboost", mode=None):
         y_variable = "y_actual"
         y_variable_predict = "y_prediction"
