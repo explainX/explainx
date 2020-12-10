@@ -212,19 +212,19 @@ class dashboard():
         PLOTLY_LOGO = "https://i.ibb.co/ZTWtVDV/explainx-logo.png"
 
         menu = dbc.Row(
-            [
+            [   
                 dbc.Col(dbc.NavItem(dbc.NavLink("Home", href="/apps/")),
-                        style={'width': "150px", 'fontSize': '10px'}),
+                        style={'width': "150px", 'fontSize': '12px'}),
                 dbc.Col(dbc.NavItem(dbc.NavLink("Global Explanation", href="/apps/global_explanation")),
-                        style={'width': "150px", 'fontSize': '10px'}),
+                        style={'width': "150px", 'fontSize': '12px'}),
                 dbc.Col(dbc.NavItem(dbc.NavLink("Local Explanation", href="/apps/local_explanation")),
-                        style={'width': "150px", 'fontSize': '10px'}),
+                        style={'width': "150px", 'fontSize': '12px'}),
                 dbc.Col(dbc.NavItem(dbc.NavLink("Feature Interaction", href="/apps/feature_interaction")),
-                        style={'width': "150px", 'fontSize': '10px'}),
+                        style={'width': "150px", 'fontSize': '12px'}),
                 dbc.Col(dbc.NavItem(dbc.NavLink("Distributions", href="/apps/distribution")),
-                        style={'width': "150px", 'fontSize': '10px'}),
+                        style={'width': "150px", 'fontSize': '12px'}),
                 dbc.Col(dbc.NavItem(dbc.NavLink("Cohort Analysis", href="/apps/cohort")),
-                        style={'width': "150px", 'fontSize': '10px'})
+                        style={'width': "150px", 'fontSize': '12px'})
 
             ],
 
@@ -240,13 +240,20 @@ class dashboard():
                     dbc.Row(
                         [
                             dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px")),
-                            dbc.Col(dbc.NavbarBrand("explainX.ai", className="ml-2",
-                                                    style={'fontSize': '15px', 'color': 'black'})),
+                            dbc.Col(
+                                dbc.NavbarBrand("explainX.ai",
+                                            style={'fontSize': '15px', 'color': 'black'}
+                                            )),
+                            dbc.Col(
+                                dbc.Button("Explain your own model!",
+                                    color="danger",
+                                    style={
+                                        'fontSize': '12px'}))
                         ],
                         align="center",
                         no_gutters=True,
                     ),
-                    href="https://www.explainx.ai",
+                    href="https://www.explainx.ai/register",
                 ),
 
                 dbc.NavbarToggler(id="navbar-toggler"),
