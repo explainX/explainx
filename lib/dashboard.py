@@ -198,15 +198,6 @@ class dashboard():
 
         available_columns = list(df.columns)
 
-        # external_stylesheets = [dbc.themes.BOOTSTRAP,
-        #                         # {
-        #                         #     'href': 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css',
-        #                         #     'rel': 'stylesheet'
-        #                         # }
-        #                         ]
-
-        # app = JupyterDash(__name__, external_stylesheets=external_stylesheets)
-
         app.title = "explainX.ai - Main Dashboard"
 
         PLOTLY_LOGO = "https://i.ibb.co/ZTWtVDV/explainx-logo.png"
@@ -253,7 +244,7 @@ class dashboard():
                         align="center",
                         no_gutters=True,
                     ),
-                    href="https://www.explainx.ai/register",
+                    href="https://www.github.com/explainx/explainx",
                 ),
 
                 dbc.NavbarToggler(id="navbar-toggler"),
