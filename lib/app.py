@@ -12,11 +12,9 @@ external_stylesheets = ['https://raw.githubusercontent.com/rab657/explainx/maste
                             }
                             ]
 
-# external JavaScript files
-external_scripts = ['https://raw.githubusercontent.com/explainX/explainx/share_button/hotjar.js',
-                   {'src': 'https://raw.githubusercontent.com/explainX/explainx/share_button/hotjar.js'}]
 
-app = JupyterDash(__name__, external_stylesheets=external_stylesheets, suppress_callback_exceptions=True, external_scripts=external_scripts)
+
+app = JupyterDash(__name__, external_stylesheets=external_stylesheets, suppress_callback_exceptions=True)
 
 app.index_string = '''
 <!DOCTYPE html>
@@ -27,16 +25,17 @@ app.index_string = '''
         {%favicon%}
         {%css%}
         {%scripts%}
-        <script>
-            (function(h,o,t,j,a,r){
-                h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-                h._hjSettings={hjid:2146099,hjsv:6};
-                a=o.getElementsByTagName('head')[0];
-                r=o.createElement('script');r.async=1;
-                r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-                a.appendChild(r);
-            })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
-        </script>
+       <!-- Hotjar Tracking Code for http://3.128.188.55:8080/ -->
+      <script>
+          (function(h,o,t,j,a,r){
+              h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+              h._hjSettings={hjid:2146099,hjsv:6};
+              a=o.getElementsByTagName('head')[0];
+              r=o.createElement('script');r.async=1;
+              r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+              a.appendChild(r);
+          })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+      </script>
     </head>
     <body>
        
