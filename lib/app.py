@@ -24,6 +24,17 @@ app.index_string = '''
         <title>{%title%}</title>
         {%favicon%}
         {%css%}
+        
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-169309629-1"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'UA-169309629-1');
+        </script>
+
        
        <!-- Hotjar Tracking Code for http://3.128.188.55:8080/ -->
       <script>
