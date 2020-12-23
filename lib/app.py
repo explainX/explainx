@@ -12,7 +12,10 @@ external_stylesheets = ['https://raw.githubusercontent.com/rab657/explainx/maste
                             }
                             ]
 
-app = JupyterDash(__name__, external_stylesheets=external_stylesheets, suppress_callback_exceptions=True)
+# external JavaScript files
+external_scripts = ['https://www.google-analytics.com/analytics.js',]
+
+app = JupyterDash(__name__, external_stylesheets=external_stylesheets, suppress_callback_exceptions=True, external_scripts=external_scripts)
 
 app.title = "explainX.ai - Main Dashboard"
 
