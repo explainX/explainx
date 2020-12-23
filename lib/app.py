@@ -24,7 +24,7 @@ app.index_string = '''
         <title>{%title%}</title>
         {%favicon%}
         {%css%}
-        {%scripts%}
+       
        <!-- Hotjar Tracking Code for http://3.128.188.55:8080/ -->
       <script>
           (function(h,o,t,j,a,r){
@@ -42,7 +42,7 @@ app.index_string = '''
         {%app_entry%}
         <footer>
             {%config%}
-           
+            {%scripts%}
             {%renderer%}
         </footer>
        
