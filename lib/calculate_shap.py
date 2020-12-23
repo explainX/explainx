@@ -9,6 +9,7 @@ Input:
 
 """
 
+
 class calculate_shap():
     def __init__(self):
         super(calculate_shap, self).__init__()
@@ -64,15 +65,13 @@ class calculate_shap():
 
         # final_df = df.join(shap_values)
 
-        shap_columns= shap_values.columns
+        shap_columns = shap_values.columns
 
         Y = df.copy()
         for c in shap_columns:
             Y[c] = list(shap_values[c])
 
-
         return Y
-
 
     def kernel_shap(self, model, X_train):
         # use Kernel SHAP to explain test set predictions
@@ -88,15 +87,13 @@ class calculate_shap():
             shap_columns.append(i + "_impact")
         pd_shap.columns = shap_columns
 
-
-
         Y = X_train.copy()
         for c in shap_columns:
             Y[c] = list(pd_shap[c])
 
         return Y, explainer
 
-    def kernel_shap_classification(self, model, X_train,prediction_col):
+    def kernel_shap_classification(self, model, X_train, prediction_col):
         # use Kernel SHAP to explain test set predictions
         explainer = shap.KernelExplainer(model.predict_proba, X_train)
         shap_values = explainer.shap_values(X_train, nsamples=100)
@@ -110,40 +107,49 @@ class calculate_shap():
             shap_columns.append(i + "_impact")
         pd_shap.columns = shap_columns
 
-
-
         Y = X_train.copy()
         for c in shap_columns:
             Y[c] = list(pd_shap[c])
 
         return Y, explainer
 
-    def select_row_shap_values(self, shap_values,prediction_col):
+    def h2o_shap_results(self, model, h2o_df, X_train, prediction_col):
+
+        pd_shap = model.predict_contributions(h2o_df)
+
+        pd_shap = pd_shap.as_data_frame()
+        pd_shap.drop(['BiasTerm'],axis=1,inplace=True,errors='ignore')
+        shap_columns = [i + "_impact" for i in pd_shap.columns]
+        pd_shap.columns = shap_columns
+        print(shap_columns)
+        y = X_train.copy()
+        for c in shap_columns:
+            y[c] = list(pd_shap[c])
+        return y, pd_shap
+
+    def select_row_shap_values(self, shap_values, prediction_col):
 
         num_of_classes = len(shap_values)
 
-        if num_of_classes== len(prediction_col):
+        if num_of_classes == len(prediction_col):
             df_final = pd.DataFrame(shap_values)
             return df_final
 
-        point_no=0
+        point_no = 0
         df_array = []
         for p in prediction_col:
             df_array.append(shap_values[p][point_no])
-            point_no=point_no+1
+            point_no = point_no + 1
 
         df_final = pd.DataFrame(df_array)
         return df_final
 
-
-    def randomforest_shap_classification(self, model, X,prediction_col):
+    def randomforest_shap_classification(self, model, X, prediction_col):
         explainer = shap.TreeExplainer(model)
-        shap_values = explainer.shap_values(X,approximate=True)
+        shap_values = explainer.shap_values(X, approximate=True)
 
-
-        pd_shap = self.select_row_shap_values(shap_values,prediction_col)
+        pd_shap = self.select_row_shap_values(shap_values, prediction_col)
         all_columns = list(X.columns)
-
 
         pd_shap.columns = [f"{y}_impact" for y in all_columns]
 
@@ -153,19 +159,15 @@ class calculate_shap():
         for c in shap_columns:
             Y[c] = list(pd_shap[c])
 
-
         return Y, explainer
-
 
     def randomforest_shap(self, model, X):
         explainer = shap.TreeExplainer(model)
-        shap_values = explainer.shap_values(X,approximate=True)
-
+        shap_values = explainer.shap_values(X, approximate=True)
 
         pd_shap = pd.DataFrame(shap_values)
         all_columns = list(X.columns)
 
-
         pd_shap.columns = [f"{y}_impact" for y in all_columns]
 
         shap_columns = pd_shap.columns
@@ -174,9 +176,7 @@ class calculate_shap():
         for c in shap_columns:
             Y[c] = list(pd_shap[c])
 
-
         return Y, explainer
-
 
     def get_shap_values(self, x_array, model, x_variable, cat_index):
         """
@@ -191,78 +191,77 @@ class calculate_shap():
         shap_values = pd.DataFrame(data=shap_values, columns=total_columns)
         return shap_values
 
-    def find(self, model, df,prediction_col,is_classification, model_name="xgboost"):
+    def find(self, model, df, prediction_col, is_classification, model_name="xgboost"):
 
         if model_name == "xgboost":
-            df2 , explainer= self.xgboost_shap(model, df)
+            df2, explainer = self.xgboost_shap(model, df)
             return df2, explainer
 
         elif model_name == "lightgbm":
-            df2 , explainer= self.xgboost_shap(model, df)
+            df2, explainer = self.xgboost_shap(model, df)
 
             return df2, explainer
 
         elif model_name == "catboost":
             df2 = self.catboost_shap(model, df)
-            explainer= None
+            explainer = None
             return df2, explainer
 
+        elif model_name == 'h2o':
+            df2, explainer = self.h2o_shap_results(model, df, df.as_data_frame(), prediction_col)
+            return df2, explainer
 
         elif model_name == "randomforest":
             if is_classification:
-                df2 , explainer= self.randomforest_shap_classification(model, df, prediction_col)
+                df2, explainer = self.randomforest_shap_classification(model, df, prediction_col)
             else:
-                df2 , explainer= self.randomforest_shap(model, df)
+                df2, explainer = self.randomforest_shap(model, df)
             return df2, explainer
 
         elif model_name == "svm":
             if is_classification:
-                df2 , explainer= self.kernel_shap_classification(model, df,prediction_col)
+                df2, explainer = self.kernel_shap_classification(model, df, prediction_col)
             else:
                 df2, explainer = self.kernel_shap(model, df)
             return df2, explainer
 
         elif model_name == "knn":
             if is_classification:
-                df2, explainer = self.kernel_shap_classification(model, df,prediction_col)
+                df2, explainer = self.kernel_shap_classification(model, df, prediction_col)
             else:
-                df2 , explainer= self.kernel_shap(model, df)
+                df2, explainer = self.kernel_shap(model, df)
             return df2, explainer
 
         elif model_name == "logisticregression":
             if is_classification:
-                df2 , explainer= self.kernel_shap_classification(model, df,prediction_col)
+                df2, explainer = self.kernel_shap_classification(model, df, prediction_col)
             else:
                 df2, explainer = self.kernel_shap(model, df)
             return df2, explainer
 
         elif model_name == "decisiontree":
             if is_classification:
-                df2, explainer = self.kernel_shap_classification(model, df,prediction_col)
+                df2, explainer = self.kernel_shap_classification(model, df, prediction_col)
             else:
                 df2, explainer = self.kernel_shap(model, df)
             return df2, explainer
 
         elif model_name == "neuralnetwork":
             if is_classification:
-                df2, explainer = self.kernel_shap_classification(model, df,prediction_col)
+                df2, explainer = self.kernel_shap_classification(model, df, prediction_col)
             else:
                 df2, explainer = self.kernel_shap(model, df)
             return df2, explainer
 
-        elif model_name=="gradientboostingregressor":
-            df2 , explainer= self.xgboost_shap(model, df)
+        elif model_name == "gradientboostingregressor":
+            df2, explainer = self.xgboost_shap(model, df)
             return df2, explainer
         elif "gradientboosting" in model_name:
             df2, explainer = self.xgboost_shap(model, df)
             return df2, explainer
         else:
             if is_classification:
-                df2 , explainer= self.kernel_shap_classification(model, df,prediction_col)
+                df2, explainer = self.kernel_shap_classification(model, df, prediction_col)
             else:
-                df2 , explainer= self.kernel_shap(model, df)
+                df2, explainer = self.kernel_shap(model, df)
             return df2, explainer
-
-
-
-
