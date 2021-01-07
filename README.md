@@ -239,7 +239,7 @@ Please click on the image below to load the tutorial:
 |8. | DecisionTreeClassifier|Live |
 |9. | All Scikit-learn Models|Live |
 |10.| Neural Networks|Live |
-|11.| H2O.ai AutoML | Next in Line |
+|11.| H2O.ai AutoML | Live |
 |12.| TensorFlow Models | Coming Soon |
 |13.| PyTorch Models | Coming Soon |
 
