@@ -733,7 +733,7 @@ class dashboard():
                                dev_tools_hot_reload=True)
         else:
             try:
-                app.run_server(host='0.0.0.0', port=port, debug=debug_value, dev_tools_ui=debug_value,
+                app.run_server(host='127.0.0.1', port=port, debug=debug_value, dev_tools_ui=debug_value,
                                dev_tools_props_check=debug_value, dev_tools_silence_routes_logging=True,
                                dev_tools_hot_reload=True)
             except:
@@ -741,12 +741,12 @@ class dashboard():
                 try:
                     try:
                         port = self.find_free_port()
-                        app.run_server(host='0.0.0.0', port=port, debug=debug_value, dev_tools_ui=debug_value,
+                        app.run_server(host='127.0.0.1', port=port, debug=debug_value, dev_tools_ui=debug_value,
                                        dev_tools_props_check=debug_value, dev_tools_silence_routes_logging=True,
                                        dev_tools_hot_reload=True)
                     except:
                         port = self.find_free_port()
-                        app.run_server(host='0.0.0.0', port=port, debug=debug_value, dev_tools_ui=debug_value,
+                        app.run_server(host='127.0.0.1', port=port, debug=debug_value, dev_tools_ui=debug_value,
                                        dev_tools_props_check=debug_value, dev_tools_silence_routes_logging=True,
                                        dev_tools_hot_reload=True)
                 except:

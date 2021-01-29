@@ -4,7 +4,7 @@
 #### ExplainX is a model explainability/interpretability framework for data scientists and business users.
 
 [![Supported Python versions](https://img.shields.io/badge/python-3.6%20|%203.7|%203.8-brightgreen.svg)](https://pypi.org/project/explainx/)
-[![Downloads](https://pepy.tech/badge/dalex)](https://pepy.tech/project/dalex)
+[![Downloads](https://pepy.tech/badge/explainx)](https://pepy.tech/project/dalex)
 ![Maintenance](https://img.shields.io/maintenance/yes/2020?style=flat-square)
 [![Website](https://img.shields.io/website?url=https%3A%2F%2Fwww.explainx.ai%2F)](https://www.explainx.ai/)
 
@@ -111,7 +111,7 @@ explainx.ai(X_test, Y_test, model, model_name="randomforest")
 
 ```python
 
-App running on https://0.0.0.0:8080
+App running on https://127.0.0.1:8080
 
 ```
 
