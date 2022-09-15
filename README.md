@@ -1,6 +1,7 @@
 # explainX: Explainable AI Framework for Data Scientists
 <img src="explainx_logo.png" align="right" width="150"/>
 
+### We are looking for co-authors to take this project forward. Reach out @ ms8909@nyu.edu
 #### ExplainX is a model explainability/interpretability framework for data scientists and business users.
 
 [![Supported Python versions](https://img.shields.io/badge/python-3.6%20|%203.7|%203.8-brightgreen.svg)](https://pypi.org/project/explainx/)
