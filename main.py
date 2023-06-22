@@ -1,3 +1,7 @@
+#ipython for ali's local env
+cd ..
+cd explainx_development
+
 from explainx import *
 from explainx.lib.imports import *
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
