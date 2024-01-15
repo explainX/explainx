@@ -6,7 +6,7 @@ dash_html_components==1.0.3
 plotly==4.5.1
 dash_table==4.7.0
 pandas==1.0.4
-numpy==1.18.1
+numpy==1.22.0
 dash_bootstrap_components==0.10.2
 cvxopt==1.2.4
 scikit-learn==0.22.1
