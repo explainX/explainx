@@ -8,7 +8,7 @@ dash_table==4.7.0
 pandas==1.0.4
 numpy==1.22.0
 dash_bootstrap_components==0.10.2
-cvxopt==1.2.4
+cvxopt==1.2.7
 scikit-learn==0.22.1
 scipy==1.10.0
 pandasql==0.7.3
