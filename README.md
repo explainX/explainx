@@ -7,12 +7,12 @@
 [![Supported Python versions](https://img.shields.io/badge/python-3.6%20|%203.7|%203.8-brightgreen.svg)](https://pypi.org/project/explainx/)
 [![Downloads](https://pepy.tech/badge/explainx)](https://pepy.tech/project/explainx)
 ![Maintenance](https://img.shields.io/maintenance/yes/2020?style=flat-square)
-[![Website](https://img.shields.io/website?url=https%3A%2F%2Fwww.explainx.ai%2F)](https://www.explainx.ai/)
+[![Website](https://img.shields.io/website?)]()
 
 
-Use explainX to understand overall model behavior, explain the "why" behind model predictions, remove biases and create convincing explanations for your business stakeholders. [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Explain%20any%20black-box%20Machine%20Learning%20model%20in%20just%20one%20line%20of%20code%21&url=https://www.explainx.ai&hashtags=xai,explainable_ai,explainable_machine_learning,trust_in_ai,transparent_ai)
+Use explainX to understand overall model behavior, explain the "why" behind model predictions, remove biases and create convincing explanations for your business stakeholders. [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Explain%20any%20black-box%20Machine%20Learning%20model%20in%20just%20one%20line%20of%20code%21&hashtags=xai,explainable_ai,explainable_machine_learning,trust_in_ai,transparent_ai)
 
-<img width="1000" src="rf_starter_example.png" alt="explainX.ai">
+<img width="1000" src="rf_starter_example.png" alt="explainX AI explainable AI library">
 
 
 #### Why we need model explainability & interpretibility?
@@ -49,7 +49,6 @@ To download on Windows, please install [Microsoft C++ Build Tools](https://visua
 
 ## Installation on the cloud
 If you are using a notebook instance on the cloud (AWS SageMaker, Colab, Azure), please follow our step-by-step guide to install & run explainX cloud. 
-[Cloud Installation Instructions](https://docs.explainx.ai/getting-started/installation)
 
 
 ## Usage (Example)
@@ -177,13 +176,9 @@ explainx_modules.cohort_analysis()
 To access the modules within your jupyter notebook as IFrames, just pass the <b>mode='inline'</b> argument. 
 
 
-<b>For detailed description into each module, check out our documentation at https://www.docs.explainx.ai</b>
-
-
 ## Cloud Installation
 
 **If you are running explainX on the cloud e.g., AWS Sagemaker?** **https://0.0.0.0:8080** will not work.
-Please visit our documentation for installation instructions for the cloud: [Cloud Installation Instructions](https://docs.explainx.ai/getting-started/installation)
 
 After installation is complete, just open your **terminal** and run the following command.
 ```jupyter
@@ -197,7 +192,7 @@ lt -h "https://serverless.social" -p 8080
 
 ```
 
-<img width="1000" src="demo-explainx-with-sound.gif" alt="explainX.ai">
+<img width="1000" src="demo-explainx-with-sound.gif" alt="explainX ai explainable ai">
 
 
 
