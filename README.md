@@ -96,11 +96,38 @@ Runnable, studyable examples for **every** framework live in
 
 ## Install
 
+> ⚠️ **`pip install explainx` does not give you 3.0 yet.** This LLM-native rewrite
+> (v3.0.0) has not been published to PyPI, so `pip install explainx` currently
+> still installs the **legacy 2.x** package. Until the 3.0 release is on PyPI,
+> use one of the methods below.
+
+**From PyPI** (works once 3.0.0 is published):
+
 ```sh
-pip install "explainx[all]"   # core + SHAP + MCP + drift + LLM narration
+pip install "explainx[all]"   # core + SHAP + MCP + drift + LLM narration + dashboard
 # or minimal:
 pip install explainx          # core only (extras optional)
 ```
+
+**From GitHub** (installs the current 3.0 code on `master`):
+
+```sh
+pip install "git+https://github.com/explainX/explainx.git"
+# with all optional extras:
+pip install "explainx[all] @ git+https://github.com/explainX/explainx.git"
+```
+
+**From source** (for development / running the examples & tests):
+
+```sh
+git clone https://github.com/explainX/explainx.git
+cd explainx
+pip install -e ".[all]"       # editable install with every extra
+pytest                        # run the test suite
+```
+
+Extras can be combined or used individually: `shap`, `mcp`, `drift`, `llm`,
+`dashboard`, or `all` (e.g. `pip install "explainx[shap,dashboard]"`).
 
 ## Python API
 
