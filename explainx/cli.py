@@ -1,9 +1,9 @@
 """Command-line interface: explain a saved model without writing code.
 
-    explainx-llm report   --model m.joblib --data d.csv --target y --sensitive gender --html out.html
-    explainx-llm bias     --model m.joblib --data d.csv --target y --sensitive gender
-    explainx-llm explain  --model m.joblib --data d.csv --target y --row 0
-    explainx-llm drift     --reference train.csv --current prod.csv
+    explainx report   --model m.joblib --data d.csv --target y --sensitive gender --html out.html
+    explainx bias     --model m.joblib --data d.csv --target y --sensitive gender
+    explainx explain  --model m.joblib --data d.csv --target y --row 0
+    explainx drift     --reference train.csv --current prod.csv
 
 Output is JSON on stdout (pipe it into `jq`, a file, or an agent), with an
 optional rendered HTML report.
@@ -27,7 +27,7 @@ def _common(p: argparse.ArgumentParser, target: bool = True):
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="explainx-llm", description="LLM-native model explainability.")
+    parser = argparse.ArgumentParser(prog="explainx", description="LLM-native model explainability.")
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_report = sub.add_parser("report", help="Full explainability report.")

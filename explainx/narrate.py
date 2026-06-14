@@ -13,7 +13,7 @@ explanations: Claude narrates facts it is given rather than inventing them.
 
 Requires the optional ``anthropic`` package and an ``ANTHROPIC_API_KEY``::
 
-    pip install "explainx-llm[llm]"
+    pip install "explainx[llm]"
 """
 
 from __future__ import annotations
@@ -73,7 +73,7 @@ def narrate_report(
     except Exception as exc:  # pragma: no cover - import guard
         raise ImportError(
             "narrate_report requires the 'anthropic' package. "
-            "Install it with `pip install \"explainx-llm[llm]\"`."
+            "Install it with `pip install \"explainx[llm]\"`."
         ) from exc
 
     client = anthropic.Anthropic()
