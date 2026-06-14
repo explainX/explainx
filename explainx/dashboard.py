@@ -62,6 +62,7 @@ VIEWS = [
     "Full report", "Global importance", "Local explanation", "Counterfactual / recourse",
     "Feature effects (PDP / ALE)", "Interactions", "Fairness", "Bias mitigation",
     "Conformal uncertainty", "Prototypes & criticisms", "Explanation quality", "Data drift",
+    "Error analysis", "Label issues", "Target leakage", "Calibration",
 ]
 
 
@@ -278,6 +279,63 @@ def render_drift(st, ctx: Ctx) -> None:
     st.dataframe(pd.DataFrame([f.to_dict() for f in report.features]).set_index("feature"))
 
 
+def render_error_analysis(st, ctx: Ctx) -> None:
+    import pandas as pd
+
+    if ctx.y is None:
+        st.info("Select a target column to run error analysis.")
+        return
+    ea = ctx.ex.error_analysis()
+    st.metric(f"Baseline {ea.metric}", f"{ea.baseline_error:.3f}")
+    st.dataframe(pd.DataFrame([s.to_dict() for s in ea.slices]))
+    st.write("• " + ea.recommendation)
+
+
+def render_label_issues(st, ctx: Ctx) -> None:
+    import pandas as pd
+
+    if ctx.y is None:
+        st.info("Select a target column to detect label issues.")
+        return
+    li = ctx.ex.label_issues(top_k=50)
+    c1, c2 = st.columns(2)
+    c1.metric("Likely-mislabeled", li.n_issues)
+    c2.metric("Estimated noise rate", f"{li.estimated_noise_rate:.1%}")
+    st.dataframe(pd.DataFrame([i.to_dict() for i in li.issues]))
+    st.write("• " + li.recommendation)
+
+
+def render_leakage(st, ctx: Ctx) -> None:
+    import pandas as pd
+
+    if ctx.y is None:
+        st.info("Select a target column to scan for leakage.")
+        return
+    lk = ctx.ex.leakage()
+    if lk.suspected_leakage:
+        st.error("Suspected leakage: " + ", ".join(lk.suspected_leakage))
+    else:
+        st.success("No obvious target leakage.")
+    st.dataframe(pd.DataFrame([f.to_dict() for f in lk.features]).set_index("feature"))
+    st.write("• " + lk.recommendation)
+
+
+def render_calibration(st, ctx: Ctx) -> None:
+    import pandas as pd
+
+    if ctx.y is None:
+        st.info("Select a target column to assess calibration.")
+        return
+    cal = ctx.ex.calibration()
+    c1, c2 = st.columns(2)
+    c1.metric("ECE", f"{cal.ece:.3f}")
+    c2.metric("Brier", f"{cal.brier:.3f}")
+    if cal.bins:
+        df = pd.DataFrame([b.to_dict() for b in cal.bins]).set_index("mean_confidence")
+        st.line_chart(df[["accuracy"]])
+    st.write("• " + cal.recommendation)
+
+
 RENDERERS = {
     "Full report": render_full_report,
     "Global importance": render_global_importance,
@@ -291,6 +349,10 @@ RENDERERS = {
     "Prototypes & criticisms": render_prototypes,
     "Explanation quality": render_quality,
     "Data drift": render_drift,
+    "Error analysis": render_error_analysis,
+    "Label issues": render_label_issues,
+    "Target leakage": render_leakage,
+    "Calibration": render_calibration,
 }
 
 

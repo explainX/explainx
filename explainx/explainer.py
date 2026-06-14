@@ -30,6 +30,8 @@ from .mitigation import mitigate_demographic_parity
 from .interactions import feature_interactions
 from .prototypes import prototypes_and_criticisms
 from .schema import PrototypesResult
+from .adapters import wrap_model
+from .diagnostics import error_analysis, find_label_issues, detect_leakage, assess_calibration
 from .summary import build_summary
 
 
@@ -45,10 +47,16 @@ class ModelExplainer:
         problem_type: Optional[str] = None,
         use_shap: bool = True,
     ):
-        self.model = model
+        # Adapt non-sklearn frameworks (native boosters, Keras, PyTorch, ...) to
+        # the predict/predict_proba convention; sklearn-compatible models pass through.
+        self.model = wrap_model(model)
         self.X = as_dataframe(X, feature_names)
         self.y = None if y is None else np.asarray(y)
-        self.problem_type = problem_type or detect_problem_type(model, self.y)
+        self.problem_type = (
+            problem_type
+            or getattr(self.model, "problem_type", None)
+            or detect_problem_type(self.model, self.y)
+        )
         self.use_shap = use_shap
 
     # --- individual analyses ------------------------------------------------
@@ -148,6 +156,27 @@ class ModelExplainer:
         return PrototypesResult(
             method="mmd_rbf", prototype_indices=protos, criticism_indices=crits
         )
+
+    # --- data-centric diagnostics (improve accuracy) ------------------------
+    def _require_y(self, what):
+        if self.y is None:
+            raise ValueError(f"{what} requires ground-truth y.")
+
+    def error_analysis(self, top_k: int = 8, min_lift: float = 1.5):
+        self._require_y("error_analysis")
+        return error_analysis(self.model, self.X, self.y, self.problem_type, top_k=top_k, min_lift=min_lift)
+
+    def label_issues(self, cv: int = 3, top_k: int = 50):
+        self._require_y("label_issues")
+        return find_label_issues(self.model, self.X, self.y, cv=cv, top_k=top_k)
+
+    def leakage(self, threshold: Optional[float] = None):
+        self._require_y("leakage")
+        return detect_leakage(self.model, self.X, self.y, self.problem_type, threshold=threshold)
+
+    def calibration(self, n_bins: int = 10):
+        self._require_y("calibration")
+        return assess_calibration(self.model, self.X, self.y, n_bins=n_bins)
 
     # --- full report --------------------------------------------------------
     def report(

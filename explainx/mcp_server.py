@@ -290,6 +290,34 @@ def _make_server():
         return {"prototype_indices": protos, "criticism_indices": crits}
 
     @mcp.tool()
+    def error_analysis(model_path: str, data_path: str, target_column: str, top_k: int = 8) -> dict:
+        """Find the data slices where the model fails worst (slice discovery)."""
+        model = load_model(model_path)
+        X, y = load_xy(data_path, target_column)
+        return ModelExplainer(model, X, y).error_analysis(top_k=top_k).to_dict()
+
+    @mcp.tool()
+    def label_issues(model_path: str, data_path: str, target_column: str, top_k: int = 50) -> dict:
+        """Flag likely-mislabeled rows (confident learning) to review/relabel."""
+        model = load_model(model_path)
+        X, y = load_xy(data_path, target_column)
+        return ModelExplainer(model, X, y).label_issues(top_k=top_k).to_dict()
+
+    @mcp.tool()
+    def detect_target_leakage(model_path: str, data_path: str, target_column: str) -> dict:
+        """Detect features that alone predict the target suspiciously well (leakage)."""
+        model = load_model(model_path)
+        X, y = load_xy(data_path, target_column)
+        return ModelExplainer(model, X, y).leakage().to_dict()
+
+    @mcp.tool()
+    def assess_calibration(model_path: str, data_path: str, target_column: str) -> dict:
+        """Measure probability calibration (ECE, Brier) and recommend a fix."""
+        model = load_model(model_path)
+        X, y = load_xy(data_path, target_column)
+        return ModelExplainer(model, X, y).calibration().to_dict()
+
+    @mcp.tool()
     def html_report(
         model_path: str,
         data_path: str,

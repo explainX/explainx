@@ -47,6 +47,8 @@ from .drift import detect_drift
 from .report_html import report_to_html, save_html
 from .conformal import conformal_predict
 from .prototypes import prototypes_and_criticisms
+from .adapters import wrap_model
+from .diagnostics import error_analysis, find_label_issues, detect_leakage, assess_calibration
 
 __all__ = [
     "explain_model",
@@ -78,6 +80,11 @@ __all__ = [
     "PrototypesResult",
     "conformal_predict",
     "prototypes_and_criticisms",
+    "wrap_model",
+    "error_analysis",
+    "find_label_issues",
+    "detect_leakage",
+    "assess_calibration",
 ]
 
 __version__ = "3.0.0"

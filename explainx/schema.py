@@ -291,6 +291,83 @@ class PrototypesResult(_Serializable):
 
 
 @dataclass
+class ErrorSlice(_Serializable):
+    feature: str
+    condition: str
+    size: int
+    error: float
+    baseline_error: float
+    lift: float  # slice error / baseline error (>1 means worse than average)
+
+
+@dataclass
+class ErrorAnalysis(_Serializable):
+    """Where the model fails: data slices with elevated error (slice discovery)."""
+
+    problem_type: str
+    metric: str
+    baseline_error: float
+    slices: list[ErrorSlice] = field(default_factory=list)
+    recommendation: str = ""
+
+
+@dataclass
+class LabelIssue(_Serializable):
+    index: int
+    given_label: Any
+    suggested_label: Any
+    confidence: float
+
+
+@dataclass
+class LabelIssues(_Serializable):
+    """Likely-mislabeled rows (confident-learning style) to review/relabel."""
+
+    n_checked: int
+    n_issues: int
+    estimated_noise_rate: float
+    out_of_sample: bool
+    issues: list[LabelIssue] = field(default_factory=list)
+    recommendation: str = ""
+
+
+@dataclass
+class LeakageFeature(_Serializable):
+    feature: str
+    solo_score: float
+    suspected: bool
+
+
+@dataclass
+class LeakageReport(_Serializable):
+    """Features that alone predict the target suspiciously well (target leakage)."""
+
+    metric: str
+    threshold: float
+    features: list[LeakageFeature] = field(default_factory=list)
+    suspected_leakage: list[str] = field(default_factory=list)
+    recommendation: str = ""
+
+
+@dataclass
+class CalibrationBin(_Serializable):
+    mean_confidence: float
+    accuracy: float
+    count: int
+
+
+@dataclass
+class CalibrationReport(_Serializable):
+    """How well predicted probabilities match observed frequencies."""
+
+    ece: float
+    brier: float
+    well_calibrated: bool
+    bins: list[CalibrationBin] = field(default_factory=list)
+    recommendation: str = ""
+
+
+@dataclass
 class ExplanationReport(_Serializable):
     """The full explainability report for a model + dataset."""
 
