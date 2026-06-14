@@ -54,10 +54,45 @@ additions (ALE, anchors) and a 2024–2025 research frontier most tools skip:
 | Metrics | classification + regression | accuracy/precision/recall/f1/auc, r²/mae/rmse |
 | Monitoring | **data drift** (PSI + KS) | reference vs. current dataset |
 | **LLM narration** | Claude (`claude-opus-4-8`) | plain-language briefings / Q&A grounded in the report |
-| Reporting | **HTML export** + **CLI** | shareable artifact; no-code usage |
+| Reporting | **HTML export** + **CLI** + **dashboard** | shareable artifact; no-code usage |
 
-Works with any estimator following the scikit-learn `predict` / `predict_proba`
-convention (scikit-learn, XGBoost, LightGBM, CatBoost, …).
+### Improve accuracy (data-centric diagnostics)
+
+Beyond explaining a model, explainX helps you make it **more accurate** — the
+data-centric-AI playbook, returned as actionable reports:
+
+| Diagnostic | What it finds | Why it improves accuracy |
+|---|---|---|
+| **Error analysis** | data slices with the highest error (slice discovery) | tells you where to add data / features or split the model |
+| **Label issues** | likely-mislabeled rows (confident learning) | cleaning labels is often the highest-ROI accuracy lever |
+| **Target leakage** | features that alone predict the target | catches inflated offline accuracy that collapses in production |
+| **Calibration** | ECE / Brier + reliability | flags untrustworthy probabilities and recommends a fix |
+
+```python
+ex.error_analysis()   # ErrorAnalysis: worst slices + recommendation
+ex.label_issues()     # LabelIssues: rows to relabel (cross-validated)
+ex.leakage()          # LeakageReport: suspected leaky features
+ex.calibration()      # CalibrationReport: ECE, Brier, fix recommendation
+```
+
+## Works with any ML framework
+
+explainX speaks the scikit-learn `predict` / `predict_proba` convention, so many
+frameworks work **with no wrapping**: scikit-learn, **XGBoost**, **LightGBM**,
+**CatBoost** (their sklearn-API estimators). For anything else, `wrap_model()`
+adapts it — native XGBoost/LightGBM `Booster`s, **Keras/TensorFlow**, **PyTorch**,
+**statsmodels**, or any custom prediction function:
+
+```python
+from explainx import explain_model, wrap_model
+
+explain_model(sklearn_or_xgb_or_lgbm_or_catboost_model, X, y)      # direct
+explain_model(wrap_model(keras_or_torch_model, task="classification"), X, y)
+explain_model(wrap_model(predict_proba_fn=my_api_call, classes=[0, 1]), X, y)
+```
+
+Runnable, studyable examples for **every** framework live in
+[`examples/`](examples/) (one file per framework).
 
 ## Install
 
@@ -207,6 +242,10 @@ The agent saves a fitted model and dataset to disk, then calls tools by path:
 | `feature_interactions_tool` | Strongest pairwise interactions (H-statistic) |
 | `prototypes_and_criticisms_tool` | Representative + atypical rows |
 | `detect_data_drift` | Distribution drift between two datasets |
+| `error_analysis` | Worst-performing data slices (slice discovery) |
+| `label_issues` | Likely-mislabeled rows (confident learning) |
+| `detect_target_leakage` | Features that leak the target |
+| `assess_calibration` | Probability calibration (ECE / Brier) |
 | `html_report` | Write a shareable HTML report |
 
 Each returns a JSON-ready dict the agent can reason over — e.g. read a
