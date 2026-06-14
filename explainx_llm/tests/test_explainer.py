@@ -239,6 +239,115 @@ def test_cli_bias(tmp_path):
     assert rc == 0
 
 
+def test_conformal_classification_coverage(rf_model, classification_data):
+    from explainx_llm import ModelExplainer
+
+    X, y = classification_data
+    # Split into calibration and test halves.
+    n = len(X)
+    Xc, yc = X.iloc[: n // 2], y[: n // 2]
+    Xt, yt = X.iloc[n // 2 :], y[n // 2 :]
+    res = ModelExplainer(rf_model, X, y).conformal(Xc, yc, Xt, alpha=0.1, y_test=yt)
+    assert res.problem_type == "classification"
+    assert res.prediction_sets is not None
+    # Empirical coverage should be roughly at/above the 0.9 target (allow slack).
+    assert res.empirical_coverage is not None and res.empirical_coverage >= 0.8
+    json.dumps(res.to_dict())
+
+
+def test_conformal_regression_interval():
+    from sklearn.linear_model import LinearRegression
+    from sklearn.datasets import make_regression
+    from explainx_llm import ModelExplainer
+
+    X, y = make_regression(n_samples=300, n_features=4, noise=5.0, random_state=0)
+    cols = [f"f{i}" for i in range(X.shape[1])]
+    Xdf = pd.DataFrame(X, columns=cols)
+    model = LinearRegression().fit(Xdf, y)
+    n = len(Xdf)
+    res = ModelExplainer(model, Xdf, y).conformal(
+        Xdf.iloc[: n // 2], y[: n // 2], Xdf.iloc[n // 2 :], alpha=0.1, y_test=y[n // 2 :]
+    )
+    assert res.intervals is not None
+    assert res.average_interval_width > 0
+    assert res.empirical_coverage >= 0.8
+
+
+def test_recourse_respects_immutable_feature():
+    from sklearn.ensemble import RandomForestClassifier
+    from explainx_llm import ModelExplainer
+
+    rng = np.random.RandomState(3)
+    n = 400
+    gender = rng.randint(0, 2, n)
+    score = rng.normal(size=n)
+    y = ((score + 1.2 * gender) > 0).astype(int)
+    X = pd.DataFrame({"gender": gender, "score": score})
+    model = RandomForestClassifier(n_estimators=40, random_state=0).fit(X, y)
+
+    idx = int(np.where(model.predict(X) == 0)[0][0])
+    cf = ModelExplainer(model, X, y).recourse(idx, immutable_features=["gender"])
+    # gender must never appear among the proposed changes.
+    assert all(ch.feature != "gender" for ch in cf.changes)
+
+
+def test_bias_mitigation_reduces_parity_gap():
+    from sklearn.ensemble import RandomForestClassifier
+    from explainx_llm import ModelExplainer
+
+    rng = np.random.RandomState(0)
+    n = 600
+    gender = rng.randint(0, 2, n)
+    score = rng.normal(size=n)
+    approve = ((score + 1.8 * gender) > 0).astype(int)
+    X = pd.DataFrame({"gender": gender, "score": score})
+    model = RandomForestClassifier(n_estimators=40, random_state=0).fit(X, approve)
+
+    res = ModelExplainer(model, X, approve).mitigate_bias("gender")
+    assert res.parity_gap_after <= res.parity_gap_before + 1e-9
+    assert len(res.thresholds) == 2
+
+
+def test_feature_interactions(rf_model, classification_data):
+    from explainx_llm import ModelExplainer
+
+    X, y = classification_data
+    res = ModelExplainer(rf_model, X, y).interactions(top_k=3)
+    assert res.method == "friedman_h"
+    assert len(res.pairs) <= 3
+    for p in res.pairs:
+        assert 0.0 <= p.strength <= 1.0
+
+
+def test_prototypes_and_criticisms(classification_data):
+    from explainx_llm import prototypes_and_criticisms
+
+    X, _ = classification_data
+    protos, crits = prototypes_and_criticisms(X, n_prototypes=4, n_criticisms=2)
+    assert len(protos) == 4
+    assert len(set(protos)) == 4  # distinct
+    assert not (set(protos) & set(crits))  # disjoint
+
+
+def test_narrate_prompt_builder():
+    """The prompt builder is pure and testable without the API/network."""
+    from explainx_llm.narrate import build_prompt, DEFAULT_MODEL
+    from explainx_llm import explain_model
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.datasets import make_classification
+
+    assert DEFAULT_MODEL == "claude-opus-4-8"
+    X, y = make_classification(n_samples=120, n_features=4, random_state=0)
+    Xdf = pd.DataFrame(X, columns=[f"f{i}" for i in range(4)])
+    model = RandomForestClassifier(n_estimators=20, random_state=0).fit(Xdf, y)
+    report = explain_model(model, Xdf, y, n_local=1)
+
+    prompt = build_prompt(report, question="Why was row 0 predicted that way?")
+    assert "json" in prompt.lower()
+    assert "row 0" in prompt
+    assert report.model_name in prompt
+
+
 def test_fairness_no_bias_when_balanced():
     from sklearn.ensemble import RandomForestClassifier
 

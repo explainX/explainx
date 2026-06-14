@@ -28,8 +28,9 @@ dependencies = [
 shap = ["shap>=0.44"]
 mcp = ["mcp>=1.0.0"]
 drift = ["scipy>=1.7"]   # enables the Kolmogorov-Smirnov drift test (PSI works without it)
-all = ["shap>=0.44", "mcp>=1.0.0", "scipy>=1.7"]
-dev = ["pytest>=7.0", "shap>=0.44", "mcp>=1.0.0", "scipy>=1.7"]
+llm = ["anthropic>=0.40"]   # LLM narration of reports via Claude
+all = ["shap>=0.44", "mcp>=1.0.0", "scipy>=1.7", "anthropic>=0.40"]
+dev = ["pytest>=7.0", "shap>=0.44", "mcp>=1.0.0", "scipy>=1.7", "anthropic>=0.40"]
 
 [project.scripts]
 explainx-mcp = "explainx_llm.mcp_server:main"

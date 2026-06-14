@@ -216,6 +216,80 @@ def _make_server():
         ).to_dict()
 
     @mcp.tool()
+    def conformal_prediction(
+        model_path: str,
+        calibration_path: str,
+        data_path: str,
+        target_column: str,
+        alpha: float = 0.1,
+    ) -> dict:
+        """Distribution-free uncertainty: conformal prediction sets / intervals.
+
+        Needs a labeled calibration dataset (calibration_path) separate from the
+        data to predict on (data_path). Guarantees ~(1-alpha) coverage.
+        """
+        from .conformal import conformal_predict
+
+        model = load_model(model_path)
+        X_cal, y_cal = load_xy(calibration_path, target_column)
+        X_test, y_test = load_xy(data_path, target_column)
+        ex = ModelExplainer(model, X_cal, y_cal)
+        return conformal_predict(
+            model, X_cal, y_cal, X_test, ex.problem_type, alpha=alpha, y_test=y_test
+        ).to_dict()
+
+    @mcp.tool()
+    def actionable_recourse(
+        model_path: str,
+        data_path: str,
+        row_index: int,
+        target_column: Optional[str] = None,
+        immutable_features: Optional[list[str]] = None,
+        max_changes: int = 5,
+    ) -> dict:
+        """Minimal *actionable* change that flips a decision (respects immutable features)."""
+        model = load_model(model_path)
+        X, y = load_xy(data_path, target_column)
+        return (
+            ModelExplainer(model, X, y)
+            .recourse(row_index, immutable_features=immutable_features, max_changes=max_changes)
+            .to_dict()
+        )
+
+    @mcp.tool()
+    def mitigate_bias(
+        model_path: str,
+        data_path: str,
+        sensitive_feature: str,
+        target_column: Optional[str] = None,
+    ) -> dict:
+        """Recommend per-group decision thresholds that equalize selection rate."""
+        model = load_model(model_path)
+        X, y = load_xy(data_path, target_column)
+        return ModelExplainer(model, X, y).mitigate_bias(sensitive_feature).to_dict()
+
+    @mcp.tool()
+    def feature_interactions_tool(
+        model_path: str, data_path: str, target_column: Optional[str] = None, top_k: int = 5
+    ) -> dict:
+        """Rank the strongest pairwise feature interactions (Friedman H-statistic)."""
+        model = load_model(model_path)
+        X, y = load_xy(data_path, target_column)
+        return ModelExplainer(model, X, y).interactions(top_k=top_k).to_dict()
+
+    @mcp.tool()
+    def prototypes_and_criticisms_tool(
+        data_path: str, n_prototypes: int = 5, n_criticisms: int = 3
+    ) -> dict:
+        """Representative prototype rows and atypical criticism rows for a dataset."""
+        from .io import load_dataframe
+        from .prototypes import prototypes_and_criticisms
+
+        df = load_dataframe(data_path)
+        protos, crits = prototypes_and_criticisms(df, n_prototypes, n_criticisms)
+        return {"prototype_indices": protos, "criticism_indices": crits}
+
+    @mcp.tool()
     def html_report(
         model_path: str,
         data_path: str,

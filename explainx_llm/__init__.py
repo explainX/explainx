@@ -37,9 +37,16 @@ from .schema import (
     ExplanationQuality,
     DriftReport,
     DriftFeature,
+    ConformalResult,
+    MitigationResult,
+    InteractionResult,
+    InteractionPair,
+    PrototypesResult,
 )
 from .drift import detect_drift
 from .report_html import report_to_html, save_html
+from .conformal import conformal_predict
+from .prototypes import prototypes_and_criticisms
 
 __all__ = [
     "explain_model",
@@ -64,6 +71,13 @@ __all__ = [
     "detect_drift",
     "report_to_html",
     "save_html",
+    "ConformalResult",
+    "MitigationResult",
+    "InteractionResult",
+    "InteractionPair",
+    "PrototypesResult",
+    "conformal_predict",
+    "prototypes_and_criticisms",
 ]
 
 __version__ = "0.1.0"

@@ -36,10 +36,21 @@ def find_counterfactual(
     desired_class: Any = None,
     max_changes: int = 4,
     background: Optional[pd.DataFrame] = None,
+    immutable_features: Optional[list] = None,
+    feature_directions: Optional[dict] = None,
 ) -> Counterfactual:
+    """Find the smallest change that flips a prediction.
+
+    For *actionable recourse*, pass ``immutable_features`` (columns that can
+    never change, e.g. ``age``, ``gender``) and/or ``feature_directions`` mapping
+    a column to ``"increase"`` or ``"decrease"`` (e.g. income can only go up).
+    The search then proposes only realistic, permitted edits.
+    """
     if problem_type != "classification":
         raise ValueError("Counterfactuals are currently supported for classification only.")
 
+    immutable = set(immutable_features or [])
+    directions = feature_directions or {}
     background = X if background is None else background
     instance = X.iloc[[index]].copy()
     original_pred = predict(model, instance)[0]
@@ -70,10 +81,17 @@ def find_counterfactual(
         best_gain, best_col, best_val = -np.inf, None, None
         base_score = desired_score(current)
         for col in X.columns:
-            if col in changed:
+            if col in changed or col in immutable:
                 continue
+            current_val = current.iloc[0][col]
             for val in candidates[col]:
-                if val == current.iloc[0][col]:
+                if val == current_val:
+                    continue
+                # Respect monotonic recourse constraints when provided.
+                direction = directions.get(col)
+                if direction == "increase" and not val > current_val:
+                    continue
+                if direction == "decrease" and not val < current_val:
                     continue
                 trial = current.copy()
                 trial[col] = val

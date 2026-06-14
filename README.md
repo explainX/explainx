@@ -45,9 +45,15 @@ additions (ALE, anchors) and a 2024–2025 research frontier most tools skip:
 | Global surrogate | **decision tree** + fidelity | inspectable glassbox rules + how faithful they are |
 | Feature effects | **PDP** and **ALE** | ALE stays unbiased under feature correlation |
 | Explanation quality | **faithfulness** + **stability** | does the explanation reflect the model, and is it robust? |
+| Counterfactuals & **recourse** | greedy search with immutable / monotonic constraints | actionable "what to change" |
+| **Uncertainty** | **conformal prediction** | distribution-free prediction sets / intervals with coverage guarantee |
 | Fairness / bias | demographic parity, disparate impact (4/5 rule), equal opportunity | per sensitive attribute |
+| Bias **mitigation** | post-processing per-group thresholds | detect → *fix* |
+| **Interactions** | Friedman's H-statistic | which features matter *together* |
+| Example-based | **prototypes & criticisms** (MMD) | representative vs. atypical cases |
 | Metrics | classification + regression | accuracy/precision/recall/f1/auc, r²/mae/rmse |
 | Monitoring | **data drift** (PSI + KS) | reference vs. current dataset |
+| **LLM narration** | Claude (`claude-opus-4-8`) | plain-language briefings / Q&A grounded in the report |
 | Reporting | **HTML export** + **CLI** | shareable artifact; no-code usage |
 
 Works with any estimator following the scikit-learn `predict` / `predict_proba`
@@ -90,11 +96,29 @@ ex.lime(index=0)                   # LocalExplanation (LIME)
 ex.anchor(index=0)                 # Anchor: high-precision sufficient rule
 ex.fairness("gender")              # FairnessReport
 ex.counterfactual(index=0)         # Counterfactual: minimal flip
+ex.recourse(index=0, immutable_features=["age", "gender"])  # actionable recourse
 ex.surrogate()                     # SurrogateExplanation: glassbox tree + fidelity
 ex.partial_dependence("income")    # PartialDependence curve
 ex.ale("income")                   # ALEResult: correlation-robust effect
 ex.explanation_quality(index=0)    # ExplanationQuality: faithfulness + stability
+ex.conformal(X_cal, y_cal, X_test) # ConformalResult: guaranteed-coverage sets/intervals
+ex.mitigate_bias("gender")         # MitigationResult: per-group thresholds that fix parity
+ex.interactions(top_k=5)           # InteractionResult: Friedman H-statistic
+ex.prototypes()                    # PrototypesResult: representative + atypical rows
 ```
+
+### LLM narration (optional)
+
+```python
+from explainx_llm.narrate import narrate_report   # needs: pip install "explainx-llm[llm]"
+
+report = explain_model(model, X_test, y_test, sensitive_features=["gender"])
+print(narrate_report(report, question="Why was applicant 5 rejected, and what would change it?"))
+```
+
+The engine computes the evidence (SHAP, fairness, counterfactuals, conformal sets);
+Claude narrates it. Numbers stay in the engine, prose comes from the LLM — so the
+explanation is grounded, not hallucinated.
 
 ### Monitoring & reporting
 
@@ -157,6 +181,11 @@ The agent saves a fitted model and dataset to disk, then calls tools by path:
 | `partial_dependence` | Marginal effect curve for a feature |
 | `accumulated_local_effects` | Correlation-robust effect curve (ALE) |
 | `explanation_quality` | Faithfulness + stability of an explanation |
+| `conformal_prediction` | Guaranteed-coverage prediction sets / intervals |
+| `actionable_recourse` | Minimal flip respecting immutable features |
+| `mitigate_bias` | Per-group thresholds that equalize selection rate |
+| `feature_interactions_tool` | Strongest pairwise interactions (H-statistic) |
+| `prototypes_and_criticisms_tool` | Representative + atypical rows |
 | `detect_data_drift` | Distribution drift between two datasets |
 | `html_report` | Write a shareable HTML report |
 

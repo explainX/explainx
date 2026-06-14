@@ -226,6 +226,71 @@ class DriftReport(_Serializable):
 
 
 @dataclass
+class ConformalResult(_Serializable):
+    """Distribution-free uncertainty via split conformal prediction.
+
+    Gives a finite-sample coverage guarantee: prediction sets (classification)
+    or intervals (regression) that contain the truth with probability >= 1-alpha,
+    with no assumptions about the model.
+    """
+
+    problem_type: str
+    alpha: float
+    coverage_target: float  # 1 - alpha
+    qhat: float
+    prediction_sets: Optional[list[list[Any]]] = None  # classification
+    intervals: Optional[list[list[float]]] = None  # regression [lo, hi]
+    average_set_size: Optional[float] = None
+    average_interval_width: Optional[float] = None
+    empirical_coverage: Optional[float] = None  # if labels supplied
+
+
+@dataclass
+class MitigationThreshold(_Serializable):
+    group: Any
+    threshold: float
+    selection_rate: float
+
+
+@dataclass
+class MitigationResult(_Serializable):
+    """Post-processing bias mitigation via per-group decision thresholds."""
+
+    sensitive_feature: str
+    objective: str  # "demographic_parity"
+    thresholds: list[MitigationThreshold] = field(default_factory=list)
+    parity_gap_before: Optional[float] = None
+    parity_gap_after: Optional[float] = None
+    accuracy_before: Optional[float] = None
+    accuracy_after: Optional[float] = None
+    notes: list[str] = field(default_factory=list)
+
+
+@dataclass
+class InteractionPair(_Serializable):
+    feature_a: str
+    feature_b: str
+    strength: float  # Friedman H-statistic in [0, 1]
+
+
+@dataclass
+class InteractionResult(_Serializable):
+    """Pairwise feature-interaction strengths (Friedman's H-statistic)."""
+
+    method: str
+    pairs: list[InteractionPair] = field(default_factory=list)
+
+
+@dataclass
+class PrototypesResult(_Serializable):
+    """Example-based explanation: representative prototypes + atypical criticisms."""
+
+    method: str
+    prototype_indices: list[int] = field(default_factory=list)
+    criticism_indices: list[int] = field(default_factory=list)
+
+
+@dataclass
 class ExplanationReport(_Serializable):
     """The full explainability report for a model + dataset."""
 

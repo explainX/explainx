@@ -25,6 +25,11 @@ from .lime_explain import lime_explain
 from .anchors import find_anchor
 from .ale import ale as _ale
 from .quality import evaluate_local
+from .conformal import conformal_predict
+from .mitigation import mitigate_demographic_parity
+from .interactions import feature_interactions
+from .prototypes import prototypes_and_criticisms
+from .schema import PrototypesResult
 from .summary import build_summary
 
 
@@ -98,6 +103,51 @@ class ModelExplainer:
     def explanation_quality(self, index: int = 0, top_k: Optional[int] = None):
         local = self.explain(index, top_k=top_k)
         return evaluate_local(self.model, self.X, local, self.problem_type)
+
+    def recourse(
+        self,
+        index: int,
+        desired_class: Any = None,
+        immutable_features: Optional[list] = None,
+        feature_directions: Optional[dict] = None,
+        max_changes: int = 5,
+    ):
+        return find_counterfactual(
+            self.model, self.X, index, self.problem_type,
+            desired_class=desired_class, max_changes=max_changes,
+            immutable_features=immutable_features, feature_directions=feature_directions,
+        )
+
+    def conformal(
+        self,
+        X_calib: Any,
+        y_calib: Any,
+        X_test: Optional[Any] = None,
+        alpha: float = 0.1,
+        y_test: Optional[Any] = None,
+    ):
+        X_calib = as_dataframe(X_calib, list(self.X.columns))
+        X_test = self.X if X_test is None else as_dataframe(X_test, list(self.X.columns))
+        return conformal_predict(
+            self.model, X_calib, y_calib, X_test, self.problem_type, alpha=alpha, y_test=y_test
+        )
+
+    def mitigate_bias(self, sensitive_feature: str, target_rate: Optional[float] = None):
+        return mitigate_demographic_parity(
+            self.model, self.X, sensitive_feature, self.y, target_rate=target_rate
+        )
+
+    def interactions(self, top_k: int = 5, features: Optional[Sequence[str]] = None):
+        return feature_interactions(
+            self.model, self.X, self.problem_type,
+            features=list(features) if features else None, top_k=top_k,
+        )
+
+    def prototypes(self, n_prototypes: int = 5, n_criticisms: int = 3):
+        protos, crits = prototypes_and_criticisms(self.X, n_prototypes, n_criticisms)
+        return PrototypesResult(
+            method="mmd_rbf", prototype_indices=protos, criticism_indices=crits
+        )
 
     # --- full report --------------------------------------------------------
     def report(
