@@ -1,255 +1,220 @@
-# explainX: Explainable AI Framework for Data Scientists
+# explainX-LLM: LLM-native Explainable AI
 <img src="explainx_logo.png" align="right" width="150"/>
 
-### We are looking for co-authors to take this project forward. Reach out @ ms8909@nyu.edu
-#### ExplainX is a model explainability/interpretability framework for data scientists and business users.
+**explainX-LLM** turns the explainX idea into a modern, **LLM-native** explainability
+engine. Train any machine-learning model, then let a human *or an LLM agent*
+inspect it: understand *why* a prediction was made, surface bias, find the
+minimal change that flips a decision, and feed those insights back into training.
 
-[![Supported Python versions](https://img.shields.io/badge/python-3.6%20|%203.7|%203.8-brightgreen.svg)](https://pypi.org/project/explainx/)
-[![Downloads](https://pepy.tech/badge/explainx)](https://pepy.tech/project/explainx)
-![Maintenance](https://img.shields.io/maintenance/yes/2020?style=flat-square)
-[![Website](https://img.shields.io/website?)]()
+Where the original explainX rendered a human-only Plotly dashboard on a 2020
+dependency stack, this rewrite returns **structured, machine-readable results**
+(typed objects that serialize to JSON) plus a natural-language summary — usable
+from plain Python *and* over the **Model Context Protocol (MCP)** so agents like
+Claude can call it as tools while they build models.
 
+> The goal: bring state-of-the-art explainability research into one place, with
+> an interface designed for the era where LLMs train and debug models.
 
-Use explainX to understand overall model behavior, explain the "why" behind model predictions, remove biases and create convincing explanations for your business stakeholders. [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Explain%20any%20black-box%20Machine%20Learning%20model%20in%20just%20one%20line%20of%20code%21&hashtags=xai,explainable_ai,explainable_machine_learning,trust_in_ai,transparent_ai)
+---
 
-<img width="1000" src="rf_starter_example.png" alt="explainX AI explainable AI library">
+## Why
 
+1. **Explain predictions** — global feature importance + per-prediction reasoning.
+2. **Debug models** — counterfactuals and partial-dependence curves show what the
+   model actually learned.
+3. **Detect bias** — group-fairness metrics (disparate impact, demographic parity,
+   equal opportunity) answer "is my model rejecting one group regardless of profile?"
+4. **Build trust** — a plain-language summary for stakeholders and agents.
+5. **Close the loop** — results are structured so an LLM can read them and decide
+   how to fix the training data or model.
 
-#### Why we need model explainability & interpretibility?
+## What's inside
 
-Essential for:
-1. Explaining model predictions
-2. Debugging models
-3. Detecting biases in data
-4. Gaining trust of business users
-5. Successfully deploying AI solution
+A unified API over the methods the XAI literature identifies as the most
+deployed — SHAP, LIME, surrogate trees and counterfactuals — plus modern
+additions (ALE, anchors) and a 2024–2025 research frontier most tools skip:
+**quantifying whether an explanation can be trusted**.
 
-#### What questions can we answer with explainX?
+| Capability | Method | Notes |
+|---|---|---|
+| Global importance | **SHAP** (auto) → permutation → intrinsic | SHAP used automatically when installed |
+| Local explanation | **SHAP** (auto) → model-agnostic ablation | per-prediction signed contributions |
+| Local surrogate | **LIME** (from scratch) | local weighted linear approximation |
+| Sufficient rules | **Anchors** | high-precision IF-THEN rule per prediction |
+| Counterfactuals | greedy model-agnostic search | smallest change that flips a decision |
+| Global surrogate | **decision tree** + fidelity | inspectable glassbox rules + how faithful they are |
+| Feature effects | **PDP** and **ALE** | ALE stays unbiased under feature correlation |
+| Explanation quality | **faithfulness** + **stability** | does the explanation reflect the model, and is it robust? |
+| Counterfactuals & **recourse** | greedy search with immutable / monotonic constraints | actionable "what to change" |
+| **Uncertainty** | **conformal prediction** | distribution-free prediction sets / intervals with coverage guarantee |
+| Fairness / bias | demographic parity, disparate impact (4/5 rule), equal opportunity | per sensitive attribute |
+| Bias **mitigation** | post-processing per-group thresholds | detect → *fix* |
+| **Interactions** | Friedman's H-statistic | which features matter *together* |
+| Example-based | **prototypes & criticisms** (MMD) | representative vs. atypical cases |
+| Metrics | classification + regression | accuracy/precision/recall/f1/auc, r²/mae/rmse |
+| Monitoring | **data drift** (PSI + KS) | reference vs. current dataset |
+| **LLM narration** | Claude (`claude-opus-4-8`) | plain-language briefings / Q&A grounded in the report |
+| Reporting | **HTML export** + **CLI** | shareable artifact; no-code usage |
 
-1. Why did my model make a mistake? 
-2. Is my model biased? If yes, where?
-3. How can I understand and trust the model's decisions?
-4. Does my model satisfy legal & regulatory requirements?
+Works with any estimator following the scikit-learn `predict` / `predict_proba`
+convention (scikit-learn, XGBoost, LightGBM, CatBoost, …).
 
-#### We have deployed the app on our server so you can play around with the dashboard. Check it out:
-
-Dashboard Demo: http://3.128.188.55:8080/
-
-# Getting Started
-
-## Installation
-
-Python 3.5+ | Linux, Mac, Windows
+## Install
 
 ```sh
-pip install explainx
+pip install -e ".[all]"     # core + SHAP + MCP server
+# or minimal:
+pip install -e .            # core only (SHAP/MCP optional)
 ```
 
-To download on Windows, please install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) first and then install the explainX package via ``` pip ```
-
-## Installation on the cloud
-If you are using a notebook instance on the cloud (AWS SageMaker, Colab, Azure), please follow our step-by-step guide to install & run explainX cloud. 
-
-
-## Usage (Example)
-After successfully installing explainX, open up your Python IDE of Jupyter Notebook and simply follow the code below to use it:
-
-1. Import required module.
+## Python API
 
 ```python
+from explainx_llm import explain_model
 
-from explainx import * 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
+report = explain_model(
+    model, X_test, y_test,
+    sensitive_features=["gender"],   # run bias analysis on these columns
+    n_local=3,                       # explain a few individual predictions
+)
 
+print(report.summary)      # natural-language briefing for a human/LLM
+report.to_dict()           # full structured result (JSON-ready)
+report.to_json()
 ```
 
-2. Load and split your dataset into x_data and y_data
+Need finer control? Use the stateful explainer:
 
 ```python
+from explainx_llm import ModelExplainer
 
-#Load Dataset: X_Data, Y_Data 
-#X_Data = Pandas DataFrame
-#Y_Data = Numpy Array or List
-
-X_data,Y_data = explainx.dataset_heloc()
-
+ex = ModelExplainer(model, X_test, y_test)
+ex.metrics()                       # ModelMetrics
+ex.importance()                    # GlobalImportance (SHAP when available)
+ex.explain(index=0, top_k=5)       # LocalExplanation (SHAP/ablation)
+ex.lime(index=0)                   # LocalExplanation (LIME)
+ex.anchor(index=0)                 # Anchor: high-precision sufficient rule
+ex.fairness("gender")              # FairnessReport
+ex.counterfactual(index=0)         # Counterfactual: minimal flip
+ex.recourse(index=0, immutable_features=["age", "gender"])  # actionable recourse
+ex.surrogate()                     # SurrogateExplanation: glassbox tree + fidelity
+ex.partial_dependence("income")    # PartialDependence curve
+ex.ale("income")                   # ALEResult: correlation-robust effect
+ex.explanation_quality(index=0)    # ExplanationQuality: faithfulness + stability
+ex.conformal(X_cal, y_cal, X_test) # ConformalResult: guaranteed-coverage sets/intervals
+ex.mitigate_bias("gender")         # MitigationResult: per-group thresholds that fix parity
+ex.interactions(top_k=5)           # InteractionResult: Friedman H-statistic
+ex.prototypes()                    # PrototypesResult: representative + atypical rows
 ```
 
-3. Split dataset into training & testing. 
-
-``` python
-
-X_train, X_test, Y_train, Y_test = train_test_split(X_data,Y_data, test_size=0.3, random_state=0)
-
-```
-
-4. Train your model.
+### LLM narration (optional)
 
 ```python
+from explainx_llm.narrate import narrate_report   # needs: pip install "explainx-llm[llm]"
 
-# Train a RandomForest Model
-model = RandomForestClassifier()
-model.fit(X_train, Y_train)
-
+report = explain_model(model, X_test, y_test, sensitive_features=["gender"])
+print(narrate_report(report, question="Why was applicant 5 rejected, and what would change it?"))
 ```
 
-After you're done training the model, you can either access the complete explainability dashboard or access individual techniques.
+The engine computes the evidence (SHAP, fairness, counterfactuals, conformal sets);
+Claude narrates it. Numbers stay in the engine, prose comes from the LLM — so the
+explanation is grounded, not hallucinated.
 
-
-## Complete Explainability Dashboard
-
-To access the entire dashboard with all the explainability techniques under one roof, follow the code down below. It is great for sharing your work with your peers and managers in an interactive and easy to understand way. 
-
-5.1. Pass your model and dataset into the explainX function:
+### Monitoring & reporting
 
 ```python
-explainx.ai(X_test, Y_test, model, model_name="randomforest")
+from explainx_llm import detect_drift, save_html
+
+detect_drift(reference_df, current_df)   # DriftReport (PSI + KS per feature)
+save_html(report, "report.html")         # shareable page; embeds the full JSON
 ```
 
-5.2. Click on the dashboard link to start exploring model behavior:
+### No-code CLI
+
+```sh
+explainx-llm report --model m.joblib --data d.csv --target y --sensitive gender --html out.html
+explainx-llm bias   --model m.joblib --data d.csv --target y --sensitive gender
+explainx-llm drift  --reference train.csv --current prod.csv
+```
+
+### Try the demo
+
+```sh
+python -m explainx_llm.examples.demo
+```
+
+It trains a deliberately gender-biased loan model and shows the fairness check
+firing, plus a counterfactual that flips a rejection to an approval.
+
+## Use it from an LLM agent (MCP)
+
+Start the server (stdio transport):
+
+```sh
+explainx-mcp              # installed console script
+# or:  python -m explainx_llm.mcp_server
+```
+
+Register it with an MCP client (e.g. Claude Desktop / Claude Code):
+
+```json
+{
+  "mcpServers": {
+    "explainx": { "command": "explainx-mcp" }
+  }
+}
+```
+
+The agent saves a fitted model and dataset to disk, then calls tools by path:
+
+| Tool | Purpose |
+|---|---|
+| `explain_model` | Full report (metrics, importance, local, fairness, surrogate, quality) |
+| `feature_importance` | Global importance ranking |
+| `explain_prediction` | Why one row was predicted as it was (SHAP/ablation) |
+| `lime_explain_prediction` | Local LIME explanation for one row |
+| `anchor_rule` | High-precision sufficient rule for one row |
+| `counterfactual` | Minimal change that flips a row's class |
+| `surrogate_rules` | Glassbox decision-tree rules + fidelity |
+| `check_bias` | Group-fairness analysis on a sensitive feature |
+| `model_metrics` | Performance metrics |
+| `partial_dependence` | Marginal effect curve for a feature |
+| `accumulated_local_effects` | Correlation-robust effect curve (ALE) |
+| `explanation_quality` | Faithfulness + stability of an explanation |
+| `conformal_prediction` | Guaranteed-coverage prediction sets / intervals |
+| `actionable_recourse` | Minimal flip respecting immutable features |
+| `mitigate_bias` | Per-group thresholds that equalize selection rate |
+| `feature_interactions_tool` | Strongest pairwise interactions (H-statistic) |
+| `prototypes_and_criticisms_tool` | Representative + atypical rows |
+| `detect_data_drift` | Distribution drift between two datasets |
+| `html_report` | Write a shareable HTML report |
+
+Each returns a JSON-ready dict the agent can reason over — e.g. read a
+`disparate_impact_ratio` below 0.8, conclude the model is biased, and rebalance
+the training data.
 
 ```python
-
-App running on https://127.0.0.1:8080
-
+# what the agent does first:
+import joblib
+joblib.dump(model, "model.joblib")
+df.to_csv("data.csv", index=False)   # features + target column
+# then it calls:  check_bias(model_path="model.joblib", data_path="data.csv",
+#                            sensitive_feature="gender", target_column="approved")
 ```
 
+## Tests
 
-## Explainability Modules
-
-In this latest release, we have also given the option to use explainability techniques individually. This will allow the user to choose technique that fits their personal AI use case. 
-
-6.1. Pass your model, X_Data and Y_Data into the explainx_modules function. 
-
-```python
-
-explainx_modules.ai(model, X_test, Y_test)
-
-```
-As an upgrade, we have eliminated the need to pass in the model name as explainX is smart enough to identify the model type and problem type i.e. classification or regression, by itself. 
-
-You can access multiple modules:
-
-Module 1: Dataframe with Predictions
-```python
-
-explainx_modules.dataframe_graphing()
-
+```sh
+pytest          # or: python -m pytest explainx_llm/tests
 ```
 
-Module 2: Model Metrics
-```python
+## Migrating from legacy explainX
 
-explainx_modules.metrics()
-
-```
-
-Module 3: Global Level SHAP Values
-```python
-
-explainx_modules.shap_df()
-
-```
-
-Module 4: What-If Scenario Analysis (Local Level Explanations)
-```python
-
-explainx_modules.what_if_analysis()
-
-```
-
-Module 5: Partial Dependence Plot & Summary Plot
-```python
-
-explainx_modules.feature_interactions()
-
-```
-
-Module 6: Model Performance Comparison (Cohort Analysis)
-```python
-
-explainx_modules.cohort_analysis()
-
-```
-
-To access the modules within your jupyter notebook as IFrames, just pass the <b>mode='inline'</b> argument. 
-
-
-## Cloud Installation
-
-**If you are running explainX on the cloud e.g., AWS Sagemaker?** **https://0.0.0.0:8080** will not work.
-
-After installation is complete, just open your **terminal** and run the following command.
-```jupyter
-
-lt -h "https://serverless.social" -p [port number]
-
-```
-```jupyter
-
-lt -h "https://serverless.social" -p 8080
-
-```
-
-<img width="1000" src="demo-explainx-with-sound.gif" alt="explainX ai explainable ai">
-
-
-
-## Walkthough Video Tutorial
-
-Please click on the image below to load the tutorial:
-
-[![here](https://github.com/explainX/explainx/blob/master/explain_video_img.png)](https://youtu.be/CDMpOismME8)  
-
-(Note: Please manually set it to 720p or greater to have the text appear clearly)
-
-
-
-## Supported Techniques
-
-|Interpretability Technique | Status |
-|--|--|
-|SHAP Kernel Explainer| Live |
-|SHAP Tree Explainer| Live |
-|What-if Analysis| Live |
-|Model Performance Comparison | Live |
-|Partial Dependence Plot| Live |
-|Surrogate Decision Tree | Coming Soon |
-|Anchors | Coming Soon |
-|Integrated Gradients (IG)| Coming Soon |
-
-
-
-## Main Models Supported
-
-| No. | Model Name | Status |
-|--|--|--|
-|1. | Catboost | Live|
-|2. | XGboost==1.0.2 | Live|
-|3. | Gradient Boosting Regressor| Live|
-|4. | RandomForest Model| Live|
-|5. | SVM|Live|
-|6. | KNeighboursClassifier| Live
-|7. | Logistic Regression| Live |
-|8. | DecisionTreeClassifier|Live |
-|9. | All Scikit-learn Models|Live |
-|10.| Neural Networks|Live |
-|11.| H2O.ai AutoML | Live |
-|12.| TensorFlow Models | Coming Soon |
-|13.| PyTorch Models | Coming Soon |
-
-
-
-## Contributing
-Pull requests are welcome. In order to make changes to explainx, the ideal approach is to fork the repository then clone the fork locally.
-
-For major changes, please open an issue first to discuss what you would like to change.
-Please make sure to update tests as appropriate.
-
-## Report Issues
-
-Please help us by [reporting any issues](https://github.com/explainX/explainx/issues/new) you may have while using explainX.
+The 2020 Dash dashboard (`explain.py`, `main.py`, `lib/`) and its pinned,
+no-longer-installable stack have been removed in favour of this engine. The new
+import is `explainx_llm`; explanations are returned as data rather than rendered
+as a web app, which is what makes them consumable by both humans and LLMs.
 
 ## License
+
 [MIT](https://choosealicense.com/licenses/mit/)

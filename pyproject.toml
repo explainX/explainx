@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "explainx-llm"
+version = "0.1.0"
+description = "LLM-native model explainability: structured, agent-callable explanations, bias detection and counterfactuals for any scikit-learn-compatible model."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "explainX" }]
+keywords = ["explainability", "interpretability", "xai", "shap", "fairness", "bias", "mcp", "llm", "counterfactual"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "numpy>=1.23",
+    "pandas>=1.5",
+    "scikit-learn>=1.1",
+    "joblib>=1.2",
+]
+
+[project.optional-dependencies]
+shap = ["shap>=0.44"]
+mcp = ["mcp>=1.0.0"]
+drift = ["scipy>=1.7"]   # enables the Kolmogorov-Smirnov drift test (PSI works without it)
+llm = ["anthropic>=0.40"]   # LLM narration of reports via Claude
+all = ["shap>=0.44", "mcp>=1.0.0", "scipy>=1.7", "anthropic>=0.40"]
+dev = ["pytest>=7.0", "shap>=0.44", "mcp>=1.0.0", "scipy>=1.7", "anthropic>=0.40"]
+
+[project.scripts]
+explainx-mcp = "explainx_llm.mcp_server:main"
+explainx-llm = "explainx_llm.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["explainx_llm*"]
+
+[tool.pytest.ini_options]
+testpaths = ["explainx_llm/tests"]
