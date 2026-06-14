@@ -141,6 +141,14 @@ Opens a Streamlit app: upload a fitted model + dataset, then run any module
 fairness, mitigation, conformal, prototypes, quality, drift) or the full report,
 see live tables and charts, and download the HTML/JSON.
 
+| Global importance | Local explanation |
+|---|---|
+| ![Global importance view](docs/images/dashboard_importance.png) | ![Local explanation view](docs/images/dashboard_local.png) |
+
+| Fairness (bias detected) | Full report |
+|---|---|
+| ![Fairness view](docs/images/dashboard_fairness.png) | ![Full report view](docs/images/dashboard_full_report.png) |
+
 ### No-code CLI
 
 ```sh
@@ -213,6 +221,63 @@ df.to_csv("data.csv", index=False)   # features + target column
 # then it calls:  check_bias(model_path="model.joblib", data_path="data.csv",
 #                            sensitive_feature="gender", target_column="approved")
 ```
+
+## Example outputs
+
+All outputs below come from the bundled demo — a deliberately **gender-biased**
+loan-approval model. Reproduce them with `python docs/generate_examples.py`.
+
+**Natural-language summary** (`explain_model(...).summary`):
+
+```
+Model `RandomForestClassifier` is a classification model evaluated on 800 samples across 4 features.
+Performance: accuracy=1.000, precision=1.000, recall=1.000, f1=1.000, roc_auc=1.000.
+The most influential features (via shap_mean_abs) are: credit_score (0.257), gender (0.168), debt_ratio (0.128), income (0.062).
+A depth-4 decision-tree surrogate reproduces the model with accuracy=0.896 fidelity, giving an inspectable rule set.
+Explanation quality (shap): faithfulness=1.00, stability=0.97 (higher is more trustworthy; ~1.0 is excellent).
+Fairness on `gender`: BIAS DETECTED. Disparate impact ratio 0.37 is below the 0.8 four-fifths threshold:
+group '0' receives the positive outcome (1) at 22.6% vs '1' at 61.3%. Demographic parity gap of 38.7%.
+Recommended next steps: rebalance/reweight the training data across the sensitive groups, consider
+removing or decorrelating proxy features, or apply a fairness constraint, then re-evaluate.
+```
+
+**Global importance** — `ex.importance()` &nbsp;|&nbsp; **Local explanation** — `ex.explain(0)`
+
+| ![global importance](docs/images/importance.png) | ![local explanation](docs/images/local.png) |
+|---|---|
+
+**Feature effects** — `ex.partial_dependence(...)` / `ex.ale(...)` &nbsp;|&nbsp; **Fairness** — `ex.fairness("gender")`
+
+| ![pdp and ale](docs/images/effects.png) | ![fairness](docs/images/fairness.png) |
+|---|---|
+
+**Interactions** — `ex.interactions()` &nbsp;|&nbsp; **Conformal coverage** — `ex.conformal(...)` &nbsp;|&nbsp; **Drift** — `detect_drift(...)`
+
+| ![interactions](docs/images/interactions.png) | ![conformal](docs/images/conformal.png) | ![drift](docs/images/drift.png) |
+|---|---|---|
+
+**Counterfactual / recourse** (`gender` held immutable):
+
+```
+credit_score: 530.3 -> 739.3   =>  prediction flips 0 (rejected) -> 1 (approved)
+```
+
+**Anchor** (sufficient rule): `IF 410 <= credit_score <= 584 THEN rejected` (precision 0.96, coverage 0.21)
+
+**Glassbox surrogate** (`accuracy=0.859` fidelity to the model):
+
+```
+|--- credit_score <= 672.83
+|   |--- gender <= 0.50
+|   |   |--- income <= 62.72  -> rejected
+|   |   |--- income >  62.72  -> rejected
+|   |--- gender >  0.50
+|   |   |--- debt_ratio <= 0.44 -> approved
+|   |   |--- debt_ratio >  0.44 -> rejected
+|--- credit_score >  672.83 ...
+```
+
+**Bias mitigation** — `ex.mitigate_bias("gender")`: demographic-parity gap **38.7% → 0.2%** via per-group thresholds.
 
 ## Tests
 
