@@ -129,6 +129,18 @@ detect_drift(reference_df, current_df)   # DriftReport (PSI + KS per feature)
 save_html(report, "report.html")         # shareable page; embeds the full JSON
 ```
 
+### Interactive dashboard
+
+```sh
+pip install "explainx[dashboard]"
+explainx-dashboard
+```
+
+Opens a Streamlit app: upload a fitted model + dataset, then run any module
+(importance, local/LIME/anchor, counterfactual & recourse, PDP/ALE, interactions,
+fairness, mitigation, conformal, prototypes, quality, drift) or the full report,
+see live tables and charts, and download the HTML/JSON.
+
 ### No-code CLI
 
 ```sh
