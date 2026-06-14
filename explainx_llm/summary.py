@@ -46,6 +46,26 @@ def build_summary(report: "ExplanationReport") -> str:
             f"top drivers: {drivers}."
         )
 
+    if report.surrogate is not None:
+        s = report.surrogate
+        lines.append(
+            f"A depth-{s.max_depth} decision-tree surrogate reproduces the model with "
+            f"{s.fidelity_metric}={s.fidelity:.3f} fidelity, giving an inspectable rule set."
+        )
+
+    if report.explanation_quality is not None:
+        q = report.explanation_quality
+        bits = []
+        if q.faithfulness is not None:
+            bits.append(f"faithfulness={q.faithfulness:.2f}")
+        if q.stability is not None:
+            bits.append(f"stability={q.stability:.2f}")
+        if bits:
+            lines.append(
+                f"Explanation quality ({q.method}): " + ", ".join(bits) +
+                " (higher is more trustworthy; ~1.0 is excellent)."
+            )
+
     bias_found = False
     for fr in report.fairness:
         status = "BIAS DETECTED" if fr.biased else "no bias flagged"

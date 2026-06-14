@@ -20,6 +20,11 @@ from .local import explain_instance
 from .fairness import fairness_analysis
 from .counterfactual import find_counterfactual
 from .pdp import partial_dependence
+from .surrogate import global_surrogate
+from .lime_explain import lime_explain
+from .anchors import find_anchor
+from .ale import ale as _ale
+from .quality import evaluate_local
 from .summary import build_summary
 
 
@@ -73,6 +78,27 @@ class ModelExplainer:
     def partial_dependence(self, feature: str, grid_resolution: int = 20):
         return partial_dependence(self.model, self.X, feature, grid_resolution=grid_resolution)
 
+    def surrogate(self, max_depth: int = 4):
+        return global_surrogate(self.model, self.X, self.problem_type, max_depth=max_depth)
+
+    def lime(self, index: int, top_k: Optional[int] = None, n_samples: int = 1000):
+        return lime_explain(
+            self.model, self.X, index, self.problem_type, n_samples=n_samples, top_k=top_k
+        )
+
+    def anchor(self, index: int, precision_threshold: float = 0.95, max_predicates: int = 4):
+        return find_anchor(
+            self.model, self.X, index,
+            precision_threshold=precision_threshold, max_predicates=max_predicates,
+        )
+
+    def ale(self, feature: str, n_bins: int = 10):
+        return _ale(self.model, self.X, feature, self.problem_type, n_bins=n_bins)
+
+    def explanation_quality(self, index: int = 0, top_k: Optional[int] = None):
+        local = self.explain(index, top_k=top_k)
+        return evaluate_local(self.model, self.X, local, self.problem_type)
+
     # --- full report --------------------------------------------------------
     def report(
         self,
@@ -80,6 +106,8 @@ class ModelExplainer:
         explain_indices: Optional[Sequence[int]] = None,
         n_local: int = 3,
         top_k: Optional[int] = 10,
+        include_surrogate: bool = True,
+        include_quality: bool = True,
     ) -> ExplanationReport:
         report = ExplanationReport(
             model_name=model_name(self.model),
@@ -111,6 +139,21 @@ class ModelExplainer:
         for feat in sensitive_features or []:
             try:
                 report.fairness.append(self.fairness(feat))
+            except Exception:
+                pass
+
+        if include_surrogate:
+            try:
+                report.surrogate = self.surrogate()
+            except Exception:
+                pass
+
+        if include_quality and report.local_explanations:
+            try:
+                first = report.local_explanations[0]
+                report.explanation_quality = evaluate_local(
+                    self.model, self.X, first, self.problem_type
+                )
             except Exception:
                 pass
 

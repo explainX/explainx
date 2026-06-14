@@ -164,6 +164,68 @@ class ModelMetrics(_Serializable):
 
 
 @dataclass
+class SurrogateExplanation(_Serializable):
+    """A glassbox model trained to mimic the black box (global surrogate)."""
+
+    method: str
+    fidelity: float  # how well the surrogate agrees with the model on the data
+    fidelity_metric: str  # "accuracy" (classification) or "r2" (regression)
+    max_depth: int
+    rules_text: str = ""
+    feature_importances: list[FeatureImportance] = field(default_factory=list)
+
+
+@dataclass
+class ALEResult(_Serializable):
+    """Accumulated Local Effects: feature effect that is unbiased under correlation."""
+
+    feature: str
+    bin_edges: list[float] = field(default_factory=list)
+    ale: list[float] = field(default_factory=list)  # centered effect per bin
+
+
+@dataclass
+class Anchor(_Serializable):
+    """A high-precision IF-THEN rule that 'anchors' a prediction locally."""
+
+    index: int
+    prediction: Any
+    rules: list[str] = field(default_factory=list)
+    precision: float = 0.0  # P(same prediction | rule holds)
+    coverage: float = 0.0  # fraction of data the rule applies to
+
+
+@dataclass
+class ExplanationQuality(_Serializable):
+    """Quantified trustworthiness of an explanation (2024-2025 XAI eval research)."""
+
+    method: str
+    faithfulness: Optional[float] = None  # do attributions match feature-removal effects?
+    stability: Optional[float] = None  # are attributions stable under small input changes?
+    notes: list[str] = field(default_factory=list)
+
+
+@dataclass
+class DriftFeature(_Serializable):
+    feature: str
+    psi: Optional[float] = None
+    ks_statistic: Optional[float] = None
+    ks_pvalue: Optional[float] = None
+    drifted: bool = False
+
+
+@dataclass
+class DriftReport(_Serializable):
+    """Distribution shift between a reference and a current dataset."""
+
+    n_features: int
+    n_drifted: int
+    psi_threshold: float
+    drifted: bool
+    features: list[DriftFeature] = field(default_factory=list)
+
+
+@dataclass
 class ExplanationReport(_Serializable):
     """The full explainability report for a model + dataset."""
 
@@ -176,4 +238,6 @@ class ExplanationReport(_Serializable):
     global_importance: Optional[GlobalImportance] = None
     local_explanations: list[LocalExplanation] = field(default_factory=list)
     fairness: list[FairnessReport] = field(default_factory=list)
+    surrogate: Optional[SurrogateExplanation] = None
+    explanation_quality: Optional[ExplanationQuality] = None
     summary: str = ""

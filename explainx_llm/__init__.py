@@ -31,7 +31,15 @@ from .schema import (
     Counterfactual,
     FeatureChange,
     PartialDependence,
+    SurrogateExplanation,
+    ALEResult,
+    Anchor,
+    ExplanationQuality,
+    DriftReport,
+    DriftFeature,
 )
+from .drift import detect_drift
+from .report_html import report_to_html, save_html
 
 __all__ = [
     "explain_model",
@@ -47,6 +55,15 @@ __all__ = [
     "Counterfactual",
     "FeatureChange",
     "PartialDependence",
+    "SurrogateExplanation",
+    "ALEResult",
+    "Anchor",
+    "ExplanationQuality",
+    "DriftReport",
+    "DriftFeature",
+    "detect_drift",
+    "report_to_html",
+    "save_html",
 ]
 
 __version__ = "0.1.0"

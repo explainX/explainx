@@ -143,6 +143,102 @@ def test_shap_path_used_when_available(rf_model, classification_data):
     assert local.method == "shap"
 
 
+def test_surrogate_tree(rf_model, classification_data):
+    X, y = classification_data
+    s = ModelExplainer(rf_model, X, y).surrogate(max_depth=3)
+    assert s.method == "decision_tree"
+    assert 0.0 <= s.fidelity <= 1.0
+    assert s.rules_text  # human-readable rules
+    assert s.feature_importances
+
+
+def test_lime_explanation(rf_model, classification_data):
+    X, y = classification_data
+    local = ModelExplainer(rf_model, X, y).lime(0, top_k=4)
+    assert local.method == "lime"
+    assert len(local.contributions) == 4
+    json.dumps(local.to_dict())
+
+
+def test_anchor_rule(rf_model, classification_data):
+    X, y = classification_data
+    anchor = ModelExplainer(rf_model, X, y).anchor(0)
+    assert anchor.index == 0
+    assert 0.0 <= anchor.precision <= 1.0
+    assert 0.0 <= anchor.coverage <= 1.0
+
+
+def test_ale_curve(rf_model, classification_data):
+    X, y = classification_data
+    a = ModelExplainer(rf_model, X, y).ale("f0", n_bins=8)
+    assert a.feature == "f0"
+    assert len(a.bin_edges) == len(a.ale)
+
+
+def test_explanation_quality(rf_model, classification_data):
+    X, y = classification_data
+    q = ModelExplainer(rf_model, X, y).explanation_quality(0)
+    # faithfulness/stability are floats in [-1,1] or None when undefined.
+    for metric in (q.faithfulness, q.stability):
+        assert metric is None or -1.0001 <= metric <= 1.0001
+
+
+def test_report_includes_surrogate_and_quality(rf_model, classification_data):
+    X, y = classification_data
+    report = explain_model(rf_model, X, y, n_local=1)
+    assert report.surrogate is not None
+    assert report.explanation_quality is not None
+    json.dumps(report.to_dict())
+
+
+def test_drift_detection():
+    from explainx_llm import detect_drift
+
+    rng = np.random.RandomState(0)
+    ref = pd.DataFrame({"a": rng.normal(0, 1, 500), "b": rng.normal(5, 2, 500)})
+    # 'a' shifts hard; 'b' stays put.
+    cur = pd.DataFrame({"a": rng.normal(3, 1, 500), "b": rng.normal(5, 2, 500)})
+    report = detect_drift(ref, cur)
+    assert report.drifted is True
+    by_feat = {f.feature: f for f in report.features}
+    assert by_feat["a"].drifted is True
+    assert by_feat["b"].drifted is False
+
+
+def test_html_report_export(rf_model, classification_data, tmp_path):
+    from explainx_llm import save_html
+
+    X, y = classification_data
+    report = explain_model(rf_model, X, y, sensitive_features=None, n_local=1)
+    out = tmp_path / "report.html"
+    save_html(report, str(out))
+    content = out.read_text()
+    assert "<html" in content
+    assert "explainx-report" in content  # embedded JSON payload
+
+
+def test_cli_bias(tmp_path):
+    import joblib
+    from sklearn.ensemble import RandomForestClassifier
+    from explainx_llm.cli import main
+
+    rng = np.random.RandomState(0)
+    n = 300
+    gender = rng.randint(0, 2, n)
+    score = rng.normal(size=n)
+    approved = ((score + 1.5 * gender) > 0).astype(int)
+    df = pd.DataFrame({"gender": gender, "score": score, "approved": approved})
+    model = RandomForestClassifier(n_estimators=30, random_state=0).fit(
+        df[["gender", "score"]], df["approved"]
+    )
+    mp, dp = tmp_path / "m.joblib", tmp_path / "d.csv"
+    joblib.dump(model, mp)
+    df.to_csv(dp, index=False)
+
+    rc = main(["bias", "--model", str(mp), "--data", str(dp), "--target", "approved", "--sensitive", "gender"])
+    assert rc == 0
+
+
 def test_fairness_no_bias_when_balanced():
     from sklearn.ensemble import RandomForestClassifier
 

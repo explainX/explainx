@@ -54,15 +54,39 @@ def main():
     print("\n--- NATURAL-LANGUAGE SUMMARY (for a human or LLM) ---\n")
     print(report.summary)
 
+    ex = ModelExplainer(model, X, y)
+
     print("\n--- COUNTERFACTUAL for a rejected applicant ---\n")
     rejected = int(np.where(model.predict(X) == 0)[0][0])
-    cf = ModelExplainer(model, X, y).counterfactual(rejected)
+    cf = ex.counterfactual(rejected)
     if cf.found:
         for ch in cf.changes:
             print(f"  {ch.feature}: {ch.original_value} -> {ch.counterfactual_value}")
         print(f"  => prediction flips {cf.original_prediction} -> {cf.new_prediction}")
     else:
         print("  No counterfactual found within the change budget.")
+
+    print("\n--- ANCHOR (sufficient rule) for that applicant ---\n")
+    anchor = ex.anchor(rejected)
+    print(f"  IF {' AND '.join(anchor.rules) or '(none)'}")
+    print(f"  THEN prediction = {anchor.prediction} "
+          f"(precision {anchor.precision:.2f}, coverage {anchor.coverage:.2f})")
+
+    print("\n--- GLASSBOX SURROGATE fidelity ---\n")
+    surrogate = ex.surrogate(max_depth=3)
+    print(f"  decision-tree surrogate reproduces the model with "
+          f"{surrogate.fidelity_metric}={surrogate.fidelity:.3f}")
+
+    print("\n--- EXPLANATION QUALITY (is the explanation trustworthy?) ---\n")
+    q = ex.explanation_quality(0)
+    print(f"  faithfulness={q.faithfulness}  stability={q.stability}")
+
+    print("\n--- SHAREABLE HTML REPORT ---\n")
+    from explainx_llm import save_html
+
+    out = "explainx_report.html"
+    save_html(report, out, title="Loan model explainability")
+    print(f"  wrote {out} (open in a browser; full JSON is embedded for tools)")
 
     print("\n(Full structured report is available via report.to_json())")
 

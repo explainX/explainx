@@ -27,11 +27,13 @@ dependencies = [
 [project.optional-dependencies]
 shap = ["shap>=0.44"]
 mcp = ["mcp>=1.0.0"]
-all = ["shap>=0.44", "mcp>=1.0.0"]
-dev = ["pytest>=7.0", "shap>=0.44", "mcp>=1.0.0"]
+drift = ["scipy>=1.7"]   # enables the Kolmogorov-Smirnov drift test (PSI works without it)
+all = ["shap>=0.44", "mcp>=1.0.0", "scipy>=1.7"]
+dev = ["pytest>=7.0", "shap>=0.44", "mcp>=1.0.0", "scipy>=1.7"]
 
 [project.scripts]
 explainx-mcp = "explainx_llm.mcp_server:main"
+explainx-llm = "explainx_llm.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["explainx_llm*"]

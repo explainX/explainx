@@ -30,14 +30,25 @@ Claude can call it as tools while they build models.
 
 ## What's inside
 
+A unified API over the methods the XAI literature identifies as the most
+deployed — SHAP, LIME, surrogate trees and counterfactuals — plus modern
+additions (ALE, anchors) and a 2024–2025 research frontier most tools skip:
+**quantifying whether an explanation can be trusted**.
+
 | Capability | Method | Notes |
 |---|---|---|
-| Global importance | **SHAP** (auto) → permutation importance → intrinsic | SHAP used automatically when installed |
+| Global importance | **SHAP** (auto) → permutation → intrinsic | SHAP used automatically when installed |
 | Local explanation | **SHAP** (auto) → model-agnostic ablation | per-prediction signed contributions |
+| Local surrogate | **LIME** (from scratch) | local weighted linear approximation |
+| Sufficient rules | **Anchors** | high-precision IF-THEN rule per prediction |
 | Counterfactuals | greedy model-agnostic search | smallest change that flips a decision |
-| Partial dependence | scikit-learn PDP → agnostic fallback | marginal effect of a feature |
+| Global surrogate | **decision tree** + fidelity | inspectable glassbox rules + how faithful they are |
+| Feature effects | **PDP** and **ALE** | ALE stays unbiased under feature correlation |
+| Explanation quality | **faithfulness** + **stability** | does the explanation reflect the model, and is it robust? |
 | Fairness / bias | demographic parity, disparate impact (4/5 rule), equal opportunity | per sensitive attribute |
 | Metrics | classification + regression | accuracy/precision/recall/f1/auc, r²/mae/rmse |
+| Monitoring | **data drift** (PSI + KS) | reference vs. current dataset |
+| Reporting | **HTML export** + **CLI** | shareable artifact; no-code usage |
 
 Works with any estimator following the scikit-learn `predict` / `predict_proba`
 convention (scikit-learn, XGBoost, LightGBM, CatBoost, …).
@@ -73,11 +84,33 @@ from explainx_llm import ModelExplainer
 
 ex = ModelExplainer(model, X_test, y_test)
 ex.metrics()                       # ModelMetrics
-ex.importance()                    # GlobalImportance
-ex.explain(index=0, top_k=5)       # LocalExplanation
+ex.importance()                    # GlobalImportance (SHAP when available)
+ex.explain(index=0, top_k=5)       # LocalExplanation (SHAP/ablation)
+ex.lime(index=0)                   # LocalExplanation (LIME)
+ex.anchor(index=0)                 # Anchor: high-precision sufficient rule
 ex.fairness("gender")              # FairnessReport
 ex.counterfactual(index=0)         # Counterfactual: minimal flip
+ex.surrogate()                     # SurrogateExplanation: glassbox tree + fidelity
 ex.partial_dependence("income")    # PartialDependence curve
+ex.ale("income")                   # ALEResult: correlation-robust effect
+ex.explanation_quality(index=0)    # ExplanationQuality: faithfulness + stability
+```
+
+### Monitoring & reporting
+
+```python
+from explainx_llm import detect_drift, save_html
+
+detect_drift(reference_df, current_df)   # DriftReport (PSI + KS per feature)
+save_html(report, "report.html")         # shareable page; embeds the full JSON
+```
+
+### No-code CLI
+
+```sh
+explainx-llm report --model m.joblib --data d.csv --target y --sensitive gender --html out.html
+explainx-llm bias   --model m.joblib --data d.csv --target y --sensitive gender
+explainx-llm drift  --reference train.csv --current prod.csv
 ```
 
 ### Try the demo
@@ -112,13 +145,20 @@ The agent saves a fitted model and dataset to disk, then calls tools by path:
 
 | Tool | Purpose |
 |---|---|
-| `explain_model` | Full report (metrics, importance, local, fairness) |
+| `explain_model` | Full report (metrics, importance, local, fairness, surrogate, quality) |
 | `feature_importance` | Global importance ranking |
-| `explain_prediction` | Why one row was predicted as it was |
+| `explain_prediction` | Why one row was predicted as it was (SHAP/ablation) |
+| `lime_explain_prediction` | Local LIME explanation for one row |
+| `anchor_rule` | High-precision sufficient rule for one row |
 | `counterfactual` | Minimal change that flips a row's class |
+| `surrogate_rules` | Glassbox decision-tree rules + fidelity |
 | `check_bias` | Group-fairness analysis on a sensitive feature |
 | `model_metrics` | Performance metrics |
 | `partial_dependence` | Marginal effect curve for a feature |
+| `accumulated_local_effects` | Correlation-robust effect curve (ALE) |
+| `explanation_quality` | Faithfulness + stability of an explanation |
+| `detect_data_drift` | Distribution drift between two datasets |
+| `html_report` | Write a shareable HTML report |
 
 Each returns a JSON-ready dict the agent can reason over — e.g. read a
 `disparate_impact_ratio` below 0.8, conclude the model is biased, and rebalance

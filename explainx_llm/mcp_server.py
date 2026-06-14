@@ -141,6 +141,97 @@ def _make_server():
             .to_dict()
         )
 
+    @mcp.tool()
+    def surrogate_rules(
+        model_path: str, data_path: str, target_column: Optional[str] = None, max_depth: int = 4
+    ) -> dict:
+        """Fit a glassbox decision-tree surrogate and return its rules + fidelity."""
+        model = load_model(model_path)
+        X, y = load_xy(data_path, target_column)
+        return ModelExplainer(model, X, y).surrogate(max_depth=max_depth).to_dict()
+
+    @mcp.tool()
+    def lime_explain_prediction(
+        model_path: str,
+        data_path: str,
+        row_index: int,
+        target_column: Optional[str] = None,
+        top_k: int = 10,
+    ) -> dict:
+        """Explain one prediction with LIME (local linear surrogate)."""
+        model = load_model(model_path)
+        X, y = load_xy(data_path, target_column)
+        return ModelExplainer(model, X, y).lime(row_index, top_k=top_k).to_dict()
+
+    @mcp.tool()
+    def anchor_rule(
+        model_path: str,
+        data_path: str,
+        row_index: int,
+        target_column: Optional[str] = None,
+        precision_threshold: float = 0.95,
+    ) -> dict:
+        """Find a high-precision IF-THEN rule that anchors a row's prediction."""
+        model = load_model(model_path)
+        X, y = load_xy(data_path, target_column)
+        return (
+            ModelExplainer(model, X, y)
+            .anchor(row_index, precision_threshold=precision_threshold)
+            .to_dict()
+        )
+
+    @mcp.tool()
+    def accumulated_local_effects(
+        model_path: str,
+        data_path: str,
+        feature: str,
+        target_column: Optional[str] = None,
+        n_bins: int = 10,
+    ) -> dict:
+        """Compute ALE for a numeric feature (correlation-robust effect curve)."""
+        model = load_model(model_path)
+        X, y = load_xy(data_path, target_column)
+        return ModelExplainer(model, X, y).ale(feature, n_bins=n_bins).to_dict()
+
+    @mcp.tool()
+    def explanation_quality(
+        model_path: str,
+        data_path: str,
+        row_index: int = 0,
+        target_column: Optional[str] = None,
+    ) -> dict:
+        """Score the faithfulness and stability of a local explanation."""
+        model = load_model(model_path)
+        X, y = load_xy(data_path, target_column)
+        return ModelExplainer(model, X, y).explanation_quality(row_index).to_dict()
+
+    @mcp.tool()
+    def detect_data_drift(reference_path: str, current_path: str, psi_threshold: float = 0.25) -> dict:
+        """Detect distribution drift between a reference and a current dataset (PSI + KS)."""
+        from .io import load_dataframe
+        from .drift import detect_drift
+
+        return detect_drift(
+            load_dataframe(reference_path), load_dataframe(current_path), psi_threshold
+        ).to_dict()
+
+    @mcp.tool()
+    def html_report(
+        model_path: str,
+        data_path: str,
+        output_path: str,
+        target_column: Optional[str] = None,
+        sensitive_features: Optional[list[str]] = None,
+    ) -> dict:
+        """Generate a shareable HTML report and write it to output_path."""
+        from .report_html import save_html
+
+        model = load_model(model_path)
+        X, y = load_xy(data_path, target_column)
+        report = _explain_model(model, X, y, sensitive_features=sensitive_features)
+        save_html(report, output_path)
+        return {"written": output_path, "biased": any(f.biased for f in report.fairness)}
+
     return mcp
 
 
