@@ -1,4 +1,4 @@
-"""End-to-end tests for the explainx_llm core.
+"""End-to-end tests for the explainx core.
 
 These train real scikit-learn models and assert the engine produces sane,
 JSON-serializable explanations -- including a deliberately biased dataset so we
@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from explainx_llm import explain_model, ModelExplainer
+from explainx import explain_model, ModelExplainer
 
 
 @pytest.fixture
@@ -192,7 +192,7 @@ def test_report_includes_surrogate_and_quality(rf_model, classification_data):
 
 
 def test_drift_detection():
-    from explainx_llm import detect_drift
+    from explainx import detect_drift
 
     rng = np.random.RandomState(0)
     ref = pd.DataFrame({"a": rng.normal(0, 1, 500), "b": rng.normal(5, 2, 500)})
@@ -206,7 +206,7 @@ def test_drift_detection():
 
 
 def test_html_report_export(rf_model, classification_data, tmp_path):
-    from explainx_llm import save_html
+    from explainx import save_html
 
     X, y = classification_data
     report = explain_model(rf_model, X, y, sensitive_features=None, n_local=1)
@@ -220,7 +220,7 @@ def test_html_report_export(rf_model, classification_data, tmp_path):
 def test_cli_bias(tmp_path):
     import joblib
     from sklearn.ensemble import RandomForestClassifier
-    from explainx_llm.cli import main
+    from explainx.cli import main
 
     rng = np.random.RandomState(0)
     n = 300
@@ -240,7 +240,7 @@ def test_cli_bias(tmp_path):
 
 
 def test_conformal_classification_coverage(rf_model, classification_data):
-    from explainx_llm import ModelExplainer
+    from explainx import ModelExplainer
 
     X, y = classification_data
     # Split into calibration and test halves.
@@ -258,7 +258,7 @@ def test_conformal_classification_coverage(rf_model, classification_data):
 def test_conformal_regression_interval():
     from sklearn.linear_model import LinearRegression
     from sklearn.datasets import make_regression
-    from explainx_llm import ModelExplainer
+    from explainx import ModelExplainer
 
     X, y = make_regression(n_samples=300, n_features=4, noise=5.0, random_state=0)
     cols = [f"f{i}" for i in range(X.shape[1])]
@@ -275,7 +275,7 @@ def test_conformal_regression_interval():
 
 def test_recourse_respects_immutable_feature():
     from sklearn.ensemble import RandomForestClassifier
-    from explainx_llm import ModelExplainer
+    from explainx import ModelExplainer
 
     rng = np.random.RandomState(3)
     n = 400
@@ -293,7 +293,7 @@ def test_recourse_respects_immutable_feature():
 
 def test_bias_mitigation_reduces_parity_gap():
     from sklearn.ensemble import RandomForestClassifier
-    from explainx_llm import ModelExplainer
+    from explainx import ModelExplainer
 
     rng = np.random.RandomState(0)
     n = 600
@@ -309,7 +309,7 @@ def test_bias_mitigation_reduces_parity_gap():
 
 
 def test_feature_interactions(rf_model, classification_data):
-    from explainx_llm import ModelExplainer
+    from explainx import ModelExplainer
 
     X, y = classification_data
     res = ModelExplainer(rf_model, X, y).interactions(top_k=3)
@@ -320,7 +320,7 @@ def test_feature_interactions(rf_model, classification_data):
 
 
 def test_prototypes_and_criticisms(classification_data):
-    from explainx_llm import prototypes_and_criticisms
+    from explainx import prototypes_and_criticisms
 
     X, _ = classification_data
     protos, crits = prototypes_and_criticisms(X, n_prototypes=4, n_criticisms=2)
@@ -331,8 +331,8 @@ def test_prototypes_and_criticisms(classification_data):
 
 def test_narrate_prompt_builder():
     """The prompt builder is pure and testable without the API/network."""
-    from explainx_llm.narrate import build_prompt, DEFAULT_MODEL
-    from explainx_llm import explain_model
+    from explainx.narrate import build_prompt, DEFAULT_MODEL
+    from explainx import explain_model
     from sklearn.ensemble import RandomForestClassifier
     from sklearn.datasets import make_classification
 

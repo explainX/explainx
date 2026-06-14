@@ -1,7 +1,7 @@
-# explainX-LLM: LLM-native Explainable AI
+# explainX: LLM-native Explainable AI
 <img src="explainx_logo.png" align="right" width="150"/>
 
-**explainX-LLM** turns the explainX idea into a modern, **LLM-native** explainability
+**explainX 3.0** is a modern, **LLM-native** rewrite of the explainability
 engine. Train any machine-learning model, then let a human *or an LLM agent*
 inspect it: understand *why* a prediction was made, surface bias, find the
 minimal change that flips a decision, and feed those insights back into training.
@@ -62,15 +62,15 @@ convention (scikit-learn, XGBoost, LightGBM, CatBoost, …).
 ## Install
 
 ```sh
-pip install -e ".[all]"     # core + SHAP + MCP server
+pip install "explainx[all]"   # core + SHAP + MCP + drift + LLM narration
 # or minimal:
-pip install -e .            # core only (SHAP/MCP optional)
+pip install explainx          # core only (extras optional)
 ```
 
 ## Python API
 
 ```python
-from explainx_llm import explain_model
+from explainx import explain_model
 
 report = explain_model(
     model, X_test, y_test,
@@ -86,7 +86,7 @@ report.to_json()
 Need finer control? Use the stateful explainer:
 
 ```python
-from explainx_llm import ModelExplainer
+from explainx import ModelExplainer
 
 ex = ModelExplainer(model, X_test, y_test)
 ex.metrics()                       # ModelMetrics
@@ -110,7 +110,7 @@ ex.prototypes()                    # PrototypesResult: representative + atypical
 ### LLM narration (optional)
 
 ```python
-from explainx_llm.narrate import narrate_report   # needs: pip install "explainx-llm[llm]"
+from explainx.narrate import narrate_report   # needs: pip install "explainx[llm]"
 
 report = explain_model(model, X_test, y_test, sensitive_features=["gender"])
 print(narrate_report(report, question="Why was applicant 5 rejected, and what would change it?"))
@@ -123,7 +123,7 @@ explanation is grounded, not hallucinated.
 ### Monitoring & reporting
 
 ```python
-from explainx_llm import detect_drift, save_html
+from explainx import detect_drift, save_html
 
 detect_drift(reference_df, current_df)   # DriftReport (PSI + KS per feature)
 save_html(report, "report.html")         # shareable page; embeds the full JSON
@@ -132,15 +132,15 @@ save_html(report, "report.html")         # shareable page; embeds the full JSON
 ### No-code CLI
 
 ```sh
-explainx-llm report --model m.joblib --data d.csv --target y --sensitive gender --html out.html
-explainx-llm bias   --model m.joblib --data d.csv --target y --sensitive gender
-explainx-llm drift  --reference train.csv --current prod.csv
+explainx report --model m.joblib --data d.csv --target y --sensitive gender --html out.html
+explainx bias   --model m.joblib --data d.csv --target y --sensitive gender
+explainx drift  --reference train.csv --current prod.csv
 ```
 
 ### Try the demo
 
 ```sh
-python -m explainx_llm.examples.demo
+python -m explainx.examples.demo
 ```
 
 It trains a deliberately gender-biased loan model and shows the fairness check
@@ -152,7 +152,7 @@ Start the server (stdio transport):
 
 ```sh
 explainx-mcp              # installed console script
-# or:  python -m explainx_llm.mcp_server
+# or:  python -m explainx.mcp_server
 ```
 
 Register it with an MCP client (e.g. Claude Desktop / Claude Code):
@@ -205,14 +205,14 @@ df.to_csv("data.csv", index=False)   # features + target column
 ## Tests
 
 ```sh
-pytest          # or: python -m pytest explainx_llm/tests
+pytest          # or: python -m pytest explainx/tests
 ```
 
 ## Migrating from legacy explainX
 
 The 2020 Dash dashboard (`explain.py`, `main.py`, `lib/`) and its pinned,
 no-longer-installable stack have been removed in favour of this engine. The new
-import is `explainx_llm`; explanations are returned as data rather than rendered
+import is `explainx`; explanations are returned as data rather than rendered
 as a web app, which is what makes them consumable by both humans and LLMs.
 
 ## License

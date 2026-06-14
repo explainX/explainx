@@ -1,4 +1,4 @@
-"""An MCP server exposing explainx-llm as agent-callable tools.
+"""An MCP server exposing explainx as agent-callable tools.
 
 This lets an LLM agent (Claude, etc.) inspect a model it just trained: it saves
 the fitted estimator and a dataset to disk, then calls these tools by path. Each
@@ -7,7 +7,7 @@ detect bias and decide how to fix the training.
 
 Run it::
 
-    python -m explainx_llm.mcp_server          # stdio transport
+    python -m explainx.mcp_server          # stdio transport
 
 or register it in an MCP client config pointing at that command.
 
@@ -39,7 +39,7 @@ def _make_server():
             "Install it with `pip install mcp`."
         ) from exc
 
-    mcp = FastMCP("explainx-llm")
+    mcp = FastMCP("explainx")
 
     @mcp.tool()
     def explain_model(

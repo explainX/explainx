@@ -2,7 +2,7 @@
 
 Run with::
 
-    python -m explainx_llm.examples.demo
+    python -m explainx.examples.demo
 
 It deliberately bakes a gender bias into the data so you can see the fairness
 checks fire and the natural-language summary recommend a fix -- exactly the
@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 
-from explainx_llm import explain_model, ModelExplainer
+from explainx import explain_model, ModelExplainer
 
 
 def build_biased_loan_data(n: int = 800, seed: int = 0):
@@ -47,7 +47,7 @@ def main():
     model = RandomForestClassifier(n_estimators=80, random_state=0).fit(X, y)
 
     print("=" * 70)
-    print("explainx-llm demo: loan-approval model")
+    print("explainx demo: loan-approval model")
     print("=" * 70)
 
     report = explain_model(model, X, y, sensitive_features=["gender"], n_local=2)
@@ -82,7 +82,7 @@ def main():
     print(f"  faithfulness={q.faithfulness}  stability={q.stability}")
 
     print("\n--- SHAREABLE HTML REPORT ---\n")
-    from explainx_llm import save_html
+    from explainx import save_html
 
     out = "explainx_report.html"
     save_html(report, out, title="Loan model explainability")

@@ -43,7 +43,7 @@ def _tool(server, name):
 
 
 def test_mcp_tools_roundtrip(saved_artifacts):
-    from explainx_llm.mcp_server import _make_server
+    from explainx.mcp_server import _make_server
 
     model_path, data_path = saved_artifacts
     server = _make_server()

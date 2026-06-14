@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "explainx-llm"
-version = "0.1.0"
+name = "explainx"
+version = "3.0.0"
 description = "LLM-native model explainability: structured, agent-callable explanations, bias detection and counterfactuals for any scikit-learn-compatible model."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -33,11 +33,11 @@ all = ["shap>=0.44", "mcp>=1.0.0", "scipy>=1.7", "anthropic>=0.40"]
 dev = ["pytest>=7.0", "shap>=0.44", "mcp>=1.0.0", "scipy>=1.7", "anthropic>=0.40"]
 
 [project.scripts]
-explainx-mcp = "explainx_llm.mcp_server:main"
-explainx-llm = "explainx_llm.cli:main"
+explainx-mcp = "explainx.mcp_server:main"
+explainx = "explainx.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["explainx_llm*"]
+include = ["explainx*"]
 
 [tool.pytest.ini_options]
-testpaths = ["explainx_llm/tests"]
+testpaths = ["explainx/tests"]

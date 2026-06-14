@@ -8,11 +8,11 @@ insights back into training.
 Unlike the legacy explainX (a Plotly Dash dashboard meant for human eyes), this
 core returns **structured, machine-readable results** (typed objects that
 serialize to JSON) plus a natural-language summary. That makes it usable from
-plain Python *and* over the Model Context Protocol (see ``explainx_llm.mcp_server``).
+plain Python *and* over the Model Context Protocol (see ``explainx.mcp_server``).
 
 Quick start
 -----------
->>> from explainx_llm import explain_model
+>>> from explainx import explain_model
 >>> report = explain_model(model, X_test, y_test)
 >>> print(report.summary)          # natural-language overview for a human/LLM
 >>> report.to_dict()               # structured JSON-ready dict
@@ -80,4 +80,4 @@ __all__ = [
     "prototypes_and_criticisms",
 ]
 
-__version__ = "0.1.0"
+__version__ = "3.0.0"
