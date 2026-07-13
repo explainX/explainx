@@ -1,6 +1,8 @@
 # explainX: LLM-native Explainable AI
 <img src="explainx_logo.png" align="right" width="150"/>
 
+[![Downloads](https://pepy.tech/badge/explainx)](https://pepy.tech/project/explainx)
+
 **explainX 3.0** is a modern, **LLM-native** rewrite of the explainability
 engine. Train any machine-learning model, then let a human *or an LLM agent*
 inspect it: understand *why* a prediction was made, surface bias, find the
